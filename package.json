@@ -1,0 +1,34 @@
+{
+  "private": true,
+  "sideEffects": false,
+  "scripts": {
+    "build": "remix build",
+    "dev": "concurrently \"npm run sass\" \"remix dev\"",
+    "start": "remix-serve build",
+    "typecheck": "tsc -b",
+    "sass": "sass --watch app/:app/"
+  },
+  "dependencies": {
+    "@prisma/client": "^4.8.0",
+    "@remix-run/node": "^1.9.0",
+    "@remix-run/react": "^1.9.0",
+    "@remix-run/serve": "^1.9.0",
+    "isbot": "^3.6.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^1.9.0",
+    "@remix-run/eslint-config": "^1.9.0",
+    "@types/react": "^18.0.25",
+    "@types/react-dom": "^18.0.8",
+    "concurrently": "^7.6.0",
+    "eslint": "^8.27.0",
+    "prisma": "^4.8.0",
+    "sass": "^1.57.1",
+    "typescript": "^4.8.4"
+  },
+  "engines": {
+    "node": ">=14"
+  }
+}

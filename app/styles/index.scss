@@ -1,0 +1,451 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.game-flex-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+}
+
+.game-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  min-width: 250px;
+  background-color: #f3f6fa;
+
+  &:after {
+    content: "";
+    display: block;
+    padding-bottom: 100%;
+  }
+}
+
+.game {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.game-table,
+.game-table:after {
+  display: block;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.game-table:after {
+  content: "";
+  position: absolute;
+  left: 33.3333%;
+  width: 33.3333%;
+  top: 0;
+  border-left: 2px solid #344861;
+  border-right: 2px solid #344861;
+  pointer-events: none;
+}
+
+.game-table {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  background: #fff;
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  border: 2px solid #344861;
+}
+
+.game-row,
+.game-table tbody:after {
+  width: 100%;
+}
+
+.game-table tbody {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.game-table tbody:after {
+  box-sizing: border-box;
+  display: block;
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(1 / 3 * 100%);
+  height: calc(1 / 3 * 100%);
+  border-top: 2px solid #344861;
+  border-bottom: 2px solid #344861;
+  pointer-events: none;
+  box-sizing: border-box;
+}
+
+.game-row {
+  width: 100%;
+  display: flex;
+  height: calc(1 / 9 * 100%);
+}
+
+.game-row:nth-child(3n) .game-cell {
+  border-bottom: 0;
+}
+
+.game-cell {
+  cursor: pointer;
+  position: relative;
+  display: flex;
+  flex-basis: calc(1 / 9 * 100%);
+  border-right: 1px solid #bec6d4;
+  border-bottom: 1px solid #bec6d4;
+
+  &::after {
+    padding-bottom: 100%;
+    content: "";
+    display: block;
+  }
+
+  &.table-hightlight {
+    background-color: #e2e7ed;
+  }
+
+  &.number .cell-value {
+    color: #187bcd;
+  }
+
+  &.number-hightlight {
+    background-color: #cbdbed;
+  }
+
+  &.number-conflict {
+    background-color: #f7cfd6;
+
+    .cell-value.default-conflict {
+      color: #e12120;
+    }
+  }
+
+  &.cell-selected {
+    background-color: #bbdefb;
+  }
+}
+
+.game-cell:nth-child(3n) {
+  border-right: 0;
+}
+
+.cell-value {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  font-weight: 100;
+  color: #666;
+  text-align: center;
+}
+
+.cell-value span {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  left: 50%;
+  font-size: clamp(0px, 5vw, 30px);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.game-controls-wrapper {
+  position: relative;
+  min-width: 200px;
+  max-width: 360px;
+  width: 50%;
+  margin-left: 20px;
+  user-select: none;
+  transition: opacity .3s ease-in-out;
+}
+
+.numpad-wrapper {
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  -webkit-flex-grow: 1;
+  -ms-flex-positive: 1;
+  flex-grow: 1;
+  position: relative;
+}
+
+.numpad {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.numpad-item {
+  position: relative;
+  width: 33.3333%;
+  box-sizing: border-box;
+  padding: 7% 0 6%;
+  text-align: center;
+  border-color: #bec6d4;
+  border-style: solid;
+  border-width: 1px 0 0 1px;
+  cursor: pointer;
+  transition: all .2s ease-in-out;
+}
+
+.numpad-wrapper .numpad-item span {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 32px;
+  color: #344861;
+  transition: color .2s ease-in-out;
+  transform: translateY(-50%);
+  font-size: clamp(0px, 5vw, 30px);
+}
+
+.numpad-wrapper .numpad-item:nth-child(3n) {
+  border-right-width: 1px;
+}
+
+.game-controls {
+  -webkit-box-flex: 0;
+  -webkit-flex: none;
+  -moz-box-flex: 0;
+  -ms-flex: none;
+  flex: none;
+}
+
+.game-controls .game-controls-buttons {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: row;
+  -moz-box-orient: horizontal;
+  -moz-box-direction: normal;
+  -ms-flex-direction: row;
+  flex-direction: row;
+  -webkit-flex-wrap: wrap;
+  -ms-flex-wrap: wrap;
+  flex-wrap: wrap;
+  width: 100%;
+  height: 100%;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.game-controls .game-controls-item {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-flex-basis: 50%;
+  -ms-flex-preferred-size: 50%;
+  flex-basis: 50%;
+  max-width: 50%;
+  padding: 12px 0 6px;
+  text-align: center;
+  cursor: pointer;
+  border-color: #bec6d4;
+  border-style: solid;
+  border-width: 1px 0 0 1px;
+  -webkit-transition: all .2s ease-in-out;
+  -o-transition: all .2s ease-in-out;
+  -moz-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+
+.game-controls .game-controls-pencil .svg-wrapper {
+  position: relative;
+}
+
+.game-controls .game-controls-item .icon-game-control {
+  width: 30px;
+  height: 32px;
+  color: #344861;
+  -webkit-transition: color .2s ease-in-out;
+  -o-transition: color .2s ease-in-out;
+  -moz-transition: color .2s ease-in-out;
+  transition: color .2s ease-in-out;
+}
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+.game-controls .game-controls-label {
+  font-size: 14px;
+  color: #344861;
+}
+
+.game-controls-wrapper nav {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -moz-box-orient: vertical;
+  -moz-box-direction: normal;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-flex-wrap: nowrap;
+  -ms-flex-wrap: nowrap;
+  flex-wrap: nowrap;
+  height: 100%;
+  width: 100%;
+}
+
+@media screen and (max-width: 800px) {
+  .sudoku-wrapper {
+    max-width: 500px;
+    margin: 0 auto 20px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .game-flex-wrapper {
+    flex-direction: column;
+  }
+}
+
+@media screen and (max-width: 1070px) {
+  .game-controls-wrapper {
+    max-width: none;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .game-controls-wrapper {
+    min-width: 100px;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .game-controls-wrapper {
+    width: 100%;
+    margin: 0 auto;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .game-controls-wrapper nav {
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: reverse;
+    -webkit-flex-direction: column-reverse;
+    -moz-box-orient: vertical;
+    -moz-box-direction: reverse;
+    -ms-flex-direction: column-reverse;
+    flex-direction: column-reverse;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .numpad-wrapper .numpad {
+    position: relative;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .numpad-wrapper .numpad-item {
+    -webkit-flex-basis: 11.11111%;
+    -ms-flex-preferred-size: 11.11111%;
+    flex-basis: 11.11111%;
+    border: 0;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .game-controls .game-controls-buttons {
+    -webkit-flex-wrap: nowrap;
+    -ms-flex-wrap: nowrap;
+    flex-wrap: nowrap;
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+    -moz-box-pack: justify;
+    -ms-flex-pack: justify;
+    justify-content: space-between;
+    padding: 0 0;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .game-controls .game-controls-item {
+    -webkit-flex-basis: auto;
+    -ms-flex-preferred-size: auto;
+    flex-basis: auto;
+    border: 0;
+    padding: 10px 30px 7px;
+  }
+}
+
+
+
+
+
+
+
+
+.new-game-button {
+  cursor: pointer;
+  height: 60px;
+  margin-bottom: 20px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  background-color: #4a90e2;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 60px;
+  vertical-align: middle;
+  text-align: center;
+  color: #fff;
+  -webkit-transition: all .2s ease-in-out;
+  -o-transition: all .2s ease-in-out;
+  -moz-transition: all .2s ease-in-out;
+  transition: all .2s ease-in-out;
+}
+
+.game-controls .game-controls-item:nth-child(3),
+.game-controls .game-controls-item:nth-child(4) {
+  border-bottom-width: 1px;
+}
+
+.game-controls .game-controls-item:nth-child(2n) {
+  border-right-width: 1px;
+}
