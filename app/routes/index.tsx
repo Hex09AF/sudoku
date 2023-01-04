@@ -2,6 +2,7 @@ import BoardGame from "~/comps/BoardGame";
 
 import type { LinksFunction } from "@remix-run/node";
 
+import Header from "~/comps/Header";
 import stylesUrl from "~/styles/index.css";
 
 export const links: LinksFunction = () => {
@@ -11,6 +12,7 @@ export const links: LinksFunction = () => {
 export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
+      <Header />
       <BoardGame />
     </div>
   );
