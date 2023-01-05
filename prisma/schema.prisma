@@ -17,3 +17,10 @@ model User {
   username     String   @unique
   passwordHash String
 }
+
+model Room {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  board        String
+}

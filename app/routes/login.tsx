@@ -1,18 +1,17 @@
 import type {
   ActionArgs,
-  LinksFunction,
+  LinksFunction
 } from "@remix-run/node";
-import { json } from "@remix-run/node";
 import {
   Link,
   useActionData,
-  useSearchParams,
+  useSearchParams
 } from "@remix-run/react";
 
 import stylesUrl from "~/styles/login.css";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
-import { createUserSession, login } from "~/utils/session.server";
+import { createUserSession, login, register } from "~/utils/session.server";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesUrl },
@@ -31,11 +30,11 @@ function validatePassword(password: unknown) {
 }
 
 function validateUrl(url: string) {
-  let urls = ["/jokes", "/", "https://remix.run"];
+  let urls = ["/", "/", "https://remix.run"];
   if (urls.includes(url)) {
     return url;
   }
-  return "/jokes";
+  return "/";
 }
 
 export const action = async ({ request }: ActionArgs) => {
@@ -44,7 +43,7 @@ export const action = async ({ request }: ActionArgs) => {
   const username = form.get("username");
   const password = form.get("password");
   const redirectTo = validateUrl(
-    form.get("redirectTo") || "/jokes"
+    form.get("redirectTo") || "/"
   );
   if (
     typeof loginType !== "string" ||
@@ -76,7 +75,7 @@ export const action = async ({ request }: ActionArgs) => {
     case "login": {
       // login to get the user
       // if there's no user, return the fields and a formError
-      // if there is a user, create their session and redirect to /jokes
+      // if there is a user, create their session and redirect to /
       const user = await login({ username, password });
       console.log({ user });
       if (!user) {
@@ -101,12 +100,16 @@ export const action = async ({ request }: ActionArgs) => {
         });
       }
       // create the user
-      // create their session and redirect to /jokes
-      return badRequest({
-        fieldErrors: null,
-        fields,
-        formError: "Not implemented",
-      });
+      // create their session and redirect to /
+      const user = await register({ username, password });
+      if (!user) {
+        return badRequest({
+          fieldErrors: null,
+          fields,
+          formError: `Something went wrong trying to create a new user.`,
+        });
+      }
+      return createUserSession(user.id, redirectTo);
     }
     default: {
       return badRequest({
@@ -233,9 +236,6 @@ export default function Login() {
         <ul>
           <li>
             <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/jokes">Jokes</Link>
           </li>
         </ul>
       </div>

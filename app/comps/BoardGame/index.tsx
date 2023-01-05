@@ -5,12 +5,12 @@ import GameControl from "~/comps/Control";
 
 import RANDOMBOARD from "../../helper/random";
 
-const BoardGame = () => {
+const BoardGame = ({ boardData, roomId, userId, socket }) => {
   const [selectCell, setSelectCell] = useState({ row: 4, col: 4 });
 
-  const [curBoardValue, setCurBoardValue] = useState(zeroBoard);
+  const [curBoardValue, setCurBoardValue] = useState(boardData);
 
-  const [firstBoardValue, setFirstBoardValue] = useState(zeroBoard);
+  const [firstBoardValue, setFirstBoardValue] = useState(boardData);
 
   const [canRowXNumberY, setCanRowXNumberY] = useState(
     new Array(9).fill(0).map(() => new Array(10).fill(0))
@@ -35,6 +35,8 @@ const BoardGame = () => {
   };
 
   useEffect(() => {
+    if (!socket) return;
+
     const handleKeyDown = (e) => {
       let value = -1;
 
@@ -68,6 +70,7 @@ const BoardGame = () => {
         const newBoardValue = JSON.parse(JSON.stringify(curBoardValue));
         newBoardValue[selectCell.row][selectCell.col] = value;
         setCurBoardValue(newBoardValue);
+        socket.emit("play", newBoardValue);
       }
     };
 
@@ -76,7 +79,7 @@ const BoardGame = () => {
     return function cleanup() {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [curBoardValue, selectCell, checkValid]);
+  }, [socket, curBoardValue, selectCell, checkValid]);
 
   useEffect(() => {
     const updateCanArray = () => {
@@ -108,18 +111,11 @@ const BoardGame = () => {
   }, [curBoardValue]);
 
   useEffect(() => {
-    const fetchFirstBoardValue = async () => {
-      try {
-        let x = await RANDOMBOARD();
-        setCurBoardValue(x);
-        setFirstBoardValue(x);
-      } catch (err) {
-        console.log(err);
-      }
-    };
-
-    fetchFirstBoardValue();
-  }, []);
+    if (!socket) return;
+    socket.on('play', ( boardValue ) => {
+      setCurBoardValue(boardValue);
+    });
+  }, [socket])
 
   return (
     <div className="sudoku-wrapper">

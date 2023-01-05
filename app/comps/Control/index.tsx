@@ -1,37 +1,12 @@
 import { useState } from "react";
-import SOLVE from "~/helper/solve";
-
-import RANDOMBOARD from "~/helper/random";
 
 const GameControl = ({
   selectCell,
   firstBoardValue,
   curBoardValue,
   setCurBoardValue,
-  setFirstBoardValue
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  const SOLVEGAME = async () => {
-    setIsLoading(true);
-    try {
-      let x = await SOLVE(curBoardValue);
-      setCurBoardValue(x);
-    } catch (err) {
-      console.log(err);
-    }
-    setIsLoading(false);
-  };
-
-  const NEWGAME = async () => {
-    try {
-      let x = await RANDOMBOARD();
-      setCurBoardValue(x);
-      setFirstBoardValue(x);
-    } catch (err) {
-      console.log(err);
-    }
-  };
 
   const BACKGAME = () => {
     setCurBoardValue(firstBoardValue);
@@ -49,9 +24,6 @@ const GameControl = ({
     <div className="game-controls-wrapper">
       <nav>
         <div className="new-game-button-wrapper">
-          <div onClick={() => NEWGAME()} className="button new-game-button">
-            Trò chơi Mới
-          </div>
           {/* <div className="new-game-menu">
             <div className="tooltip-arrow"></div>
             <ul className="select-difficulty">
@@ -110,47 +82,6 @@ const GameControl = ({
         </div>
         <div className="game-controls">
           <div className="game-controls-buttons">
-            <div
-              className="game-controls-item game-controls-pencil"
-              data-action="pencil"
-            >
-              <div className="svg-wrapper">
-                <svg
-                  className="icon-game-control"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 30 30"
-                >
-                  <path
-                    fill="currentColor"
-                    fillRule="evenodd"
-                    d="M3.73 28.124l6.329-2.11c.006-.003.009-.007.014-.01a.514.514 0 0 0 .191-.117L28.403 7.732a2.593 2.593 0 0 0 .763-1.843c0-.697-.271-1.35-.763-1.843L25.099.74c-.981-.986-2.697-.988-3.682 0L3.277 18.895a.497.497 0 0 0-.118.19c-.001.004-.006.007-.008.013L.026 28.48c-.005.015.002.03-.002.043-.01.041-.024.08-.024.122 0 .028.01.052.016.08a.512.512 0 0 0 .504.442h28.646V28.13L3.73 28.124zM18.75 4.882l5.512 5.518L9.895 24.781l-5.514-5.519L18.75 4.882zm3.403-3.405c.591-.593 1.62-.59 2.21 0l3.304 3.307a1.562 1.562 0 0 1 0 2.211L25 9.663l-5.514-5.518 2.667-2.668zM3.874 20.228L8.93 25.29l-7.586 2.531 2.53-7.593z"
-                  ></path>
-                </svg>
-              </div>
-              <div className="game-controls-label">
-                Ghi chú (lấy giấy ra tự nháp nha)
-              </div>
-            </div>
-            <div
-              className="game-controls-item game-controls-hint"
-              data-action="hint"
-              onClick={() => !isLoading && SOLVEGAME()}
-            >
-              <svg
-                className="icon-game-control"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 25 33"
-              >
-                <path
-                  fill="currentColor"
-                  fillRule="evenodd"
-                  d="M17.075 29.179L7.7 31.262a.522.522 0 0 0 .112 1.03.57.57 0 0 0 .114-.013l9.375-2.083a.52.52 0 1 0-.226-1.017M12.5 0C5.607 0 0 5.607 0 12.5a12.49 12.49 0 0 0 7.608 11.505.52.52 0 1 0 .408-.958A11.447 11.447 0 0 1 1.042 12.5c0-6.318 5.14-11.458 11.458-11.458 6.318 0 11.459 5.14 11.459 11.458 0 4.603-2.738 8.743-6.976 10.547a.522.522 0 0 0-.316.479v2.619L7.7 28.137a.522.522 0 0 0 .112 1.03.57.57 0 0 0 .114-.013l9.375-2.083a.522.522 0 0 0 .408-.509v-2.697A12.486 12.486 0 0 0 25 12.5C25 5.607 19.393 0 12.5 0"
-                ></path>
-              </svg>
-              <div className="game-controls-label">
-                {isLoading ? "ĐANG GIẢI" : "Giải"}
-              </div>
-            </div>
             <div
               className="game-controls-item game-controls-undo"
               data-action="undo"
