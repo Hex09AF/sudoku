@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useSubmit } from "@remix-run/react";
+import debounce from "lodash.debounce"
 
-import zeroBoard from "~/const/board";
-import GameControl from "~/comps/Control";
+const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMoves }) => {
 
-import RANDOMBOARD from "../../helper/random";
+  const submit = useSubmit();
 
-const BoardGame = ({ boardData, roomId, userId, socket }) => {
+  const [curMoves, setCurMoves] = useState(initMoves);
+
+  const [curUserMoves, setCurUserMoves] = useState<[]>(initCurUserMoves)
+
   const [selectCell, setSelectCell] = useState({ row: 4, col: 4 });
 
   const [curBoardValue, setCurBoardValue] = useState(boardData);
@@ -24,15 +28,48 @@ const BoardGame = ({ boardData, roomId, userId, socket }) => {
       .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)))
   );
 
+  const isEnemyCell = (pair) => {
+    let flag = false;
+    curMoves.forEach(move => {
+      if (move.userId != userId && move.moves.findIndex(v => v[0] == pair.row && v[1] == pair.col) != -1) {
+        flag = true;
+      }
+    })
+    return flag;
+  }
+
+  const isUserCell = (pair) => {
+    return curUserMoves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
+  }
+
   const checkValid = (pair) => {
     return (
+      !isEnemyCell(pair) &&
       pair.row >= 0 &&
       pair.row < 9 &&
       pair.col >= 0 &&
       pair.col < 9 &&
-      !firstBoardValue[pair.row][pair.col]
+      (!firstBoardValue[pair.row][pair.col] || isUserCell(pair))
     );
   };
+
+  const sayHello = useCallback(debounce((curSelectCell, value) => {
+    const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
+    const isExistCell = newCurUserMoves.findIndex(v => {
+      return v[0] == curSelectCell.row && v[1] == curSelectCell.col
+    })
+    if (isExistCell != -1) {
+      newCurUserMoves[isExistCell] = [curSelectCell.row, curSelectCell.col, value]
+    } else {
+      newCurUserMoves.push([curSelectCell.row, curSelectCell.col, value]);
+    }
+    setCurUserMoves(newCurUserMoves)
+    const formData = new FormData();
+    formData.append("roomId", roomId);
+    formData.append("userId", userId);
+    formData.append("newCurUserMoves", JSON.stringify(newCurUserMoves));
+    submit(formData, { method: "post", action: `/solo/${roomId}`, replace: true });
+  }, 1000), [selectCell])
 
   useEffect(() => {
     if (!socket) return;
@@ -71,6 +108,7 @@ const BoardGame = ({ boardData, roomId, userId, socket }) => {
         newBoardValue[selectCell.row][selectCell.col] = value;
         setCurBoardValue(newBoardValue);
         socket.emit("play", newBoardValue);
+        sayHello(selectCell, value);
       }
     };
 
@@ -112,13 +150,16 @@ const BoardGame = ({ boardData, roomId, userId, socket }) => {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on('play', ( boardValue ) => {
+    socket.on('play', (boardValue) => {
       setCurBoardValue(boardValue);
     });
   }, [socket])
 
   return (
     <div className="sudoku-wrapper">
+      <div className="score-wrapper">
+        {userId}
+      </div>
       <div className="game-flex-wrapper">
         <div className="game-wrapper">
           <div className="game">
@@ -129,6 +170,8 @@ const BoardGame = ({ boardData, roomId, userId, socket }) => {
                     {row.map((val, idx2) => {
                       return (
                         <Cell
+                          isEnemy={isEnemyCell({ row: idx, col: idx2 })}
+                          isUserCell={isUserCell({ row: idx, col: idx2 })}
                           selectCell={selectCell}
                           setSelectCell={setSelectCell}
                           cellIdx={{ row: idx, col: idx2 }}
@@ -156,15 +199,14 @@ const BoardGame = ({ boardData, roomId, userId, socket }) => {
             </table>
           </div>
         </div>
-        <GameControl
+        {/* <GameControl
           curBoardValue={curBoardValue}
           setCurBoardValue={setCurBoardValue}
           firstBoardValue={firstBoardValue}
           selectCell={selectCell}
-          setFirstBoardValue={setFirstBoardValue}
-        />
+        /> */}
       </div>
-    </div>
+    </div >
   );
 };
 
@@ -177,7 +219,9 @@ const Cell = ({
   isConflictCol,
   isConflictSquare,
   isDefault,
-  isSameValue
+  isSameValue,
+  isUserCell,
+  isEnemy
 }) => {
   const isSelecting =
     selectCell.row === cellIdx.row && selectCell.col === cellIdx.col;
@@ -208,6 +252,8 @@ const Cell = ({
       ? " default-conflict "
       : "";
 
+  const isUserClass = (isUserCell ? " user-cell " : "")
+  const isEnemyClass = (isEnemy ? " enemy-cell " : "")
   /**
    *
    */
@@ -220,6 +266,8 @@ const Cell = ({
       <td
         className={
           `game-cell` +
+          isEnemyClass +
+          isUserClass +
           selectedCellClass +
           hightLightCellClass +
           numberClass +

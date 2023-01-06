@@ -11,16 +11,30 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid())
+  id           String   @id @default(cuid())
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
   username     String   @unique
   passwordHash String
+
+  rooms UsersOnRooms[]
 }
 
 model Room {
-  id           String   @id @default(cuid())
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  board        String
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  board     String
+
+  users UsersOnRooms[]
+}
+
+model UsersOnRooms {
+  user   User   @relation(fields: [userId], references: [id])
+  userId String // relation scalar field (used in the `@relation` attribute above)
+  room   Room   @relation(fields: [roomId], references: [id])
+  roomId String // relation scalar field (used in the `@relation` attribute above)
+  moves  String?
+
+  @@id([userId, roomId])
 }

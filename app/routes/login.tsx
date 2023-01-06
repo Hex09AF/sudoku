@@ -77,7 +77,6 @@ export const action = async ({ request }: ActionArgs) => {
       // if there's no user, return the fields and a formError
       // if there is a user, create their session and redirect to /
       const user = await login({ username, password });
-      console.log({ user });
       if (!user) {
         return badRequest({
           fieldErrors: null,

@@ -35,13 +35,6 @@ export default function App() {
     };
   }, []);
 
-  useEffect(() => {
-    if (!socket) return;
-    socket.on("confirmation", (data) => {
-      console.log(data);
-    });
-  }, [socket]);
-
   return (
     <html lang="en">
       <head>

@@ -24,18 +24,6 @@ export const links: LinksFunction = () => {
 export default function Index() {
   const data = useLoaderData<typeof loader>();
 
-  const socket = useSocket();
-
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("event", (data) => {
-      console.log(data);
-    });
-
-    socket.emit("event", "ping");
-  }, [socket]);
-
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
       <div>
@@ -46,6 +34,6 @@ export default function Index() {
         </form>
       </div>
       <Header user={data.user} />
-    </div >
+    </div>
   );
 }

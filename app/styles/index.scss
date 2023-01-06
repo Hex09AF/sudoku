@@ -4,6 +4,14 @@
   padding: 0;
 }
 
+html,
+body,
+.sudoku-wrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
 table {
   border-collapse: collapse;
   border-spacing: 0;
@@ -13,6 +21,9 @@ table {
   position: relative;
   width: 100%;
   display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }
 
 .game-wrapper {
@@ -138,6 +149,14 @@ table {
     }
   }
 
+  &.user-cell {
+    background-color: green;
+  }
+
+  &.enemy-cell {
+    background-color: red;
+  }
+
   &.cell-selected {
     background-color: #bbdefb;
   }
@@ -181,9 +200,11 @@ table {
 
 
 .game-controls-wrapper {
+  height: 100%;
   position: relative;
   min-width: 200px;
   max-width: 360px;
+  max-height: 500px;
   width: 50%;
   margin-left: 20px;
   user-select: none;
@@ -200,7 +221,6 @@ table {
 }
 
 .numpad {
-  position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
@@ -246,17 +266,7 @@ table {
 }
 
 .game-controls .game-controls-buttons {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: row;
-  -moz-box-orient: horizontal;
-  -moz-box-direction: normal;
-  -ms-flex-direction: row;
   flex-direction: row;
   -webkit-flex-wrap: wrap;
   -ms-flex-wrap: wrap;
@@ -312,20 +322,8 @@ svg:not(:root) {
 }
 
 .game-controls-wrapper nav {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -moz-box;
-  display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: column;
-  -moz-box-orient: vertical;
-  -moz-box-direction: normal;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -webkit-flex-wrap: nowrap;
-  -ms-flex-wrap: nowrap;
   flex-wrap: nowrap;
   height: 100%;
   width: 100%;
@@ -334,7 +332,8 @@ svg:not(:root) {
 @media screen and (max-width: 800px) {
   .sudoku-wrapper {
     max-width: 500px;
-    margin: 0 auto 20px;
+    margin: 0 auto;
+    width: 100%;
   }
 }
 
@@ -358,6 +357,7 @@ svg:not(:root) {
 
 @media screen and (max-width: 800px) {
   .game-controls-wrapper {
+    height: unset;
     width: 100%;
     margin: 0 auto;
   }
