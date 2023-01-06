@@ -42,16 +42,24 @@ io.on("connection", (socket) => {
     socket.emit("event", "pong");
   });
 
-  socket.on("joinRoom", ({ userId, room }) => {
-    const user = userJoin(socket.id, userId, room);
-    socket.join(user.room);
+  socket.on("joinRoom", ({ userId, roomId }) => {
+    const user = userJoin(socket.id, userId, roomId);
+    socket.join(user.roomId);
+    io.to(user.roomId).emit("usersInRoom", getRoomUsers(user.roomId));
   });
 
   socket.on("play", (boardValue) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.room).emit("play", boardValue);
+    io.to(user.roomId).emit("play", boardValue);
   });
 
+  socket.on("disconnect", () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      io.to(user.roomId).emit("usersInRoom", getRoomUsers(user.roomId));
+    }
+  });
 });
 
 app.use(compression());
@@ -68,10 +76,10 @@ app.all(
   MODE === "production"
     ? createRequestHandler({ build: require("../build") })
     : (req, res, next) => {
-      purgeRequireCache();
-      const build = require("../build");
-      return createRequestHandler({ build, mode: MODE })(req, res, next);
-    }
+        purgeRequireCache();
+        const build = require("../build");
+        return createRequestHandler({ build, mode: MODE })(req, res, next);
+      }
 );
 
 const port = process.env.PORT || 3000;

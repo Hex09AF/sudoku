@@ -149,16 +149,16 @@ table {
     }
   }
 
+  &.cell-selected {
+    background-color: #bbdefb;
+  }
+
   &.user-cell {
     background-color: green;
   }
 
   &.enemy-cell {
     background-color: red;
-  }
-
-  &.cell-selected {
-    background-color: #bbdefb;
   }
 }
 
@@ -185,20 +185,6 @@ table {
   font-size: clamp(0px, 5vw, 30px);
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 .game-controls-wrapper {
   height: 100%;
   position: relative;
@@ -208,7 +194,7 @@ table {
   width: 50%;
   margin-left: 20px;
   user-select: none;
-  transition: opacity .3s ease-in-out;
+  transition: opacity 0.3s ease-in-out;
 }
 
 .numpad-wrapper {
@@ -238,7 +224,7 @@ table {
   border-style: solid;
   border-width: 1px 0 0 1px;
   cursor: pointer;
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .numpad-wrapper .numpad-item span {
@@ -248,7 +234,7 @@ table {
   width: 100%;
   height: 32px;
   color: #344861;
-  transition: color .2s ease-in-out;
+  transition: color 0.2s ease-in-out;
   transform: translateY(-50%);
   font-size: clamp(0px, 5vw, 30px);
 }
@@ -292,10 +278,10 @@ table {
   border-color: #bec6d4;
   border-style: solid;
   border-width: 1px 0 0 1px;
-  -webkit-transition: all .2s ease-in-out;
-  -o-transition: all .2s ease-in-out;
-  -moz-transition: all .2s ease-in-out;
-  transition: all .2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .game-controls .game-controls-pencil .svg-wrapper {
@@ -306,10 +292,10 @@ table {
   width: 30px;
   height: 32px;
   color: #344861;
-  -webkit-transition: color .2s ease-in-out;
-  -o-transition: color .2s ease-in-out;
-  -moz-transition: color .2s ease-in-out;
-  transition: color .2s ease-in-out;
+  -webkit-transition: color 0.2s ease-in-out;
+  -o-transition: color 0.2s ease-in-out;
+  -moz-transition: color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out;
 }
 
 svg:not(:root) {
@@ -414,13 +400,6 @@ svg:not(:root) {
   }
 }
 
-
-
-
-
-
-
-
 .new-game-button {
   cursor: pointer;
   height: 60px;
@@ -435,10 +414,10 @@ svg:not(:root) {
   vertical-align: middle;
   text-align: center;
   color: #fff;
-  -webkit-transition: all .2s ease-in-out;
-  -o-transition: all .2s ease-in-out;
-  -moz-transition: all .2s ease-in-out;
-  transition: all .2s ease-in-out;
+  -webkit-transition: all 0.2s ease-in-out;
+  -o-transition: all 0.2s ease-in-out;
+  -moz-transition: all 0.2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .game-controls .game-controls-item:nth-child(3),
@@ -448,4 +427,44 @@ svg:not(:root) {
 
 .game-controls .game-controls-item:nth-child(2n) {
   border-right-width: 1px;
+}
+
+.score-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-info {
+  position: relative;
+  background-color: blue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  .plus-point {
+    color: white;
+    position: absolute;
+    left: 0px;
+    bottom: 10px;
+    width: 100%;
+    text-align: center;
+    background: none;
+    transition: all 0.2s ease-in 0s;
+    animation-name: fly-up;
+    animation-duration: 0.5s;
+    animation-fill-mode: forwards;
+  }
+}
+
+@keyframes fly-up {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
 }

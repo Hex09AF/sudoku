@@ -1,4 +1,3 @@
-import BoardGame from "~/comps/BoardGame";
 
 import { json, LinksFunction, LoaderArgs } from "@remix-run/node";
 
@@ -6,8 +5,6 @@ import Header from "~/comps/Header";
 import stylesUrl from "~/styles/index.css";
 
 import { useLoaderData } from "@remix-run/react";
-import { useEffect } from "react";
-import { useSocket } from "~/context";
 import { getUser } from "~/utils/session.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -27,11 +24,13 @@ export default function Index() {
   return (
     <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
       <div>
-        <form method="post" action="/">
-          <button type="submit">
-            Tạo trận
-          </button>
-        </form>
+        {data.user?.username == 'kody' ?
+          <form method="post" action="/">
+            <button type="submit">
+              Tạo trận
+            </button>
+          </form>
+          : ""}
       </div>
       <Header user={data.user} />
     </div>

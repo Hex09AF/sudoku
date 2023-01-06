@@ -142,14 +142,14 @@ table {
 .game-cell.number-conflict .cell-value.default-conflict {
   color: #e12120;
 }
+.game-cell.cell-selected {
+  background-color: #bbdefb;
+}
 .game-cell.user-cell {
   background-color: green;
 }
 .game-cell.enemy-cell {
   background-color: red;
-}
-.game-cell.cell-selected {
-  background-color: #bbdefb;
 }
 
 .game-cell:nth-child(3n) {
@@ -407,6 +407,46 @@ svg:not(:root) {
 
 .game-controls .game-controls-item:nth-child(2n) {
   border-right-width: 1px;
+}
+
+.score-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-info {
+  position: relative;
+  background-color: blue;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+}
+.score-info .plus-point {
+  color: white;
+  position: absolute;
+  left: 0px;
+  bottom: 10px;
+  width: 100%;
+  text-align: center;
+  background: none;
+  transition: all 0.2s ease-in 0s;
+  animation-name: fly-up;
+  animation-duration: 0.5s;
+  animation-fill-mode: forwards;
+}
+
+@keyframes fly-up {
+  0% {
+    transform: translateY(0px);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-50px);
+    opacity: 0;
+  }
 }
 
 /*# sourceMappingURL=index.css.map */

@@ -44,7 +44,7 @@ const RANDOMBOARD = () => {
      * EZ = 40, MD = 50, HA = 60
      */
 
-    let eraseCell = 45;
+    let eraseCell = 40;
     while (eraseCell) {
       let pair = RANDOMPAIR(0, 9);
       if (newBoardValue[pair.first][pair.second]) {

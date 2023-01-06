@@ -1,20 +1,33 @@
-import { useCallback, useEffect, useState } from "react";
 import { useSubmit } from "@remix-run/react";
-import debounce from "lodash.debounce"
+import debounce from "lodash.debounce";
+import { useCallback, useEffect, useState } from "react";
+import Score from "../Score";
 
-const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMoves }) => {
-
+const BoardGame = ({
+  solveBoard,
+  boardData,
+  roomId,
+  userId,
+  socket,
+  initMoves,
+  initCurUserMoves,
+}) => {
   const submit = useSubmit();
 
-  const [curMoves, setCurMoves] = useState(initMoves);
+  const [usersInRoom, setUsersInRoom] = useState([userId]);
 
-  const [curUserMoves, setCurUserMoves] = useState<[]>(initCurUserMoves)
+  const [score, setScore] = useState(40);
+  const [plusPoint, setPlusPoint] = useState(0);
+
+  const [curMoves] = useState(initMoves);
+
+  const [curUserMoves, setCurUserMoves] = useState<[]>(initCurUserMoves);
 
   const [selectCell, setSelectCell] = useState({ row: 4, col: 4 });
 
   const [curBoardValue, setCurBoardValue] = useState(boardData);
 
-  const [firstBoardValue, setFirstBoardValue] = useState(boardData);
+  const [firstBoardValue] = useState(boardData);
 
   const [canRowXNumberY, setCanRowXNumberY] = useState(
     new Array(9).fill(0).map(() => new Array(10).fill(0))
@@ -30,17 +43,26 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
 
   const isEnemyCell = (pair) => {
     let flag = false;
-    curMoves.forEach(move => {
-      if (move.userId != userId && move.moves.findIndex(v => v[0] == pair.row && v[1] == pair.col) != -1) {
+    curMoves.forEach((move) => {
+      if (
+        move.userId != userId &&
+        move.moves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
+      ) {
         flag = true;
       }
-    })
+    });
     return flag;
-  }
+  };
 
   const isUserCell = (pair) => {
-    return curUserMoves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
-  }
+    return (
+      curUserMoves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
+    );
+  };
+
+  const isMatchCell = (pair) => {
+    return solveBoard[pair.row][pair.col] == curBoardValue[pair.row][pair.col];
+  };
 
   const checkValid = (pair) => {
     return (
@@ -49,34 +71,46 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
       pair.row < 9 &&
       pair.col >= 0 &&
       pair.col < 9 &&
+      !isMatchCell(pair) &&
       (!firstBoardValue[pair.row][pair.col] || isUserCell(pair))
     );
   };
 
-  const sayHello = useCallback(debounce((curSelectCell, value) => {
-    const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
-    const isExistCell = newCurUserMoves.findIndex(v => {
-      return v[0] == curSelectCell.row && v[1] == curSelectCell.col
-    })
-    if (isExistCell != -1) {
-      newCurUserMoves[isExistCell] = [curSelectCell.row, curSelectCell.col, value]
-    } else {
-      newCurUserMoves.push([curSelectCell.row, curSelectCell.col, value]);
-    }
-    setCurUserMoves(newCurUserMoves)
-    const formData = new FormData();
-    formData.append("roomId", roomId);
-    formData.append("userId", userId);
-    formData.append("newCurUserMoves", JSON.stringify(newCurUserMoves));
-    submit(formData, { method: "post", action: `/solo/${roomId}`, replace: true });
-  }, 1000), [selectCell])
+  const sayHello = useCallback(
+    debounce((curSelectCell, value) => {
+      const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
+      const isExistCell = newCurUserMoves.findIndex((v) => {
+        return v[0] == curSelectCell.row && v[1] == curSelectCell.col;
+      });
+      if (isExistCell != -1) {
+        newCurUserMoves[isExistCell] = [
+          curSelectCell.row,
+          curSelectCell.col,
+          value,
+        ];
+      } else {
+        newCurUserMoves.push([curSelectCell.row, curSelectCell.col, value]);
+      }
+      setCurUserMoves(newCurUserMoves);
+      const formData = new FormData();
+      formData.append("roomId", roomId);
+      formData.append("userId", userId);
+      formData.append("newCurUserMoves", JSON.stringify(newCurUserMoves));
+      submit(formData, {
+        method: "post",
+        action: `/solo/${roomId}`,
+        replace: true,
+      });
+    }, 1000),
+    [selectCell]
+  );
 
   useEffect(() => {
     if (!socket) return;
 
     const handleKeyDown = (e) => {
       let value = -1;
-
+      setPlusPoint(Math.random() * 10);
       if ("1234567890".includes(e.key)) {
         value = Number.parseInt(e.key, 10);
       } else if (e.key === "Backspace") {
@@ -84,22 +118,22 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
       } else if (e.key === "ArrowUp") {
         setSelectCell((preState) => ({
           row: (preState.row - 1 + 9) % 9,
-          col: preState.col
+          col: preState.col,
         }));
       } else if (e.key === "ArrowLeft") {
         setSelectCell((preState) => ({
           row: preState.row,
-          col: (preState.col - 1 + 9) % 9
+          col: (preState.col - 1 + 9) % 9,
         }));
       } else if (e.key === "ArrowRight") {
         setSelectCell((preState) => ({
           row: preState.row,
-          col: (preState.col + 1) % 9
+          col: (preState.col + 1) % 9,
         }));
       } else if (e.key === "ArrowDown") {
         setSelectCell((preState) => ({
           row: (preState.row + 1) % 9,
-          col: preState.col
+          col: preState.col,
         }));
       }
 
@@ -150,15 +184,26 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
 
   useEffect(() => {
     if (!socket) return;
-    socket.on('play', (boardValue) => {
+    socket.on("play", (boardValue) => {
       setCurBoardValue(boardValue);
     });
-  }, [socket])
+    socket.on("usersInRoom", (users) => {
+      console.log(users, "LA CHI TROI");
+      setUsersInRoom(users);
+    });
+  }, [socket]);
 
   return (
     <div className="sudoku-wrapper">
       <div className="score-wrapper">
-        {userId}
+        {usersInRoom.map((userInRoom) => (
+          <Score
+            key={userInRoom}
+            userId={userInRoom}
+            score={score}
+            plusPoint={plusPoint}
+          />
+        ))}
       </div>
       <div className="game-flex-wrapper">
         <div className="game-wrapper">
@@ -181,14 +226,14 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
                           isConflictCol={canColXNumberY[idx2][val] > 1}
                           isConflictSquare={
                             canSquareXYNumberZ[(idx / 3) >> 0][(idx2 / 3) >> 0][
-                            val
+                              val
                             ] > 1
                           }
                           isDefault={firstBoardValue[idx][idx2] !== 0}
                           isSameValue={
                             curBoardValue[selectCell.row][selectCell.col] &&
                             curBoardValue[selectCell.row][selectCell.col] ===
-                            val
+                              val
                           }
                         />
                       );
@@ -199,14 +244,8 @@ const BoardGame = ({ boardData, roomId, userId, socket, initMoves, initCurUserMo
             </table>
           </div>
         </div>
-        {/* <GameControl
-          curBoardValue={curBoardValue}
-          setCurBoardValue={setCurBoardValue}
-          firstBoardValue={firstBoardValue}
-          selectCell={selectCell}
-        /> */}
       </div>
-    </div >
+    </div>
   );
 };
 
@@ -221,7 +260,7 @@ const Cell = ({
   isDefault,
   isSameValue,
   isUserCell,
-  isEnemy
+  isEnemy,
 }) => {
   const isSelecting =
     selectCell.row === cellIdx.row && selectCell.col === cellIdx.col;
@@ -252,8 +291,8 @@ const Cell = ({
       ? " default-conflict "
       : "";
 
-  const isUserClass = (isUserCell ? " user-cell " : "")
-  const isEnemyClass = (isEnemy ? " enemy-cell " : "")
+  const isUserClass = isUserCell ? " user-cell " : "";
+  const isEnemyClass = isEnemy ? " enemy-cell " : "";
   /**
    *
    */

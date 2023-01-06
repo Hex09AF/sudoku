@@ -24,9 +24,8 @@ const SOLVE = (boardValue) => {
 
         canRowXNumberY[i][boardValue[i][j]] = false;
         canColXNumberY[j][boardValue[i][j]] = false;
-        canSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
-          boardValue[i][j]
-        ] = false;
+        canSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][boardValue[i][j]] =
+          false;
       }
     }
 
@@ -39,17 +38,18 @@ const SOLVE = (boardValue) => {
         canColXNumberY[pair.col][number] &&
         canRowXNumberY[pair.row][number] &&
         canSquareXYNumberZ[Math.floor(pair.row / 3)][Math.floor(pair.col / 3)][
-        number
+          number
         ]
       );
     };
 
     const markIndex = (pair, number, value) => {
-      canColXNumberY[pair.col][number] = canRowXNumberY[pair.row][
-        number
-      ] = canSquareXYNumberZ[Math.floor(pair.row / 3)][
-      Math.floor(pair.col / 3)
-      ][number] = value;
+      canColXNumberY[pair.col][number] =
+        canRowXNumberY[pair.row][number] =
+        canSquareXYNumberZ[Math.floor(pair.row / 3)][Math.floor(pair.col / 3)][
+          number
+        ] =
+          value;
     };
 
     const solveSudoku = (sudokuBoard, x, y) => {

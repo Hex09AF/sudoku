@@ -30,8 +30,8 @@ function validatePassword(password: unknown) {
 }
 
 function validateUrl(url: string) {
-  let urls = ["/", "/", "https://remix.run"];
-  if (urls.includes(url)) {
+  let urls = ["/solo"];
+  if (urls.findIndex(v => { return url.startsWith(v)}) != -1) {
     return url;
   }
   return "/";
@@ -45,6 +45,7 @@ export const action = async ({ request }: ActionArgs) => {
   const redirectTo = validateUrl(
     form.get("redirectTo") || "/"
   );
+  console.log(redirectTo, "redirectToredirectToredirectTo")
   if (
     typeof loginType !== "string" ||
     typeof username !== "string" ||
