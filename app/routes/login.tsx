@@ -1,12 +1,6 @@
-import type {
-  ActionArgs,
-  LinksFunction
-} from "@remix-run/node";
-import {
-  Link,
-  useActionData,
-  useSearchParams
-} from "@remix-run/react";
+import type { ActionArgs, LinksFunction } from "@remix-run/node";
+import { Link, useActionData, useSearchParams } from "@remix-run/react";
+import { useEffect, useRef } from "react";
 
 import stylesUrl from "~/styles/login.css";
 import { db } from "~/utils/db.server";
@@ -31,7 +25,11 @@ function validatePassword(password: unknown) {
 
 function validateUrl(url: string) {
   let urls = ["/solo"];
-  if (urls.findIndex(v => { return url.startsWith(v)}) != -1) {
+  if (
+    urls.findIndex((v) => {
+      return url.startsWith(v);
+    }) != -1
+  ) {
     return url;
   }
   return "/";
@@ -42,10 +40,7 @@ export const action = async ({ request }: ActionArgs) => {
   const loginType = form.get("loginType");
   const username = form.get("username");
   const password = form.get("password");
-  const redirectTo = validateUrl(
-    form.get("redirectTo") || "/"
-  );
-  console.log(redirectTo, "redirectToredirectToredirectTo")
+  const redirectTo = validateUrl(form.get("redirectTo") || "/");
   if (
     typeof loginType !== "string" ||
     typeof username !== "string" ||
@@ -121,123 +116,157 @@ export const action = async ({ request }: ActionArgs) => {
   }
 };
 
+const colors = ["", "orange", "yellow", "green", "blue", "indigo", "violet"];
+
 export default function Login() {
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
+
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (gridRef.current && window) {
+      const fn = (e) => {
+        // normalise touch/mouse
+        e.preventDefault();
+        let pos = [e.x, e.y];
+        const h = window.innerHeight;
+        const w = window.innerWidth;
+        const ratioY = 80 / w;
+        const ratioX = 40 / h;
+        const rotY = pos[0] * ratioY - 40;
+        const rotX = pos[1] * ratioX - 20;
+        const transform = `
+          translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateZ(0deg) skew(0deg, 0deg)
+          rotateX(${rotX}deg)
+          rotateY(${rotY}deg)
+        `;
+        if (gridRef.current) {
+          gridRef.current.style.transform = transform;
+        }
+      };
+      window.addEventListener("mousemove", fn);
+      return () => {
+        window.removeEventListener("mousemove", fn);
+      };
+    }
+  }, [gridRef]);
+
   return (
-    <div className="container">
-      <div className="content" data-light="">
-        <h1>Login</h1>
-        <form method="post">
-          <input
-            type="hidden"
-            name="redirectTo"
-            value={
-              searchParams.get("redirectTo") ?? undefined
-            }
-          />
-          <fieldset>
-            <legend className="sr-only">
-              Login or Register?
-            </legend>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="login"
-                defaultChecked={
-                  !actionData?.fields?.loginType ||
-                  actionData?.fields?.loginType === "login"
-                }
-              />{" "}
-              Login
-            </label>
-            <label>
-              <input
-                type="radio"
-                name="loginType"
-                value="register"
-                defaultChecked={
-                  actionData?.fields?.loginType ===
-                  "register"
-                }
-              />{" "}
-              Register
-            </label>
-          </fieldset>
-          <div>
-            <label htmlFor="username-input">Username</label>
-            <input
-              type="text"
-              id="username-input"
-              name="username"
-              defaultValue={actionData?.fields?.username}
-              aria-invalid={Boolean(
-                actionData?.fieldErrors?.username
-              )}
-              aria-errormessage={
-                actionData?.fieldErrors?.username
-                  ? "username-error"
-                  : undefined
-              }
-            />
-            {actionData?.fieldErrors?.username ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="username-error"
-              >
-                {actionData.fieldErrors.username}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <label htmlFor="password-input">Password</label>
-            <input
-              id="password-input"
-              name="password"
-              type="password"
-              defaultValue={actionData?.fields?.password}
-              aria-invalid={Boolean(
-                actionData?.fieldErrors?.password
-              )}
-              aria-errormessage={
-                actionData?.fieldErrors?.password
-                  ? "password-error"
-                  : undefined
-              }
-            />
-            {actionData?.fieldErrors?.password ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-                id="password-error"
-              >
-                {actionData.fieldErrors.password}
-              </p>
-            ) : null}
-          </div>
-          <div id="form-error-message">
-            {actionData?.formError ? (
-              <p
-                className="form-validation-error"
-                role="alert"
-              >
-                {actionData.formError}
-              </p>
-            ) : null}
-          </div>
-          <button type="submit" className="button">
-            Submit
-          </button>
-        </form>
+    <div className="background-wrapper">
+      <div className="grid-layout" ref={gridRef}>
+        {Array(49)
+          .fill(0)
+          .map((_, idx) => {
+            return (
+              <div key={idx} className="password-cell">
+                {colors.map((v) => (
+                  <div key={v} className={`password-cell-color ${v}`}></div>
+                ))}
+              </div>
+            );
+          })}
       </div>
-      <div className="links">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-        </ul>
+      <div className="container login-content">
+        <div className="content" data-light="">
+          <h1>Login</h1>
+          <form method="post">
+            <input
+              type="hidden"
+              name="redirectTo"
+              value={searchParams.get("redirectTo") ?? undefined}
+            />
+            <fieldset>
+              <legend className="sr-only">Login or Register?</legend>
+              <label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="login"
+                  defaultChecked={
+                    !actionData?.fields?.loginType ||
+                    actionData?.fields?.loginType === "login"
+                  }
+                />{" "}
+                Login
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="register"
+                  defaultChecked={actionData?.fields?.loginType === "register"}
+                />{" "}
+                Register
+              </label>
+            </fieldset>
+            <div>
+              <label htmlFor="username-input">Username</label>
+              <input
+                type="text"
+                id="username-input"
+                name="username"
+                defaultValue={actionData?.fields?.username}
+                aria-invalid={Boolean(actionData?.fieldErrors?.username)}
+                aria-errormessage={
+                  actionData?.fieldErrors?.username
+                    ? "username-error"
+                    : undefined
+                }
+              />
+              {actionData?.fieldErrors?.username ? (
+                <p
+                  className="form-validation-error"
+                  role="alert"
+                  id="username-error"
+                >
+                  {actionData.fieldErrors.username}
+                </p>
+              ) : null}
+            </div>
+            <div>
+              <label htmlFor="password-input">Password</label>
+              <input
+                id="password-input"
+                name="password"
+                type="password"
+                defaultValue={actionData?.fields?.password}
+                aria-invalid={Boolean(actionData?.fieldErrors?.password)}
+                aria-errormessage={
+                  actionData?.fieldErrors?.password
+                    ? "password-error"
+                    : undefined
+                }
+              />
+              {actionData?.fieldErrors?.password ? (
+                <p
+                  className="form-validation-error"
+                  role="alert"
+                  id="password-error"
+                >
+                  {actionData.fieldErrors.password}
+                </p>
+              ) : null}
+            </div>
+            <div id="form-error-message">
+              {actionData?.formError ? (
+                <p className="form-validation-error" role="alert">
+                  {actionData.formError}
+                </p>
+              ) : null}
+            </div>
+            <button type="submit" className="button">
+              Submit
+            </button>
+          </form>
+        </div>
+        <div className="links">
+          <ul>
+            <li>
+              <Link to="/">Home</Link>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );

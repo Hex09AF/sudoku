@@ -3,7 +3,16 @@
  * will get unloaded, so don't worry so much about conflicting styles between
  * pages!
  */
+* {
+  box-sizing: border-box;
+}
+
+form {
+  width: 100%;
+}
+
 body {
+  margin: 0;
   background-image: var(--gradient-background);
 }
 
@@ -59,6 +68,175 @@ fieldset > :not(:last-child) {
 .links a:hover {
   text-decoration-style: wavy;
   text-decoration-thickness: 1px;
+}
+
+.background-wrapper {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100%;
+  max-width: 141%;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: #171718;
+  -webkit-perspective: 1000px;
+  perspective: 1000px;
+  color: hsla(0deg, 0%, 100%, 0.9);
+}
+
+.grid-layout {
+  will-change: transform;
+  transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(7.482deg) rotateY(39.9904deg) rotateZ(0deg) skew(0deg, 0deg);
+  transform-style: preserve-3d;
+}
+
+.grid-layout {
+  display: grid;
+  grid-auto-columns: 1fr;
+  -ms-grid-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+  -ms-grid-rows: auto auto;
+  grid-template-rows: auto auto;
+  grid-row-gap: 16px;
+  grid-column-gap: 16px;
+  position: absolute;
+  width: 75vmin;
+  height: 75vmin;
+  -ms-grid-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  -ms-grid-rows: auto auto auto auto auto auto auto;
+  grid-template-rows: auto auto auto auto auto auto auto;
+}
+
+.password-cell {
+  position: relative;
+  background-color: #171718;
+  -webkit-transform: scale3d(1, 1, 6);
+  transform: scale3d(1, 1, 6);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+.password-cell-color {
+  position: absolute;
+  left: 0%;
+  top: 0%;
+  right: 0%;
+  bottom: 0%;
+  background-color: #f01f4c;
+  opacity: 0.5;
+  -webkit-transform: translate3d(0px, 0px, -10px);
+  transform: translate3d(0px, 0px, -10px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.orange {
+  background-color: #f0841f;
+  -webkit-transform: translate3d(0px, 0px, -20px);
+  transform: translate3d(0px, 0px, -20px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.yellow {
+  background-color: #f0d01f;
+  -webkit-transform: translate3d(0px, 0px, -30px);
+  transform: translate3d(0px, 0px, -30px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.green {
+  background-color: #6cf01f;
+  -webkit-transform: translate3d(0px, 0px, -40px);
+  transform: translate3d(0px, 0px, -40px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.blue {
+  background-color: #31b3ff;
+  -webkit-transform: translate3d(0px, 0px, -50px);
+  transform: translate3d(0px, 0px, -50px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.indigo {
+  background-color: #4231ff;
+  -webkit-transform: translate3d(0px, 0px, -60px);
+  transform: translate3d(0px, 0px, -60px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+.password-cell-color.violet {
+  background-color: #f344ff;
+  -webkit-transform: translate3d(0px, 0px, -70px);
+  transform: translate3d(0px, 0px, -70px);
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+}
+
+.login-content {
+  position: relative;
+  z-index: 3;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  text-align: center;
+}
+
+.content {
+  backdrop-filter: saturate(200%) blur(30px) brightness(100%);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  padding: 30px;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+  -ms-flex-direction: column;
+  flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+  -ms-flex-align: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+button {
+  width: 100%;
+  background-color: #000;
+  display: inline-block;
+  padding: 9px 15px;
+  color: white;
+  border: 0;
+  line-height: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  border-radius: 0;
+}
+
+input {
+  display: block;
+  width: 100%;
+  height: 38px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #333333;
+  vertical-align: middle;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
 }
 
 /*# sourceMappingURL=login.css.map */
