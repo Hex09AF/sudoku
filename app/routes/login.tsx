@@ -1,7 +1,6 @@
 import type { ActionArgs, LinksFunction } from "@remix-run/node";
-import { Link, useActionData, useSearchParams } from "@remix-run/react";
+import { useActionData, useSearchParams } from "@remix-run/react";
 import { useEffect, useRef } from "react";
-
 import stylesUrl from "~/styles/login.css";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -129,25 +128,35 @@ export default function Login() {
       const fn = (e) => {
         // normalise touch/mouse
         e.preventDefault();
-        let pos = [e.x, e.y];
+        let pos = [e.clientX, e.clientY];
         const h = window.innerHeight;
         const w = window.innerWidth;
-        const ratioY = 80 / w;
-        const ratioX = 40 / h;
-        const rotY = pos[0] * ratioY - 40;
-        const rotX = pos[1] * ratioX - 20;
+        const ratioY = 60 / w;
+        const ratioX = 60 / h;
+        const rotY = pos[0] * ratioY - 30;
+        const rotX = pos[1] * ratioX - 30;
         const transform = `
-          translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateZ(0deg) skew(0deg, 0deg)
-          rotateX(${rotX}deg)
+        transition: transform 0.5s ease-out;
+        transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateZ(0deg) skew(0deg, 0deg)
+          rotateX(${-rotX}deg)
           rotateY(${rotY}deg)
         `;
         if (gridRef.current) {
-          gridRef.current.style.transform = transform;
+          gridRef.current.setAttribute("style", transform);
         }
       };
+
+      const fnMouseOut = () => {
+        if (gridRef.current) {
+          gridRef.current.setAttribute("style", "");
+        }
+      };
+
       window.addEventListener("mousemove", fn);
+      window.addEventListener("mouseout", fnMouseOut);
       return () => {
         window.removeEventListener("mousemove", fn);
+        window.removeEventListener("mouseout", fnMouseOut);
       };
     }
   }, [gridRef]);
@@ -200,7 +209,7 @@ export default function Login() {
                 Register
               </label>
             </fieldset>
-            <div>
+            <div className="login-field username">
               <label htmlFor="username-input">Username</label>
               <input
                 type="text"
@@ -224,7 +233,7 @@ export default function Login() {
                 </p>
               ) : null}
             </div>
-            <div>
+            <div className="login-field password">
               <label htmlFor="password-input">Password</label>
               <input
                 id="password-input"
@@ -259,13 +268,6 @@ export default function Login() {
               Submit
             </button>
           </form>
-        </div>
-        <div className="links">
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-          </ul>
         </div>
       </div>
     </div>
