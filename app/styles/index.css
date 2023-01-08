@@ -322,6 +322,10 @@ svg:not(:root) {
   width: 100%;
 }
 
+.sudoku-wrapper {
+  outline: none;
+}
+
 @media screen and (max-width: 800px) {
   .sudoku-wrapper {
     max-width: 500px;
@@ -439,6 +443,7 @@ svg:not(:root) {
   color: #eee4da;
   position: relative;
   font-weight: 500;
+  border-radius: 4px;
   background-color: #bbada0;
   display: flex;
   flex-direction: column;

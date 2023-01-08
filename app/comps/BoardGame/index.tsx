@@ -1,6 +1,6 @@
 import { useSubmit } from "@remix-run/react";
 import debounce from "lodash.debounce";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Score from "../Score";
 
 const BoardGame = ({
@@ -13,6 +13,8 @@ const BoardGame = ({
   initCurUserMoves,
 }) => {
   const submit = useSubmit();
+
+  const sudokuWrapperRef = useRef(null);
 
   const [usersInRoom, setUsersInRoom] = useState([userId]);
 
@@ -92,6 +94,7 @@ const BoardGame = ({
   );
 
   useEffect(() => {
+    if (!sudokuWrapperRef.current) return;
     // if (!socket) return;
 
     const handleKeyDown = (e) => {
@@ -151,13 +154,19 @@ const BoardGame = ({
         socket.emit("play", newBoardValue);
       }
     };
-
-    window.addEventListener("keydown", handleKeyDown);
+    sudokuWrapperRef.current.addEventListener("keydown", handleKeyDown);
 
     return function cleanup() {
-      window.removeEventListener("keydown", handleKeyDown);
+      sudokuWrapperRef.current.removeEventListener("keydown", handleKeyDown);
     };
-  }, [socket, curBoardValue, selectCell, checkValid, solveBoard]);
+  }, [
+    sudokuWrapperRef,
+    socket,
+    curBoardValue,
+    selectCell,
+    checkValid,
+    solveBoard,
+  ]);
 
   useEffect(() => {
     const updateCanArray = () => {
@@ -200,7 +209,7 @@ const BoardGame = ({
   }, [socket]);
 
   return (
-    <div className="sudoku-wrapper">
+    <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score

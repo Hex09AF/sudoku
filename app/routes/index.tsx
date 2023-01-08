@@ -6,10 +6,11 @@ import LookUp from "~/assets/svg/LookUp";
 import Header from "~/comps/Header";
 import stylesUrl from "~/styles/index.css";
 
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useNavigate } from "@remix-run/react";
 import BoardGame from "~/comps/BoardGame";
 import zeroBoard, { baseBoard } from "~/const/board";
 import { getUser } from "~/utils/session.server";
+import { useRef } from "react";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);
@@ -23,7 +24,15 @@ export const links: LinksFunction = () => {
 };
 
 export default function Index() {
+  const navigate = useNavigate();
   const data = useLoaderData<typeof loader>();
+  const getRoomFormRef = useRef(null);
+  const getRoom = (e) => {
+    e.preventDefault();
+    const data = new FormData(getRoomFormRef.current);
+    const idRoom = data.get("idRoom");
+    navigate(`/solo/${idRoom}`);
+  };
 
   return (
     <div>
@@ -64,7 +73,7 @@ export default function Index() {
             with you!
           </span>
         </div>
-        <div
+        <label
           style={{
             borderRadius: 8,
             padding: "0.5rem 1rem",
@@ -72,10 +81,25 @@ export default function Index() {
             display: "flex",
             alignItems: "center",
             gap: 16,
+            fontSize: "0.875rem",
+            cursor: "pointer",
           }}
         >
-          <LookUp /> Find room...
-        </div>
+          <div style={{ flexShrink: 0 }}>
+            <LookUp />
+          </div>
+          <form onSubmit={getRoom} ref={getRoomFormRef}>
+            <input
+              name="idRoom"
+              style={{
+                border: "none",
+                background: "transparent",
+                outline: "none",
+              }}
+              placeholder="Find room..."
+            />
+          </form>
+        </label>
         <div>
           {data.user?.username == "kody" ? (
             <form method="post" action="/">
