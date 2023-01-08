@@ -146,11 +146,27 @@ table {
 .game-cell.cell-selected {
   background-color: #bbdefb;
 }
-.game-cell.user-cell {
-  background-color: green;
+.game-cell.user-cell::before {
+  content: "";
+  display: block;
+  position: absolute;
+  background-size: cover;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
 }
 .game-cell.enemy-cell {
-  background-color: red;
+  content: "";
+  display: block;
+  position: absolute;
+  background-size: cover;
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  background-image: url("https://partyanimals.com/static/img/characters_Nemo_avatar@2x.63a141e4.png");
 }
 
 .game-cell:nth-child(3n) {

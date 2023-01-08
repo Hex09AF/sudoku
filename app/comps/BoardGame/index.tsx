@@ -77,21 +77,7 @@ const BoardGame = ({
   };
 
   const sayHello = useCallback(
-    debounce((curSelectCell, value) => {
-      const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
-      const isExistCell = newCurUserMoves.findIndex((v) => {
-        return v[0] == curSelectCell.row && v[1] == curSelectCell.col;
-      });
-      if (isExistCell != -1) {
-        newCurUserMoves[isExistCell] = [
-          curSelectCell.row,
-          curSelectCell.col,
-          value,
-        ];
-      } else {
-        newCurUserMoves.push([curSelectCell.row, curSelectCell.col, value]);
-      }
-      setCurUserMoves(newCurUserMoves);
+    debounce((newCurUserMoves) => {
       const formData = new FormData();
       formData.append("roomId", roomId);
       formData.append("userId", userId);
@@ -147,7 +133,21 @@ const BoardGame = ({
           setPlusPoint(-100);
           setScore((pre) => (pre || 0) - 100);
         }
-        sayHello(selectCell, value);
+        const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
+        const isExistCell = newCurUserMoves.findIndex((v) => {
+          return v[0] == selectCell.row && v[1] == selectCell.col;
+        });
+        if (isExistCell != -1) {
+          newCurUserMoves[isExistCell] = [
+            selectCell.row,
+            selectCell.col,
+            value,
+          ];
+        } else {
+          newCurUserMoves.push([selectCell.row, selectCell.col, value]);
+        }
+        setCurUserMoves(newCurUserMoves);
+        sayHello(selectCell);
         socket.emit("play", newBoardValue);
       }
     };
