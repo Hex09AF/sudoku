@@ -5,6 +5,8 @@ import stylesUrl from "~/styles/index.css";
 
 import { useLoaderData } from "@remix-run/react";
 import { getUser } from "~/utils/session.server";
+import BoardGame from "~/comps/BoardGame";
+import zeroBoard, { baseBoard } from "~/const/board";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);
@@ -22,16 +24,34 @@ export default function Index() {
 
   return (
     <div>
-      <div>
-        {data.user?.username == "kody" ? (
-          <form method="post" action="/">
-            <button type="submit">Tạo trận</button>
-          </form>
-        ) : (
-          ""
-        )}
+      <div
+        style={{
+          padding: "1rem 1rem",
+          height: 64,
+          display: "flex",
+          justifyContent: "space-between",
+        }}
+      >
+        <Header user={data.user} />
+        Competitive sudoku
+        <div>12312312312312312 Vào trận </div>
+        <div>
+          {data.user?.username == "kody" ? (
+            <form method="post" action="/">
+              <button type="submit">Tạo trận</button>
+            </form>
+          ) : (
+            ""
+          )}
+        </div>
       </div>
-      <Header user={data.user} />
+      <BoardGame
+        userId={1}
+        boardData={zeroBoard}
+        solveBoard={baseBoard}
+        initMoves={[]}
+        initCurUserMoves={[]}
+      />
     </div>
   );
 }

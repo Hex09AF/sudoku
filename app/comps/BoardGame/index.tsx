@@ -16,7 +16,7 @@ const BoardGame = ({
 
   const [usersInRoom, setUsersInRoom] = useState([userId]);
 
-  const [score, setScore] = useState(40);
+  const [score, setScore] = useState<null | number>(null);
   const [plusPoint, setPlusPoint] = useState(0);
 
   const [curMoves] = useState(initMoves);
@@ -96,21 +96,20 @@ const BoardGame = ({
       formData.append("roomId", roomId);
       formData.append("userId", userId);
       formData.append("newCurUserMoves", JSON.stringify(newCurUserMoves));
-      submit(formData, {
-        method: "post",
-        action: `/solo/${roomId}`,
-        replace: true,
-      });
+      // submit(formData, {
+      //   method: "post",
+      //   action: `/solo/${roomId}`,
+      //   replace: true,
+      // });
     }, 1000),
     [selectCell]
   );
 
   useEffect(() => {
-    if (!socket) return;
+    // if (!socket) return;
 
     const handleKeyDown = (e) => {
       let value = -1;
-      setPlusPoint(Math.random() * 10);
       if ("1234567890".includes(e.key)) {
         value = Number.parseInt(e.key, 10);
       } else if (e.key === "Backspace") {
@@ -141,8 +140,15 @@ const BoardGame = ({
         const newBoardValue = JSON.parse(JSON.stringify(curBoardValue));
         newBoardValue[selectCell.row][selectCell.col] = value;
         setCurBoardValue(newBoardValue);
-        socket.emit("play", newBoardValue);
+        if (solveBoard[selectCell.row][selectCell.col] == value) {
+          setPlusPoint(50);
+          setScore((pre) => (pre || 0) + 50);
+        } else {
+          setPlusPoint(-100);
+          setScore((pre) => (pre || 0) - 100);
+        }
         sayHello(selectCell, value);
+        socket.emit("play", newBoardValue);
       }
     };
 
@@ -151,7 +157,7 @@ const BoardGame = ({
     return function cleanup() {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [socket, curBoardValue, selectCell, checkValid]);
+  }, [socket, curBoardValue, selectCell, checkValid, solveBoard]);
 
   useEffect(() => {
     const updateCanArray = () => {

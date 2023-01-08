@@ -437,24 +437,25 @@ svg:not(:root) {
 }
 
 .score-info {
+  color: white;
   position: relative;
-  background-color: blue;
+  background-color: #6d6875;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
   .plus-point {
-    color: white;
+    border-radius: 4px;
     position: absolute;
     left: 0px;
     bottom: 10px;
     width: 100%;
     text-align: center;
     background: none;
-    transition: all 0.2s ease-in 0s;
+    transition: all 0.3s ease-in 0s;
     animation-name: fly-up;
-    animation-duration: 0.5s;
+    animation-duration: 0.8s;
     animation-fill-mode: forwards;
   }
 }
