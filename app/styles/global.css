@@ -1,6 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap");
 html {
   font-family: "Noto Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "wght" 500;
 }
 
 .background-wrapper {
@@ -37,6 +39,19 @@ html {
   filter: brightness(1) contrast(1);
   transition: all 0.33s ease;
   opacity: 1;
+}
+
+button {
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: #0066ff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #005ce6;
 }
 
 /*# sourceMappingURL=global.css.map */

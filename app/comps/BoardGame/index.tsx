@@ -204,8 +204,8 @@ const BoardGame = ({
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score
+            isUser={userInRoom == userId}
             key={userInRoom}
-            userId={userInRoom}
             score={score}
             plusPoint={plusPoint}
           />

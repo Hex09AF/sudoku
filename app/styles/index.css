@@ -157,7 +157,7 @@ table {
   height: 16px;
   background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
 }
-.game-cell.enemy-cell {
+.game-cell.enemy-cell::before {
   content: "";
   display: block;
   position: absolute;
@@ -427,22 +427,52 @@ svg:not(:root) {
 }
 
 .score-wrapper {
+  margin: 32px;
+  gap: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .score-info {
-  color: white;
+  font-size: 0.75rem;
+  color: #eee4da;
   position: relative;
-  background-color: #6d6875;
+  font-weight: 500;
+  background-color: #bbada0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 10px;
 }
+.score-info.user-cell::before {
+  content: "";
+  display: block;
+  position: absolute;
+  background-size: cover;
+  top: -16px;
+  right: -16px;
+  width: 32px;
+  height: 32px;
+  background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
+}
+.score-info.enemy-cell::before {
+  content: "";
+  display: block;
+  position: absolute;
+  background-size: cover;
+  top: -16px;
+  left: -16px;
+  width: 32px;
+  height: 32px;
+  background-image: url("https://partyanimals.com/static/img/characters_Nemo_avatar@2x.63a141e4.png");
+}
+.score-info h2 {
+  color: white;
+}
 .score-info .plus-point {
+  color: white;
   border-radius: 4px;
   position: absolute;
   left: 0px;

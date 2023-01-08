@@ -6,11 +6,11 @@ export default function Header({ user }) {
       {user ? (
         <form action="/logout" method="post">
           <button type="submit" className="button">
-            Logout
+            Sign out
           </button>
         </form>
       ) : (
-        <Link to="/login">Login</Link>
+        <Link to="/login">Sign in</Link>
       )}
     </nav>
   )
