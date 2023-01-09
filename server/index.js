@@ -22,6 +22,7 @@ const {
   getCurrentUser,
   userLeave,
   getRoomUsers,
+  updateUser,
 } = require("./utils/users");
 
 const app = express();
@@ -42,10 +43,19 @@ io.on("connection", (socket) => {
     socket.emit("event", "pong");
   });
 
-  socket.on("joinRoom", ({ userId, roomId }) => {
-    const user = userJoin(socket.id, userId, roomId);
+  socket.on("joinRoom", ({ userId, roomId, score, moves, plus }) => {
+    const isExistUser = getCurrentUser(socket.id);
+    if (isExistUser) return;
+    const user = userJoin(socket.id, userId, roomId, score, moves, plus);
     socket.join(user.roomId);
-    io.to(user.roomId).emit("usersInRoom", getRoomUsers(user.roomId));
+    io.to(user.roomId).emit("addClientInfo", {
+      usersInfo: getRoomUsers(roomId).map((v) => ({
+        userId: v.userId,
+        moves: v.moves,
+        score: v.score,
+        plus: v.plus,
+      })),
+    });
   });
 
   socket.on("play", (boardValue) => {
@@ -53,11 +63,17 @@ io.on("connection", (socket) => {
     io.to(user.roomId).emit("play", boardValue);
   });
 
+  // userId, roomId, score, moves, plus
+  socket.on("updateInfo", ({ userInfo, roomId }) => {
+    updateUser(userInfo, roomId);
+    io.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
+  });
+
   socket.on("disconnect", () => {
     const user = userLeave(socket.id);
 
     if (user) {
-      io.to(user.roomId).emit("usersInRoom", getRoomUsers(user.roomId));
+      io.to(user.roomId).emit("removeClientInfo", { userInfo: user });
     }
   });
 });

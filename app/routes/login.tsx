@@ -22,11 +22,11 @@ function validatePassword(password: unknown) {
   }
 }
 
-function validateUrl(url: string) {
+function validateUrl(url: string | FormDataEntryValue) {
   let urls = ["/solo"];
   if (
     urls.findIndex((v) => {
-      return url.startsWith(v);
+      return (url + "").startsWith(v);
     }) != -1
   ) {
     return url;
@@ -125,7 +125,7 @@ export default function Login() {
 
   useEffect(() => {
     if (gridRef.current && window) {
-      const fn = (e) => {
+      const fn = (e: MouseEvent) => {
         // normalise touch/mouse
         e.preventDefault();
         let pos = [e.clientX, e.clientY];

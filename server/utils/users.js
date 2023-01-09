@@ -1,12 +1,23 @@
 const users = [];
 
 // Join user to chat
-function userJoin(id, userId, roomId) {
-  const user = { id, userId, roomId };
+function userJoin(id, userId, roomId, score, moves, plus) {
+  const user = { id, userId, roomId, score, moves, plus };
 
   users.push(user);
 
   return user;
+}
+
+function updateUser(userInfo, roomId) {
+  const user = users.find(
+    (user) => user.userId == userInfo.userId && user.roomId == roomId
+  );
+  if (user) {
+    user.moves = userInfo.moves;
+    user.score = userInfo.score;
+    user.plus = userInfo.plus;
+  }
 }
 
 // Get current user
@@ -25,7 +36,7 @@ function userLeave(id) {
 
 // Get room users
 function getRoomUsers(roomId) {
-  return users.filter((user) => user.roomId === roomId).map((v) => v.userId);
+  return users.filter((user) => user.roomId === roomId);
 }
 
 module.exports = {
@@ -33,4 +44,5 @@ module.exports = {
   getCurrentUser,
   userLeave,
   getRoomUsers,
+  updateUser,
 };

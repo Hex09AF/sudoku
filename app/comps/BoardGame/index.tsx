@@ -1,7 +1,31 @@
 import { useSubmit } from "@remix-run/react";
 import debounce from "lodash.debounce";
+import type { SetStateAction } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { Socket } from "socket.io-client";
 import Score from "../Score";
+
+type Pair = {
+  row: number;
+  col: number;
+};
+
+type UserMove = {
+  moves: number[][];
+  userId: string;
+  score: number;
+  plus?: number;
+};
+
+type BoardGameProps = {
+  solveBoard: number[][];
+  boardData: number[][];
+  roomId: string;
+  userId: string;
+  socket?: Socket;
+  initMoves: UserMove[];
+  // moves: [[posX, posY, value], ...]
+};
 
 const BoardGame = ({
   solveBoard,
@@ -10,22 +34,16 @@ const BoardGame = ({
   userId,
   socket,
   initMoves,
-  initCurUserMoves,
-}) => {
+}: BoardGameProps) => {
   const submit = useSubmit();
 
-  const sudokuWrapperRef = useRef(null);
+  const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [usersInRoom, setUsersInRoom] = useState([userId]);
+  const [infoUsersInRoom, setInfoUsersInRoom] = useState(
+    initMoves.filter((v) => v.userId == userId)
+  );
 
-  const [score, setScore] = useState<null | number>(null);
-  const [plusPoint, setPlusPoint] = useState(0);
-
-  const [curMoves] = useState(initMoves);
-
-  const [curUserMoves, setCurUserMoves] = useState<[]>(initCurUserMoves);
-
-  const [selectCell, setSelectCell] = useState({ row: 4, col: 4 });
+  const [selectCell, setSelectCell] = useState<Pair>({ row: 4, col: 4 });
 
   const [curBoardValue, setCurBoardValue] = useState(boardData);
 
@@ -43,30 +61,31 @@ const BoardGame = ({
       .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)))
   );
 
-  const isEnemyCell = (pair) => {
+  const isEnemyCell = (pair: Pair) => {
     let flag = false;
-    curMoves.forEach((move) => {
-      if (
-        move.userId != userId &&
-        move.moves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
-      ) {
-        flag = true;
-      }
+    const usersInfo = infoUsersInRoom.filter((user) => user.userId != userId);
+    usersInfo?.forEach((user) => {
+      user?.moves?.forEach((move) => {
+        if (move[0] == pair.row && move[1] == pair.col) flag = true;
+      });
     });
     return flag;
   };
 
-  const isUserCell = (pair) => {
-    return (
-      curUserMoves.findIndex((v) => v[0] == pair.row && v[1] == pair.col) != -1
-    );
+  const isUserCell = (pair: Pair) => {
+    let flag = false;
+    const userInfo = infoUsersInRoom.find((user) => user.userId == userId);
+    userInfo?.moves.forEach((move) => {
+      if (move[0] == pair.row && move[1] == pair.col) flag = true;
+    });
+    return flag;
   };
 
-  const isMatchCell = (pair) => {
+  const isMatchCell = (pair: Pair) => {
     return solveBoard[pair.row][pair.col] == curBoardValue[pair.row][pair.col];
   };
 
-  const checkValid = (pair) => {
+  const checkValid = (pair: Pair) => {
     return (
       !isEnemyCell(pair) &&
       pair.row >= 0 &&
@@ -79,26 +98,27 @@ const BoardGame = ({
   };
 
   const sayHello = useCallback(
-    debounce((newCurUserMoves) => {
+    debounce(({ moves, score }) => {
       const formData = new FormData();
       formData.append("roomId", roomId);
       formData.append("userId", userId);
-      formData.append("newCurUserMoves", JSON.stringify(newCurUserMoves));
-      // submit(formData, {
-      //   method: "post",
-      //   action: `/solo/${roomId}`,
-      //   replace: true,
-      // });
+      formData.append("newCurUserMoves", JSON.stringify(moves));
+      formData.append("newScore", JSON.stringify(score));
+      submit(formData, {
+        method: "post",
+        action: `/solo/${roomId}`,
+        replace: true,
+      });
     }, 1000),
     [selectCell]
   );
 
   useEffect(() => {
+    if (!socket) return;
     if (sudokuWrapperRef === null) return;
     const currentSudokuRef = sudokuWrapperRef.current;
-    // if (!socket) return;
 
-    const handleKeyDown = (e) => {
+    const handleKeyDown = (e: KeyboardEvent) => {
       let value = -1;
       if ("1234567890".includes(e.key)) {
         value = Number.parseInt(e.key, 10);
@@ -130,28 +150,31 @@ const BoardGame = ({
         const newBoardValue = JSON.parse(JSON.stringify(curBoardValue));
         newBoardValue[selectCell.row][selectCell.col] = value;
         setCurBoardValue(newBoardValue);
-        if (solveBoard[selectCell.row][selectCell.col] == value) {
-          setPlusPoint(50);
-          setScore((pre) => (pre || 0) + 50);
-        } else {
-          setPlusPoint(-100);
-          setScore((pre) => (pre || 0) - 100);
+        const curInfo = infoUsersInRoom.find((v) => v.userId == userId);
+        if (curInfo) {
+          if (solveBoard[selectCell.row][selectCell.col] == value) {
+            curInfo.plus = 50;
+            curInfo.score += 50;
+          } else {
+            curInfo.plus = -100;
+            curInfo.score += -100;
+          }
+          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+            return v[0] == selectCell.row && v[1] == selectCell.col;
+          });
+          if (isExistCell != -1) {
+            curInfo.moves[isExistCell] = [
+              selectCell.row,
+              selectCell.col,
+              value,
+            ];
+          } else {
+            curInfo.moves.push([selectCell.row, selectCell.col, value]);
+          }
+          setInfoUsersInRoom(JSON.parse(JSON.stringify(infoUsersInRoom)));
+          sayHello({ moves: curInfo.moves, score: curInfo.score });
         }
-        const newCurUserMoves = JSON.parse(JSON.stringify(curUserMoves));
-        const isExistCell = newCurUserMoves.findIndex((v) => {
-          return v[0] == selectCell.row && v[1] == selectCell.col;
-        });
-        if (isExistCell != -1) {
-          newCurUserMoves[isExistCell] = [
-            selectCell.row,
-            selectCell.col,
-            value,
-          ];
-        } else {
-          newCurUserMoves.push([selectCell.row, selectCell.col, value]);
-        }
-        setCurUserMoves(newCurUserMoves);
-        sayHello(selectCell);
+        socket.emit("updateInfo", { userInfo: curInfo, roomId });
         socket.emit("play", newBoardValue);
       }
     };
@@ -204,21 +227,37 @@ const BoardGame = ({
     socket.on("play", (boardValue) => {
       setCurBoardValue(boardValue);
     });
-    socket.on("usersInRoom", (users) => {
-      console.log(users, "LA CHI TROI");
-      setUsersInRoom(users);
+    socket.on("updateClientInfo", ({ userInfo }) => {
+      setInfoUsersInRoom((preUsers) => {
+        const curUser = preUsers.find((user) => user.userId == userInfo.userId);
+        if (curUser) {
+          curUser.moves = userInfo.moves;
+          curUser.plus = userInfo.plus;
+          curUser.score = userInfo.score;
+        }
+        return JSON.parse(JSON.stringify(preUsers));
+      });
+    });
+    socket.on("removeClientInfo", ({ userInfo }) => {
+      setInfoUsersInRoom((preUsers) => {
+        const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
+        return JSON.parse(JSON.stringify(newUsers));
+      });
+    });
+    socket.on("addClientInfo", ({ usersInfo }) => {
+      setInfoUsersInRoom(usersInfo);
     });
   }, [socket]);
 
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
-        {usersInRoom.map((userInRoom) => (
+        {infoUsersInRoom.map((userInRoom) => (
           <Score
-            isUser={userInRoom == userId}
-            key={userInRoom}
-            score={score}
-            plusPoint={plusPoint}
+            isUser={userInRoom.userId == userId}
+            key={userInRoom.userId}
+            score={userInRoom.score}
+            plusPoint={userInRoom.plus || 0}
           />
         ))}
       </div>
@@ -248,7 +287,7 @@ const BoardGame = ({
                           }
                           isDefault={firstBoardValue[idx][idx2] !== 0}
                           isSameValue={
-                            curBoardValue[selectCell.row][selectCell.col] &&
+                            !!curBoardValue[selectCell.row][selectCell.col] &&
                             curBoardValue[selectCell.row][selectCell.col] ===
                               val
                           }
@@ -266,6 +305,20 @@ const BoardGame = ({
   );
 };
 
+type CellProps = {
+  isEnemy: boolean;
+  isUserCell: boolean;
+  isSameValue: boolean;
+  isDefault: boolean;
+  isConflictSquare: boolean;
+  setSelectCell: React.Dispatch<SetStateAction<Pair>>;
+  selectCell: Pair;
+  cellIdx: Pair;
+  cellVal: number;
+  isConflictRow: boolean;
+  isConflictCol: boolean;
+};
+
 const Cell = ({
   setSelectCell,
   selectCell,
@@ -278,7 +331,7 @@ const Cell = ({
   isSameValue,
   isUserCell,
   isEnemy,
-}) => {
+}: CellProps) => {
   const isSelecting =
     selectCell.row === cellIdx.row && selectCell.col === cellIdx.col;
   const selectedCellClass = isSelecting ? " cell-selected " : "";
@@ -295,7 +348,7 @@ const Cell = ({
       : "";
   const numerHightLightClass = isSameValue ? " number-hightlight " : "";
 
-  const isNumber = !isDefault && cellVal !== 0;
+  const isNumber = isUserCell || (!isDefault && cellVal !== 0);
   const numberClass = isNumber ? " number " : "";
 
   const conflictCellClass =
@@ -304,7 +357,8 @@ const Cell = ({
       : "";
 
   const conflictValueClass =
-    (isConflictCol || isConflictRow || isConflictSquare) && !isDefault
+    (isConflictCol || isConflictRow || isConflictSquare) &&
+    (!isDefault || isUserCell)
       ? " default-conflict "
       : "";
 

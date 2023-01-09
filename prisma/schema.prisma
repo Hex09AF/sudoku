@@ -30,11 +30,12 @@ model Room {
 }
 
 model UsersOnRooms {
-  user   User   @relation(fields: [userId], references: [id])
+  user   User    @relation(fields: [userId], references: [id])
   userId String // relation scalar field (used in the `@relation` attribute above)
-  room   Room   @relation(fields: [roomId], references: [id])
+  room   Room    @relation(fields: [roomId], references: [id])
   roomId String // relation scalar field (used in the `@relation` attribute above)
   moves  String?
+  score  Int
 
   @@id([userId, roomId])
 }

@@ -5,12 +5,13 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration,
+  ScrollRestoration
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
+import type { Socket } from "socket.io-client";
 import io from "socket.io-client";
-import { SocketProvider } from "./context";
 import globalStyles from "~/styles/global.css";
+import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
 
 export const meta: MetaFunction = () => ({
@@ -28,7 +29,7 @@ export const action = async ({ request }: ActionArgs) => {
 };
 
 export default function App() {
-  const [socket, setSocket] = useState();
+  const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
     const socket = io();

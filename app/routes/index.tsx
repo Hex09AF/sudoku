@@ -1,5 +1,5 @@
-import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderArgs } from "@remix-run/node";
+import { json } from "@remix-run/node";
 
 import LookUp from "~/assets/svg/LookUp";
 
@@ -7,10 +7,10 @@ import Header from "~/comps/Header";
 import stylesUrl from "~/styles/index.css";
 
 import { useLoaderData, useNavigate } from "@remix-run/react";
+import React, { useRef } from "react";
 import BoardGame from "~/comps/BoardGame";
 import zeroBoard, { baseBoard } from "~/const/board";
 import { getUser } from "~/utils/session.server";
-import { useRef } from "react";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);
@@ -27,11 +27,13 @@ export default function Index() {
   const navigate = useNavigate();
   const data = useLoaderData<typeof loader>();
   const getRoomFormRef = useRef(null);
-  const getRoom = (e) => {
+  const getRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = new FormData(getRoomFormRef.current);
-    const idRoom = data.get("idRoom");
-    navigate(`/solo/${idRoom}`);
+    if (getRoomFormRef.current) {
+      const data = new FormData(getRoomFormRef.current);
+      const idRoom = data.get("idRoom");
+      navigate(`/solo/${idRoom}`);
+    }
   };
 
   return (
@@ -111,7 +113,7 @@ export default function Index() {
         </div>
       </div>
       <BoardGame
-        userId={1}
+        userId="1"
         boardData={zeroBoard}
         solveBoard={baseBoard}
         initMoves={[]}

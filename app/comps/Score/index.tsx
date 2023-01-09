@@ -10,7 +10,7 @@ export default function Score({ score, plusPoint, isUser }) {
     >
       <div>SCORE</div>
       <h2>{score || 0}</h2>
-      {score !== null && <MyPoint />}
+      <MyPoint />
     </div>
   );
 }
