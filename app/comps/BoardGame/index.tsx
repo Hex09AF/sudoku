@@ -94,7 +94,8 @@ const BoardGame = ({
   );
 
   useEffect(() => {
-    if (!sudokuWrapperRef.current) return;
+    if (sudokuWrapperRef === null) return;
+    const currentSudokuRef = sudokuWrapperRef.current;
     // if (!socket) return;
 
     const handleKeyDown = (e) => {
@@ -154,10 +155,11 @@ const BoardGame = ({
         socket.emit("play", newBoardValue);
       }
     };
-    sudokuWrapperRef.current.addEventListener("keydown", handleKeyDown);
+    currentSudokuRef?.addEventListener("keydown", handleKeyDown);
 
     return function cleanup() {
-      sudokuWrapperRef.current.removeEventListener("keydown", handleKeyDown);
+      if (currentSudokuRef)
+        currentSudokuRef?.removeEventListener("keydown", handleKeyDown);
     };
   }, [
     sudokuWrapperRef,
