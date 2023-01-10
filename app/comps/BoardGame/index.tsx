@@ -272,6 +272,7 @@ const BoardGame = ({
                       return (
                         <Cell
                           isEnemy={isEnemyCell({ row: idx, col: idx2 })}
+                          isMatchCell={isMatchCell({ row: idx, col: idx2 })}
                           isUserCell={isUserCell({ row: idx, col: idx2 })}
                           selectCell={selectCell}
                           setSelectCell={setSelectCell}
@@ -301,6 +302,11 @@ const BoardGame = ({
           </div>
         </div>
       </div>
+      <div>
+        <p font-size="16" color="primary" className="sc-dkrFOg fXKgLz">
+          🕹️ Play with arrow keys
+        </p>
+      </div>
     </div>
   );
 };
@@ -317,6 +323,7 @@ type CellProps = {
   cellVal: number;
   isConflictRow: boolean;
   isConflictCol: boolean;
+  isMatchCell: boolean;
 };
 
 const Cell = ({
@@ -331,6 +338,7 @@ const Cell = ({
   isSameValue,
   isUserCell,
   isEnemy,
+  isMatchCell,
 }: CellProps) => {
   const isSelecting =
     selectCell.row === cellIdx.row && selectCell.col === cellIdx.col;
@@ -364,6 +372,7 @@ const Cell = ({
 
   const isUserClass = isUserCell ? " user-cell " : "";
   const isEnemyClass = isEnemy ? " enemy-cell " : "";
+  const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
   /**
    *
    */
@@ -382,7 +391,8 @@ const Cell = ({
           hightLightCellClass +
           numberClass +
           conflictCellClass +
-          numerHightLightClass
+          numerHightLightClass +
+          isMatchCellClass
         }
         onClick={() => handleSelectCell()}
       >

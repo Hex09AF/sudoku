@@ -105,7 +105,7 @@ export default function Index() {
         <div>
           {data.user?.username == "kody" ? (
             <form method="post" action="/">
-              <button type="submit">Tạo trận</button>
+              <button type="submit">Create game</button>
             </form>
           ) : (
             ""

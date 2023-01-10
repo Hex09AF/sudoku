@@ -4,12 +4,10 @@ html {
   font-family: "Noto Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   font-variation-settings: "wght" 500;
+  font-weight: 500;
 }
 
 .background-wrapper {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
   display: flex;
   width: 100vw;
   height: 100vh;
@@ -17,10 +15,19 @@ html {
   max-width: 141%;
   justify-content: center;
   align-items: center;
-  background-color: #171718;
   perspective: 1000px;
-  color: hsla(0, 0%, 100%, 0.9);
+}
 
+.login-aside {
+  height: 100%;
+  width: 60%;
+  z-index: -1;
+  right: 0;
+  position: absolute;
+  background: url(/build/_assets/shamiron-bormon-sudoku-MYP3SOI2.jpeg), linear-gradient(90deg, #ffffff 10%, transparent 40%);
+  background-blend-mode: overlay;
+  background-size: cover;
+  background-position: center;
   &::after {
     content: "";
     position: absolute;
@@ -46,7 +53,6 @@ html {
     background-size: 150%, 50%, 150%;
     background-repeat: repeat, repeat, repeat;
     background-blend-mode: overlay;
-    z-index: -1;
     filter: brightness(1) contrast(1);
     transition: all 0.33s ease;
     opacity: 1;
@@ -64,4 +70,8 @@ button {
   &:hover {
     background-color: #005ce6;
   }
+}
+
+input {
+  border: 1px solid #d7dfe9;
 }

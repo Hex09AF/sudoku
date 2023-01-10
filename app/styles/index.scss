@@ -131,15 +131,11 @@ table {
   }
 
   &.table-hightlight {
-    background-color: #e2e7ed;
+    background-color: #f2f2f3;
   }
 
   &.number .cell-value {
     color: #187bcd;
-  }
-
-  &.number-hightlight {
-    background-color: #cbdbed;
   }
 
   &.number-conflict {
@@ -151,7 +147,18 @@ table {
   }
 
   &.cell-selected {
-    background-color: #bbdefb;
+    background-color: #dcdcdc;
+  }
+
+  &.match-cell {
+    background-color: #c7f5d8;
+    .cell-value {
+      color: #0e8161;
+    }
+  }
+
+  &.number-hightlight {
+    background-color: #cbdbed;
   }
 
   &.user-cell {

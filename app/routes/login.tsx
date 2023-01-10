@@ -163,52 +163,16 @@ export default function Login() {
 
   return (
     <div className="background-wrapper">
-      <div className="grid-layout" ref={gridRef}>
-        {Array(49)
-          .fill(0)
-          .map((_, idx) => {
-            return (
-              <div key={idx} className="password-cell">
-                {colors.map((v) => (
-                  <div key={v} className={`password-cell-color ${v}`}></div>
-                ))}
-              </div>
-            );
-          })}
-      </div>
-      <div className="container login-content">
-        <div className="content" data-light="">
-          <h1>Login</h1>
+      <section className="container login-content">
+        <div className="content">
+          <h1>Sign in to Your Account</h1>
           <form method="post">
+            <input type="hidden" name="loginType" value="login" />
             <input
               type="hidden"
               name="redirectTo"
               value={searchParams.get("redirectTo") ?? undefined}
             />
-            <fieldset>
-              <legend className="sr-only">Login or Register?</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="loginType"
-                  value="login"
-                  defaultChecked={
-                    !actionData?.fields?.loginType ||
-                    actionData?.fields?.loginType === "login"
-                  }
-                />{" "}
-                Login
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="loginType"
-                  value="register"
-                  defaultChecked={actionData?.fields?.loginType === "register"}
-                />{" "}
-                Register
-              </label>
-            </fieldset>
             <div className="login-field username">
               <label htmlFor="username-input">Username</label>
               <input
@@ -269,7 +233,8 @@ export default function Login() {
             </button>
           </form>
         </div>
-      </div>
+      </section>
+      <aside className="login-aside"></aside>
     </div>
   );
 }

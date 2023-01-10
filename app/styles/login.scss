@@ -17,61 +17,6 @@ body {
   background-image: var(--gradient-background);
 }
 
-.container {
-  min-height: inherit;
-}
-
-.container,
-.content {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.content {
-  padding: 1rem;
-  background-color: hsl(0, 0%, 100%);
-  border-radius: 5px;
-  box-shadow: 0 0.2rem 1rem rgba(0, 0, 0, 0.5);
-  width: 400px;
-  max-width: 100%;
-}
-
-@media print, (min-width: 640px) {
-  .content {
-    padding: 2rem;
-    border-radius: 8px;
-  }
-}
-
-h1 {
-  margin-top: 0;
-}
-
-fieldset {
-  display: flex;
-  justify-content: center;
-}
-
-fieldset > :not(:last-child) {
-  margin-right: 2rem;
-}
-
-.links ul {
-  margin-top: 1rem;
-  padding: 0;
-  list-style: none;
-  display: flex;
-  gap: 1.5rem;
-  align-items: center;
-}
-
-.links a:hover {
-  text-decoration-style: wavy;
-  text-decoration-thickness: 1px;
-}
-
 .grid-layout {
   will-change: transform;
   transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateX(0) rotateY(0)
@@ -146,57 +91,48 @@ fieldset > :not(:last-child) {
 }
 
 .login-content {
-  position: relative;
-  z-index: 3;
-  flex-direction: column;
-  text-align: center;
-}
-
-.content {
-  backdrop-filter: saturate(200%) blur(30px) brightness(100%);
+  margin-right: auto;
+  height: 100%;
+  width: 60%;
+  padding: 3rem;
   display: flex;
-  padding: 30px;
   flex-direction: column;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.55);
+  justify-content: center;
+
+  .content {
+    width: 100%;
+    max-width: 24rem;
+  }
 }
 
 button {
+  border-radius: 10px;
   width: 100%;
-  background-color: #000;
-  display: inline-block;
-  padding: 9px 15px;
+  padding: 0.75rem;
   color: white;
-  border: 0;
-  line-height: inherit;
-  text-decoration: none;
-  cursor: pointer;
-  border-radius: 0;
 }
 
 input {
-  display: block;
   width: 100%;
-  height: 38px;
-  padding: 8px 12px;
-  margin-bottom: 10px;
-  font-size: 14px;
-  line-height: 1.42857143;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5rem;
   color: #333333;
-  background-color: #ffffff;
-  border: 1px solid #cccccc;
 }
 
 .login-field {
-  margin: 1rem 0;
+  margin: 1.5rem 0;
   label {
+    font-size: 0.875rem;
     display: block;
-    margin: 1rem 0 0.5rem;
+    margin: 1.5rem 0 0.5rem;
   }
-  &.username {
-    text-align: left;
-  }
-  &.password {
-    text-align: right;
-  }
+}
+
+.form-validation-error {
+  margin: 0.5rem 0 1rem;
+  color: #e12120;
+  font-size: 0.8rem;
 }
