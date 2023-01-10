@@ -5,7 +5,7 @@ import {
   Meta,
   Outlet,
   Scripts,
-  ScrollRestoration
+  ScrollRestoration,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";

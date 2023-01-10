@@ -2,13 +2,12 @@
   "private": true,
   "sideEffects": false,
   "scripts": {
-    "build": "remix build",
-    "dev": "concurrently \"npm run sass\" \"remix watch\" \"npm run server:dev\"",
-    "start:build": "remix-serve build",
     "typecheck": "tsc -b",
     "sass": "sass --watch app/:app/",
-    "start": "cross-env NODE_ENV=production node server/index.js",
+    "dev": "concurrently \"npm run sass\" \"remix watch\" \"npm run server:dev\"",
     "server:dev": "cross-env NODE_ENV=development nodemon server/index.js --watch build/index.js",
+    "build": "remix build",
+    "start": "cross-env NODE_ENV=production node server/index.js",
     "push": "npx prisma db push",
     "seed": "npx prisma db seed"
   },
