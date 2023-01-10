@@ -6,7 +6,7 @@
     "sass": "sass --watch app/:app/",
     "dev": "concurrently \"npm run sass\" \"remix watch\" \"npm run server:dev\"",
     "server:dev": "cross-env NODE_ENV=development nodemon server/index.js --watch build/index.js",
-    "build": "remix build",
+    "build": "npm run push && npm run seed && remix build",
     "start": "cross-env NODE_ENV=production node server/index.js",
     "push": "npx prisma db push",
     "seed": "npx prisma db seed"
