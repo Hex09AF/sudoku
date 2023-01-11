@@ -147,35 +147,46 @@ const BoardGame = ({
       }
 
       if (!e.repeat && checkValid(selectCell) && value !== -1) {
-        const newBoardValue = JSON.parse(JSON.stringify(curBoardValue));
-        newBoardValue[selectCell.row][selectCell.col] = value;
-        setCurBoardValue(newBoardValue);
-        const curInfo = infoUsersInRoom.find((v) => v.userId == userId);
-        if (curInfo) {
-          if (solveBoard[selectCell.row][selectCell.col] == value) {
-            curInfo.plus = 50;
-            curInfo.score += 50;
-          } else {
-            curInfo.plus = -100;
-            curInfo.score += -100;
+        setCurBoardValue((preState) => {
+          const newBoardValue = JSON.parse(JSON.stringify(preState));
+          newBoardValue[selectCell.row][selectCell.col] = value;
+          socket.emit("play", newBoardValue);
+          return newBoardValue;
+        });
+        setInfoUsersInRoom((preState) => {
+          const curInfo = preState.find((v) => v.userId == userId);
+          console.log("WHATIS GOING ON HERE")
+          console.log(curInfo, "BEFORE");
+          
+          if (curInfo) {
+            if (solveBoard[selectCell.row][selectCell.col] == value) {
+              curInfo.plus = 50;
+              curInfo.score += 50;
+            } else {
+              curInfo.plus = -100;
+              curInfo.score += -100;
+            }
+
+            console.log(curInfo, "AFTER")
+
+            const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+              return v[0] == selectCell.row && v[1] == selectCell.col;
+            });
+            if (isExistCell != -1) {
+              curInfo.moves[isExistCell] = [
+                selectCell.row,
+                selectCell.col,
+                value,
+              ];
+            } else {
+              curInfo.moves.push([selectCell.row, selectCell.col, value]);
+            }
+            sayHello({ moves: curInfo.moves, score: curInfo.score });
+            socket.emit("updateInfo", { userInfo: curInfo, roomId });
+            return JSON.parse(JSON.stringify(preState));
           }
-          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-            return v[0] == selectCell.row && v[1] == selectCell.col;
-          });
-          if (isExistCell != -1) {
-            curInfo.moves[isExistCell] = [
-              selectCell.row,
-              selectCell.col,
-              value,
-            ];
-          } else {
-            curInfo.moves.push([selectCell.row, selectCell.col, value]);
-          }
-          setInfoUsersInRoom(JSON.parse(JSON.stringify(infoUsersInRoom)));
-          sayHello({ moves: curInfo.moves, score: curInfo.score });
-        }
-        socket.emit("updateInfo", { userInfo: curInfo, roomId });
-        socket.emit("play", newBoardValue);
+          return preState;
+        });
       }
     };
     currentSudokuRef?.addEventListener("keydown", handleKeyDown);
@@ -301,11 +312,9 @@ const BoardGame = ({
             </table>
           </div>
         </div>
-      </div>
-      <div>
-        <p font-size="16" color="primary" className="sc-dkrFOg fXKgLz">
-          🕹️ Play with arrow keys
-        </p>
+        <div className="game-intro">
+          <p>🕹️ Play with arrow and number keys</p>
+        </div>
       </div>
     </div>
   );
@@ -359,20 +368,23 @@ const Cell = ({
   const isNumber = isUserCell || (!isDefault && cellVal !== 0);
   const numberClass = isNumber ? " number " : "";
 
+  const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
+  const isUnMatchCellClas = isUserCell && !isMatchCell;
   const conflictCellClass =
-    isConflictCol || isConflictRow || isConflictSquare
+    (isConflictCol || isConflictRow || isConflictSquare || isUnMatchCellClas) &&
+    !isMatchCell
       ? " number-conflict "
       : "";
 
   const conflictValueClass =
-    (isConflictCol || isConflictRow || isConflictSquare) &&
-    (!isDefault || isUserCell)
+    (isConflictCol || isConflictRow || isConflictSquare || isUnMatchCellClas) &&
+    (!isDefault || isUserCell) &&
+    !isMatchCell
       ? " default-conflict "
       : "";
 
   const isUserClass = isUserCell ? " user-cell " : "";
   const isEnemyClass = isEnemy ? " enemy-cell " : "";
-  const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
   /**
    *
    */

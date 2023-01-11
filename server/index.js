@@ -60,13 +60,13 @@ io.on("connection", (socket) => {
 
   socket.on("play", (boardValue) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.roomId).emit("play", boardValue);
+    socket.to(user.roomId).emit("play", boardValue);
   });
 
   // userId, roomId, score, moves, plus
   socket.on("updateInfo", ({ userInfo, roomId }) => {
     updateUser(userInfo, roomId);
-    io.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
+    socket.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
   });
 
   socket.on("disconnect", () => {

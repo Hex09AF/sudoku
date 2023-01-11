@@ -1,11 +1,10 @@
 import type {
   ActionArgs,
   LinksFunction,
-  LoaderFunction,
+  LoaderFunction
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
-import { useCatch, useLoaderData } from "@remix-run/react";
-import type { ThrownResponse } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import BoardGame from "~/comps/BoardGame";
 
 import { useEffect } from "react";
@@ -37,10 +36,6 @@ export const action = async ({ request }: ActionArgs) => {
   }
   return "";
 };
-
-export type RoomNotFoundResponse = ThrownResponse<404, string>;
-
-export type ThrownResponses = RoomNotFoundResponse;
 
 export const loader: LoaderFunction = async ({ params, request }) => {
   if (!params.roomId) {
@@ -104,21 +99,5 @@ export default function SoloRoom() {
       roomId={data.roomId}
       boardData={data.board}
     />
-  );
-}
-
-export function CatchBoundary() {
-  const caught = useCatch<ThrownResponses>();
-
-  switch (caught.status) {
-    case 404:
-      return <div>Room not found!</div>;
-    default:
-  }
-
-  return (
-    <div>
-      Something went wrong: {caught.status} {caught.statusText}
-    </div>
   );
 }

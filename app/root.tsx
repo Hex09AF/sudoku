@@ -6,11 +6,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useCatch
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
 import io from "socket.io-client";
 import globalStyles from "~/styles/global.css";
+import Rubik from "./comps/Rubik";
 import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
 
@@ -27,6 +29,29 @@ export const links: LinksFunction = () => {
 export const action = async ({ request }: ActionArgs) => {
   return createRoom();
 };
+
+export function CatchBoundary() {
+  const caught = useCatch();
+  return (
+    <html>
+      <head>
+        <title>Oops!</title>
+        <Meta />
+        <Links />
+      </head>
+      <body>
+        {caught.status == 404 ? (
+          <Rubik />
+        ) : (
+          <div>
+            Something went wrong: {caught.status} {caught.statusText}
+          </div>
+        )}
+        <Scripts />
+      </body>
+    </html>
+  );
+}
 
 export default function App() {
   const [socket, setSocket] = useState<Socket>();

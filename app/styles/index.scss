@@ -1,9 +1,3 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
 html,
 body,
 .sudoku-wrapper {
@@ -22,9 +16,14 @@ table {
   position: relative;
   width: 100%;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100%;
+
+  .game-intro {
+    margin-top: 1rem;
+  }
 }
 
 .game-wrapper {

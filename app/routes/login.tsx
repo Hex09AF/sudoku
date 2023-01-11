@@ -1,6 +1,5 @@
 import type { ActionArgs, LinksFunction } from "@remix-run/node";
 import { useActionData, useSearchParams } from "@remix-run/react";
-import { useEffect, useRef } from "react";
 import stylesUrl from "~/styles/login.css";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
@@ -115,51 +114,9 @@ export const action = async ({ request }: ActionArgs) => {
   }
 };
 
-const colors = ["", "orange", "yellow", "green", "blue", "indigo", "violet"];
-
 export default function Login() {
   const actionData = useActionData<typeof action>();
   const [searchParams] = useSearchParams();
-
-  const gridRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (gridRef.current && window) {
-      const fn = (e: MouseEvent) => {
-        // normalise touch/mouse
-        e.preventDefault();
-        let pos = [e.clientX, e.clientY];
-        const h = window.innerHeight;
-        const w = window.innerWidth;
-        const ratioY = 60 / w;
-        const ratioX = 60 / h;
-        const rotY = pos[0] * ratioY - 30;
-        const rotX = pos[1] * ratioX - 30;
-        const transform = `
-        transition: transform 0.5s ease-out;
-        transform: translate3d(0px, 0px, 0px) scale3d(1, 1, 1) rotateZ(0deg) skew(0deg, 0deg)
-          rotateX(${-rotX}deg)
-          rotateY(${rotY}deg)
-        `;
-        if (gridRef.current) {
-          gridRef.current.setAttribute("style", transform);
-        }
-      };
-
-      const fnMouseOut = () => {
-        if (gridRef.current) {
-          gridRef.current.setAttribute("style", "");
-        }
-      };
-
-      window.addEventListener("mousemove", fn);
-      window.addEventListener("mouseout", fnMouseOut);
-      return () => {
-        window.removeEventListener("mousemove", fn);
-        window.removeEventListener("mouseout", fnMouseOut);
-      };
-    }
-  }, [gridRef]);
 
   return (
     <div className="background-wrapper">
