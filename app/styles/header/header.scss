@@ -1,0 +1,41 @@
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 1rem 1rem;
+  height: 64px;
+  box-shadow: rgb(0 0 0 / 8%) 0 1px;
+
+  &__slogan {
+    max-width: 300px;
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    .slogan {
+      color: #636369;
+      &--highlight {
+        font-weight: 600;
+        margin-right: 8px;
+      }
+    }
+  }
+
+  &__findroom {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    background: #f2f2f3;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 0.875rem;
+    cursor: pointer;
+
+    input {
+      border: none;
+      background: transparent;
+      outline: none;
+    }
+  }
+}

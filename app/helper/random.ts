@@ -1,25 +1,34 @@
 import { baseBoard } from "~/const/board";
+import type { Board } from "~/declares/interaces/Board";
+
+/**
+ *
+ * @param {*} left [left, left+right)
+ * @param {*} right [left, left+right)
+ * return x [left, left+right)
+ */
+const RANDOMNUMBER = (left: number, right: number) => {
+  return ((Math.random() * right) >> 0) + left;
+};
+
+const RANDOMPAIR = (left: number, right: number) => {
+  let fs = RANDOMNUMBER(left, right);
+  let sc = RANDOMNUMBER(left, right);
+
+  return { first: fs, second: sc };
+};
+
+const TRANSPOSE = (matrix: number[][]) => {
+  for (var i = 0; i < matrix.length; i++) {
+    for (var j = 0; j < i; j++) {
+      [matrix[i][j], matrix[j][i]] = [matrix[j][i], matrix[i][j]];
+    }
+  }
+};
 
 const RANDOMBOARD = () => {
-  /**
-   *
-   * @param {*} left [left, left+right)
-   * @param {*} right [left, left+right)
-   * return x [left, left+right)
-   */
-  const RANDOMNUMBER = (left, right) => {
-    return ((Math.random() * right) >> 0) + left;
-  };
-
-  const RANDOMPAIR = (left, right) => {
-    let fs = RANDOMNUMBER(left, right);
-    let sc = RANDOMNUMBER(left, right);
-
-    return { first: fs, second: sc };
-  };
-
-  return new Promise((resolve, reject) => {
-    let newBoardValue = JSON.parse(JSON.stringify(baseBoard));
+  return new Promise<Board>((resolve) => {
+    let newBoardValue: Board = JSON.parse(JSON.stringify(baseBoard));
 
     /**
      * SHUFFLE ROW THEN COL THEN ROW THEN COL THEN ...
@@ -27,16 +36,14 @@ const RANDOMBOARD = () => {
 
     for (let times = 0; times <= 10; ++times) {
       for (let left = 0; left <= 6; left += 3) {
-        let pair = RANDOMPAIR(left, 3);
+        const pair = RANDOMPAIR(left, 3);
         [newBoardValue[pair.first], newBoardValue[pair.second]] = [
           newBoardValue[pair.second],
-          newBoardValue[pair.first]
+          newBoardValue[pair.first],
         ];
       }
 
-      newBoardValue = newBoardValue[0].map((_, colIndex) =>
-        newBoardValue.map((row) => row[colIndex])
-      );
+      TRANSPOSE(newBoardValue);
     }
 
     /**

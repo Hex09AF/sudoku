@@ -1,7 +1,7 @@
 import type {
   ActionArgs,
   LinksFunction,
-  LoaderFunction
+  LoaderFunction,
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
@@ -93,7 +93,7 @@ export default function SoloRoom() {
   return (
     <BoardGame
       solveBoard={data.solveBoard}
-      initMoves={data.moves}
+      initGameMoves={data.moves}
       userId={data.userId}
       socket={socket}
       roomId={data.roomId}

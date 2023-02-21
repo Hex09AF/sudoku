@@ -6,24 +6,30 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useCatch
+  useCatch,
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
-import io from "socket.io-client";
+// import io from "socket.io-client";
 import globalStyles from "~/styles/global.css";
+import headerStyles from "~/styles/header/header.css";
+import indexStyles from "~/styles/index.css";
 import Rubik from "./comps/Rubik";
 import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "New Remix App",
+  title: "Competitive sudoku",
   viewport: "width=device-width,initial-scale=1",
 });
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: globalStyles }];
+  return [
+    { rel: "stylesheet", href: globalStyles },
+    { rel: "stylesheet", href: headerStyles },
+    { rel: "stylesheet", href: indexStyles },
+  ];
 };
 
 export const action = async ({ request }: ActionArgs) => {
@@ -57,10 +63,10 @@ export default function App() {
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
-    const socket = io();
-    setSocket(socket);
+    // const socket = io();
+    // setSocket(socket);
     return () => {
-      socket.close();
+      // socket.close();
     };
   }, []);
 

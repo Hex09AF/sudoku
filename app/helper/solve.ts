@@ -1,5 +1,8 @@
-const SOLVE = (boardValue) => {
-  return new Promise((resolve, reject) => {
+import type { Board } from "~/declares/interaces/Board";
+import type { Pair } from "~/declares/interaces/Pair";
+
+const SOLVE = (boardValue: Board) => {
+  return new Promise<Board>((resolve, reject) => {
     let canRowXNumberY = new Array(9)
       .fill(0)
       .map(() => new Array(9 + 1).fill(true));
@@ -29,7 +32,7 @@ const SOLVE = (boardValue) => {
       }
     }
 
-    const checkValidIndex = (pair, number) => {
+    const checkValidIndex = (pair: Pair, number: number) => {
       return (
         pair.row >= 0 &&
         pair.row < 9 &&
@@ -43,7 +46,7 @@ const SOLVE = (boardValue) => {
       );
     };
 
-    const markIndex = (pair, number, value) => {
+    const markIndex = (pair: Pair, number: number, value: boolean) => {
       canColXNumberY[pair.col][number] =
         canRowXNumberY[pair.row][number] =
         canSquareXYNumberZ[Math.floor(pair.row / 3)][Math.floor(pair.col / 3)][
@@ -52,7 +55,7 @@ const SOLVE = (boardValue) => {
           value;
     };
 
-    const solveSudoku = (sudokuBoard, x, y) => {
+    const solveSudoku = (sudokuBoard: Board, x: number, y: number): boolean => {
       if (sudokuBoard[x][y] !== 0) {
         if (y + 1 === 9) {
           if (x + 1 === 9) return true;
