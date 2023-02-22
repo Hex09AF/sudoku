@@ -5,7 +5,7 @@
     "typecheck": "tsc -b",
     "sass": "sass --watch app/:app/",
     "local:build": "remix build",
-    "dev": "concurrently \"npm run sass\" \"remix dev\" \"npm run server:dev\"",
+    "dev": "concurrently \"npm run sass\" \"remix dev\"",
     "server:dev": "cross-env NODE_ENV=development nodemon server/index.js --watch build/index.js",
     "build": "npm run push && npm run seed && remix build",
     "start": "cross-env NODE_ENV=production node server/index.js",

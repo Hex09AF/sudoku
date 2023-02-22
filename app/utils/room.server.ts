@@ -10,6 +10,20 @@ export async function createRoom() {
   return redirect(`/solo/${room.id}`);
 }
 
+export async function getRooms() {
+  const rooms = await db.room.findMany({
+    take: 10,
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      users: true,
+    },
+  });
+
+  return rooms;
+}
+
 export async function getRoom(id: string) {
   const room = await db.room.findUnique({
     where: { id },

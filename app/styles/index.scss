@@ -139,10 +139,10 @@ table {
 
   &.number-conflict {
     background-color: #f7cfd6;
+  }
 
-    .cell-value.default-conflict {
-      color: #e12120;
-    }
+  .cell-value.default-conflict {
+    color: #e12120;
   }
 
   &.cell-selected {
@@ -538,10 +538,22 @@ svg:not(:root) {
 }
 
 .start-button {
-  width: 200px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   &-c {
     display: flex;
     justify-content: center;
+  }
+}
+
+.lobby-c {
+  display: flex;
+  gap: 1rem;
+}
+
+.list-room {
+  .room-info {
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
   }
 }

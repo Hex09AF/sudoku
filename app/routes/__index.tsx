@@ -9,6 +9,8 @@ import RANDOMBOARD from "~/helper/random";
 import SOLVE from "~/helper/solve";
 import { getUser } from "~/utils/session.server";
 
+import { Outlet } from "@remix-run/react";
+
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);
 
@@ -31,25 +33,28 @@ export default function Index() {
     <div>
       <Header user={user} />
 
-      <BoardGame
-        solveBoard={data.solveBoard}
-        initGameMoves={[
-          {
-            moves: [],
-            userId: "USER_LOCAL_ID",
-            score: 0,
-            plus: 0,
-          },
-          {
-            moves: [],
-            userId: "BOT_LOCAL_ID",
-            score: 0,
-            plus: 0,
-          },
-        ]}
-        userId={"USER_LOCAL_ID"}
-        initBoard={data.board}
-      />
+      <div className="lobby-c">
+        <Outlet />
+        <BoardGame
+          solveBoard={data.solveBoard}
+          initGameMoves={[
+            {
+              moves: [],
+              userId: "USER_LOCAL_ID",
+              score: 0,
+              plus: 0,
+            },
+            {
+              moves: [],
+              userId: "BOT_LOCAL_ID",
+              score: 0,
+              plus: 0,
+            },
+          ]}
+          userId={"USER_LOCAL_ID"}
+          initBoard={data.board}
+        />
+      </div>
     </div>
   );
 }

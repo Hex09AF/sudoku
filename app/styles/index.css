@@ -135,7 +135,7 @@ table {
 .game-cell.number-conflict {
   background-color: #f7cfd6;
 }
-.game-cell.number-conflict .cell-value.default-conflict {
+.game-cell .cell-value.default-conflict {
   color: #e12120;
 }
 .game-cell.cell-selected {
@@ -506,12 +506,22 @@ svg:not(:root) {
   }
 }
 .start-button {
-  width: 200px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 .start-button-c {
   display: flex;
   justify-content: center;
+}
+
+.lobby-c {
+  display: flex;
+  gap: 1rem;
+}
+
+.list-room .room-info {
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 /*# sourceMappingURL=index.css.map */

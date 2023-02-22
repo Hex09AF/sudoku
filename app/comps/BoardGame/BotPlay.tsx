@@ -51,9 +51,9 @@ const BoardGame = ({
   );
 
   useEffect(() => {
+    if (!isGameStart) return;
     if (sudokuWrapperRef === null) return;
     const currentSudokuRef = sudokuWrapperRef.current;
-
     const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
       setCurBoard((preState) => {
         const newBoardValue = JSON.parse(JSON.stringify(preState));
@@ -142,6 +142,7 @@ const BoardGame = ({
         currentSudokuRef?.removeEventListener("keydown", handleKeyDown);
     };
   }, [
+    isGameStart,
     gameMoves,
     initBoard,
     curBoard,
@@ -223,7 +224,7 @@ const BoardGame = ({
     const xyz = setInterval(() => {
       const row = randBetween(0, 8);
       const col = randBetween(0, 8);
-      let isCorrect = randBetween(1, 10) <= 7;
+      let isCorrect = randBetween(1, 10) <= 5;
       const value = isCorrect ? solveBoard[row][col] : randBetween(1, 9);
       if (
         checkValid(
@@ -248,7 +249,7 @@ const BoardGame = ({
   useEffect(() => {}, []);
 
   return (
-    <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
+    <div className="sudoku-wrapper">
       <div className="score-wrapper">
         {gameMoves.map((userInRoom) => (
           <Score
@@ -258,20 +259,23 @@ const BoardGame = ({
             plusPoint={userInRoom.plus || 0}
           />
         ))}
+        {!isGameStart && (
+          <div className="start-button-c">
+            <button
+              className="start-button"
+              type="button"
+              onClick={() => {
+                setIsGameStart(true);
+              }}
+            >
+              Play with bot
+            </button>
+          </div>
+        )}
       </div>
-      <div className="start-button-c">
-        <button
-          className="start-button"
-          type="button"
-          onClick={() => {
-            setIsGameStart(true);
-          }}
-        >
-          Start
-        </button>
-      </div>
+
       <div className="game-flex-wrapper">
-        <div className="game-wrapper">
+        <div className="game-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
           <div className="game">
             <table className="game-table">
               <tbody>
@@ -379,7 +383,8 @@ const Cell = ({
   const isUnMatchCellClas = isUserCell && !isMatchCell;
   const conflictCellClass =
     (isConflictCol || isConflictRow || isConflictSquare || isUnMatchCellClas) &&
-    !isMatchCell
+    !isMatchCell &&
+    !isEnemy
       ? " number-conflict "
       : "";
 
