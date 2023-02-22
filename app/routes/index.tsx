@@ -40,6 +40,12 @@ export default function Index() {
             score: 0,
             plus: 0,
           },
+          {
+            moves: [],
+            userId: "BOT_LOCAL_ID",
+            score: 0,
+            plus: 0,
+          },
         ]}
         userId={"USER_LOCAL_ID"}
         initBoard={data.board}

@@ -4,7 +4,13 @@ import type { Board } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
 import type { Pair } from "~/declares/interaces/Pair";
 import type { UserId } from "~/declares/interaces/User";
-import { checkValid, isEnemyCell, isMatchCell, isUserCell } from "~/utils/game";
+import {
+  checkValid,
+  isEnemyCell,
+  isMatchCell,
+  isUserCell,
+  randBetween,
+} from "~/utils/game";
 import Score from "../Score";
 
 type BoardGameProps = {
@@ -22,9 +28,9 @@ const BoardGame = ({
 }: BoardGameProps) => {
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [gameMoves, setGameMoves] = useState(
-    initGameMoves.filter((v) => v.userId == userId)
-  );
+  const [isGameStart, setIsGameStart] = useState(false);
+
+  const [gameMoves, setGameMoves] = useState(initGameMoves);
 
   const [selectCell, setSelectCell] = useState<Pair>({ row: 4, col: 4 });
 
@@ -48,7 +54,44 @@ const BoardGame = ({
     if (sudokuWrapperRef === null) return;
     const currentSudokuRef = sudokuWrapperRef.current;
 
+    const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
+      setCurBoard((preState) => {
+        const newBoardValue = JSON.parse(JSON.stringify(preState));
+        newBoardValue[pair.row][pair.col] = value;
+        return newBoardValue;
+      });
+      setGameMoves((preState) => {
+        const curInfo = preState.find((v) => v.userId == userPlayId);
+
+        if (curInfo) {
+          if (value) {
+            if (solveBoard[pair.row][pair.col] == value) {
+              curInfo.plus = 50;
+              curInfo.score += 50;
+            } else {
+              curInfo.plus = -100;
+              curInfo.score += -100;
+            }
+          } else {
+            curInfo.plus = 0;
+          }
+
+          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+            return v[0] == pair.row && v[1] == pair.col;
+          });
+          if (isExistCell != -1) {
+            curInfo.moves[isExistCell] = [pair.row, pair.col, value];
+          } else {
+            curInfo.moves.push([pair.row, pair.col, value]);
+          }
+          return JSON.parse(JSON.stringify(preState));
+        }
+        return preState;
+      });
+    };
+
     const handleKeyDown = (e: KeyboardEvent) => {
+      e.preventDefault();
       let value = -1;
       if ("1234567890".includes(e.key)) {
         value = Number.parseInt(e.key, 10);
@@ -89,43 +132,7 @@ const BoardGame = ({
         ) &&
         value !== -1
       ) {
-        setCurBoard((preState) => {
-          const newBoardValue = JSON.parse(JSON.stringify(preState));
-          newBoardValue[selectCell.row][selectCell.col] = value;
-          return newBoardValue;
-        });
-        setGameMoves((preState) => {
-          const curInfo = preState.find((v) => v.userId == userId);
-
-          if (curInfo) {
-            if (value) {
-              if (solveBoard[selectCell.row][selectCell.col] == value) {
-                curInfo.plus = 50;
-                curInfo.score += 50;
-              } else {
-                curInfo.plus = -100;
-                curInfo.score += -100;
-              }
-            } else {
-              curInfo.plus = 0;
-            }
-
-            const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-              return v[0] == selectCell.row && v[1] == selectCell.col;
-            });
-            if (isExistCell != -1) {
-              curInfo.moves[isExistCell] = [
-                selectCell.row,
-                selectCell.col,
-                value,
-              ];
-            } else {
-              curInfo.moves.push([selectCell.row, selectCell.col, value]);
-            }
-            return JSON.parse(JSON.stringify(preState));
-          }
-          return preState;
-        });
+        makeMove(selectCell, value, userId);
       }
     };
     currentSudokuRef?.addEventListener("keydown", handleKeyDown);
@@ -174,6 +181,72 @@ const BoardGame = ({
     updateCanArray();
   }, [curBoard]);
 
+  useEffect(() => {
+    if (!isGameStart) return;
+
+    const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
+      setCurBoard((preState) => {
+        const newBoardValue = JSON.parse(JSON.stringify(preState));
+        newBoardValue[pair.row][pair.col] = value;
+        return newBoardValue;
+      });
+      setGameMoves((preState) => {
+        const curInfo = preState.find((v) => v.userId == userPlayId);
+
+        if (curInfo) {
+          if (value) {
+            if (solveBoard[pair.row][pair.col] == value) {
+              curInfo.plus = 50;
+              curInfo.score += 50;
+            } else {
+              curInfo.plus = -100;
+              curInfo.score += -100;
+            }
+          } else {
+            curInfo.plus = 0;
+          }
+
+          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+            return v[0] == pair.row && v[1] == pair.col;
+          });
+          if (isExistCell != -1) {
+            curInfo.moves[isExistCell] = [pair.row, pair.col, value];
+          } else {
+            curInfo.moves.push([pair.row, pair.col, value]);
+          }
+          return JSON.parse(JSON.stringify(preState));
+        }
+        return preState;
+      });
+    };
+
+    const xyz = setInterval(() => {
+      const row = randBetween(0, 8);
+      const col = randBetween(0, 8);
+      let isCorrect = randBetween(1, 10) <= 7;
+      const value = isCorrect ? solveBoard[row][col] : randBetween(1, 9);
+      if (
+        checkValid(
+          value,
+          gameMoves,
+          "BOT_LOCAL_ID",
+          initBoard,
+          solveBoard,
+          curBoard,
+          { row, col }
+        )
+      ) {
+        makeMove({ row, col }, value, "BOT_LOCAL_ID");
+      }
+    }, 2000);
+    return () => {
+      clearInterval(xyz);
+    };
+  }, [isGameStart, curBoard, gameMoves, initBoard, solveBoard]);
+
+  // FINISH
+  useEffect(() => {}, []);
+
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
@@ -186,7 +259,17 @@ const BoardGame = ({
           />
         ))}
       </div>
-
+      <div className="start-button-c">
+        <button
+          className="start-button"
+          type="button"
+          onClick={() => {
+            setIsGameStart(true);
+          }}
+        >
+          Start
+        </button>
+      </div>
       <div className="game-flex-wrapper">
         <div className="game-wrapper">
           <div className="game">
@@ -212,7 +295,7 @@ const BoardGame = ({
                           selectCell={selectCell}
                           setSelectCell={setSelectCell}
                           cellIdx={{ row: idx, col: idx2 }}
-                          cellVal={val}
+                          cellVal={isGameStart ? val : 0}
                           key={idx2}
                           isConflictRow={canRowXNumberY[idx][val] > 1}
                           isConflictCol={canColXNumberY[idx2][val] > 1}

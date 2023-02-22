@@ -505,5 +505,13 @@ svg:not(:root) {
     opacity: 0;
   }
 }
+.start-button {
+  width: 200px;
+  margin-bottom: 1rem;
+}
+.start-button-c {
+  display: flex;
+  justify-content: center;
+}
 
 /*# sourceMappingURL=index.css.map */
