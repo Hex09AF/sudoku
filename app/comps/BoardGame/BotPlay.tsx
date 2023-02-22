@@ -371,10 +371,11 @@ const Cell = ({
     (selectCell.col / 3) >> 0 === (cellIdx.col / 3) >> 0;
 
   const hightLightCellClass =
-    isSameRow || isSameCol || isSameSquare || isSameValue
+    (isSameRow || isSameCol || isSameSquare || isSameValue) && !isEnemy
       ? " table-hightlight "
       : "";
-  const numerHightLightClass = isSameValue ? " number-hightlight " : "";
+  const numerHightLightClass =
+    isSameValue && !isEnemy ? " number-hightlight " : "";
 
   const isNumber = isUserCell || (!isDefault && cellVal !== 0);
   const numberClass = isNumber ? " number " : "";

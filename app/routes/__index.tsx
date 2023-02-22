@@ -54,6 +54,7 @@ export default function Index() {
           userId={"USER_LOCAL_ID"}
           initBoard={data.board}
         />
+        <div>Hehe</div>
       </div>
     </div>
   );
