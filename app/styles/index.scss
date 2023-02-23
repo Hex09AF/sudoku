@@ -669,3 +669,18 @@ svg:not(:root) {
     }
   }
 }
+
+.empty-info {
+  color: #636369;
+  font-size: 0.875rem;
+  padding: 1rem;
+  text-align: center;
+  .empty-text {
+    white-space: nowrap;
+    padding: 1rem;
+  }
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}

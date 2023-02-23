@@ -5,6 +5,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { useRef, useState } from "react";
 import LookUp from "~/assets/svg/LookUp";
 import { getRooms } from "~/utils/room.server";
+import EmptyRoom from "~/assets/empty-rooms.jpeg";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const rooms = await getRooms();
@@ -40,16 +41,23 @@ export default function Lobby() {
             <input name="idRoom" placeholder="Find room..." />
           </form>
         </label>
-        {data.rooms.map((v, idx) => (
-          <div className="room-info" key={v.id}>
-            <Link to={`/solo/${v.id}`}>
-              Room {idx + 1}
-              <span className="room-info__time">
-                {formatDistanceToNowStrict(new Date(v.createdAt))}
-              </span>
-            </Link>
+        {data.rooms.length > 0 ? (
+          data.rooms.map((v, idx) => (
+            <div className="room-info" key={v.id}>
+              <Link to={`/solo/${v.id}`}>
+                Room {idx + 1}
+                <span className="room-info__time">
+                  {formatDistanceToNowStrict(new Date(v.createdAt))}
+                </span>
+              </Link>
+            </div>
+          ))
+        ) : (
+          <div className="empty-info empty-room">
+            <img src={EmptyRoom} alt="empty room" />
+            <span className="empty-text">Admin will create a room soon.</span>
           </div>
-        ))}
+        )}
       </div>
       <div
         className="list-room-tag"

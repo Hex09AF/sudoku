@@ -3,6 +3,7 @@ import type { SerializeFrom } from "@remix-run/node";
 import { useEffect, useState } from "react";
 import { useSocket } from "~/context";
 import hashToAvatar from "~/helper/hash";
+import EmptyUser from "~/assets/empty-users.jpeg";
 
 type UsersOnlineProps = {
   rooms: SerializeFrom<
@@ -27,18 +28,25 @@ export default function UsersOnline({ rooms }: UsersOnlineProps) {
   return (
     <div className={`list-user-c ${!show ? "show" : ""}`}>
       <div className="list-user">
-        {users.map((v) => (
-          <div className="user-info" key={v}>
-            <img
-              className="user-info__avatar"
-              src={hashToAvatar(v)}
-              alt="avatar"
-              width={48}
-              height={48}
-            />
-            {v}
+        {users.length > 0 ? (
+          users.map((v) => (
+            <div className="user-info" key={v}>
+              <img
+                className="user-info__avatar"
+                src={hashToAvatar(v)}
+                alt="avatar"
+                width={48}
+                height={48}
+              />
+              {v}
+            </div>
+          ))
+        ) : (
+          <div className="empty-info empty-user">
+            <img src={EmptyUser} alt="empty user" />
+            <span className="empty-text">People not join the game yet.</span>
           </div>
-        ))}
+        )}
       </div>
       <div
         className="list-user-tag"

@@ -630,4 +630,19 @@ svg:not(:root) {
   border-radius: 12px;
 }
 
+.empty-info {
+  color: #636369;
+  font-size: 0.875rem;
+  padding: 1rem;
+  text-align: center;
+}
+.empty-info .empty-text {
+  white-space: nowrap;
+  padding: 1rem;
+}
+.empty-info img {
+  max-width: 100%;
+  height: auto;
+}
+
 /*# sourceMappingURL=index.css.map */
