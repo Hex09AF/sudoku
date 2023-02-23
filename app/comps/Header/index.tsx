@@ -1,6 +1,4 @@
-import { Link, useNavigate } from "@remix-run/react";
-import { useRef } from "react";
-import LookUp from "~/assets/svg/LookUp";
+import { Link } from "@remix-run/react";
 
 type HeaderProps = {
   user: {
@@ -10,18 +8,6 @@ type HeaderProps = {
 };
 
 export default function Header({ user }: HeaderProps) {
-  const navigate = useNavigate();
-  const getRoomFormRef = useRef(null);
-
-  const getRoom = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (getRoomFormRef.current) {
-      const data = new FormData(getRoomFormRef.current);
-      const idRoom = data.get("idRoom");
-      navigate(`/solo/${idRoom}`);
-    }
-  };
-
   return (
     <div className="app-header">
       <nav>
@@ -43,15 +29,6 @@ export default function Header({ user }: HeaderProps) {
           you!
         </span>
       </div>
-
-      <label className="app-header__findroom">
-        <div style={{ flexShrink: 0 }}>
-          <LookUp />
-        </div>
-        <form onSubmit={getRoom} ref={getRoomFormRef}>
-          <input name="idRoom" placeholder="Find room..." />
-        </form>
-      </label>
 
       <div>
         {user?.username == "kody" ? (

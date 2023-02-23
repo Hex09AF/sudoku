@@ -10,7 +10,7 @@ import {
 } from "@remix-run/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
-// import io from "socket.io-client";
+import io from "socket.io-client";
 import globalStyles from "~/styles/global.css";
 import headerStyles from "~/styles/header/header.css";
 import indexStyles from "~/styles/index.css";
@@ -63,10 +63,10 @@ export default function App() {
   const [socket, setSocket] = useState<Socket>();
 
   useEffect(() => {
-    // const socket = io();
-    // setSocket(socket);
+    const socket = io();
+    setSocket(socket);
     return () => {
-      // socket.close();
+      socket.close();
     };
   }, []);
 

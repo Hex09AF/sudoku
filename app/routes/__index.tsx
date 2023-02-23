@@ -10,6 +10,8 @@ import SOLVE from "~/helper/solve";
 import { getUser } from "~/utils/session.server";
 
 import { Outlet } from "@remix-run/react";
+import UsersOnline from "~/comps/UsersOnline/UsersOnline";
+import { getRooms } from "~/utils/room.server";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);
@@ -18,10 +20,13 @@ export const loader = async ({ request }: LoaderArgs) => {
 
   const solveBoard = await SOLVE(board);
 
+  const rooms = await getRooms();
+
   return json({
     user,
     solveBoard,
     board,
+    rooms,
   });
 };
 
@@ -54,7 +59,7 @@ export default function Index() {
           userId={"USER_LOCAL_ID"}
           initBoard={data.board}
         />
-        <div>Hehe</div>
+        <UsersOnline rooms={data.rooms} />
       </div>
     </div>
   );

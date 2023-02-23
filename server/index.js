@@ -33,11 +33,14 @@ const httpServer = createServer(app);
 // And then attach the socket.io server to the HTTP server
 const io = new Server(httpServer);
 
+let connectedClients = [];
+
 // Then you can use `io` to listen the `connection` event and get a socket
 // from a client
 io.on("connection", (socket) => {
   // from this point you are on the WS connection with a specific client
-  socket.emit("confirmation", "connected!");
+  connectedClients.push(socket.id);
+  io.emit("connected clients", connectedClients);
 
   socket.on("event", (data) => {
     socket.emit("event", "pong");
@@ -70,6 +73,13 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+    connectedClients = connectedClients.filter(
+      (clientId) => clientId !== socket.id
+    );
+
+    // Emit the updated list of connected clients to all clients
+    io.emit("connected clients", connectedClients);
+
     const user = userLeave(socket.id);
 
     if (user) {
