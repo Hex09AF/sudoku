@@ -66,6 +66,9 @@ button {
 button:hover {
   background-color: #005ce6;
 }
+button:disabled {
+  background-color: #d7dfe9;
+}
 
 input {
   border: 1px solid #d7dfe9;

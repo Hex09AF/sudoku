@@ -53,6 +53,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
       userId: v.userId,
       moves: JSON.parse(v?.moves || "[]"),
       score: v.score,
+      status: v.role === "PLAYER" ? "PLAY" : "NOT_READY",
     };
   });
   const userMoves = moves?.find((v) => v.userId == userId);
@@ -87,6 +88,7 @@ export default function SoloRoom() {
       score: data.curScore,
       moves: data.curUserMoves,
       plus: 0,
+      status: "NOT_READY",
     });
   }, [socket, data]);
 
@@ -97,7 +99,7 @@ export default function SoloRoom() {
       userId={data.userId}
       socket={socket}
       roomId={data.roomId}
-      boardData={data.board}
+      initBoard={data.board}
     />
   );
 }

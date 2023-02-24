@@ -20,6 +20,7 @@ export default function UsersOnline({ rooms }: UsersOnlineProps) {
 
   useEffect(() => {
     if (!socket) return;
+    socket.emit("get connected clients");
     socket.on("connected clients", (listUserOnline) => {
       setUsers(listUserOnline);
     });

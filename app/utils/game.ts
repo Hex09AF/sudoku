@@ -1,7 +1,7 @@
 import type { Board, CellValue } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
 import type { Pair } from "~/declares/interaces/Pair";
-import type { UserId } from "~/declares/interaces/User";
+import type { UserId } from "~/declares/interaces/Id";
 
 const isEnemyCell = (gameMoves: GameMove[], userId: UserId, pair: Pair) => {
   let flag = false;

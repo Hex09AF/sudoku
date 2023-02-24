@@ -1,8 +1,8 @@
 const users = [];
 
 // Join user to chat
-function userJoin(id, userId, roomId, score, moves, plus) {
-  const user = { id, userId, roomId, score, moves, plus };
+function userJoin(id, userId, roomId, score, moves, plus, status) {
+  const user = { id, userId, roomId, score, moves, plus, status };
 
   users.push(user);
 
@@ -17,6 +17,15 @@ function updateUser(userInfo, roomId) {
     user.moves = userInfo.moves;
     user.score = userInfo.score;
     user.plus = userInfo.plus;
+  }
+}
+
+function updateUserStatus(userInfo, roomId) {
+  const user = users.find(
+    (user) => user.userId == userInfo.userId && user.roomId == roomId
+  );
+  if (user) {
+    user.status = userInfo.status;
   }
 }
 
@@ -45,4 +54,5 @@ module.exports = {
   userLeave,
   getRoomUsers,
   updateUser,
+  updateUserStatus,
 };

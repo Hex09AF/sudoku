@@ -21,10 +21,11 @@ model User {
 }
 
 model Room {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  board     String
+  id         String   @id @default(cuid())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  board      String
+  gameStatus String   @default("READY")
 
   users UsersOnRooms[]
 }
@@ -35,6 +36,7 @@ model UsersOnRooms {
   room   Room    @relation(fields: [roomId], references: [id])
   roomId String // relation scalar field (used in the `@relation` attribute above)
   moves  String?
+  role   String
   score  Int
 
   @@id([userId, roomId])

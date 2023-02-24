@@ -5,4 +5,5 @@ export type GameMove = {
   userId: string;
   score: number;
   plus?: number;
+  status: string;
 };

@@ -38,7 +38,7 @@ export async function getMoves({ roomId }: { roomId: string }) {
       where: {
         roomId,
       },
-      select: { moves: true, userId: true, score: true },
+      select: { moves: true, userId: true, score: true, role: true },
     });
     return moves;
   } catch {}
@@ -79,22 +79,23 @@ export async function joinRoom({
   userId: string;
 }) {
   try {
-    const usersOnRooms = await db.usersOnRooms.findUnique({
+    const room = await db.room.findUnique({
       where: {
-        userId_roomId: {
-          userId,
-          roomId,
-        },
+        id: roomId,
       },
+      include: { users: true },
     });
 
-    if (!usersOnRooms) {
+    const user = room?.users.filter((v) => v.userId === userId);
+
+    if (!user?.length) {
       await db.usersOnRooms.create({
         data: {
           roomId,
           userId,
           moves: "[]",
           score: 0,
+          role: room?.gameStatus === "READY" ? "JOIN" : "VIEWER",
         },
       });
     }

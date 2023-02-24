@@ -17,6 +17,11 @@ Solo:
 Room:
 
 - Board
+- Game status (READY, START, FINISH)
+
+User in Room:
+
+- Role (PLAYER, VIEWER)
 
 Board:
 

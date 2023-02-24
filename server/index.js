@@ -23,6 +23,7 @@ const {
   userLeave,
   getRoomUsers,
   updateUser,
+  updateUserStatus,
 } = require("./utils/users");
 
 const app = express();
@@ -41,15 +42,26 @@ io.on("connection", (socket) => {
   // from this point you are on the WS connection with a specific client
   connectedClients.push(socket.id);
   io.emit("connected clients", connectedClients);
+  socket.on("get connected clients", () => {
+    socket.emit("connected clients", connectedClients);
+  });
 
   socket.on("event", (data) => {
     socket.emit("event", "pong");
   });
 
-  socket.on("joinRoom", ({ userId, roomId, score, moves, plus }) => {
+  socket.on("joinRoom", ({ userId, roomId, score, moves, plus, status }) => {
     const isExistUser = getCurrentUser(socket.id);
     if (isExistUser) return;
-    const user = userJoin(socket.id, userId, roomId, score, moves, plus);
+    const user = userJoin(
+      socket.id,
+      userId,
+      roomId,
+      score,
+      moves,
+      plus,
+      status
+    );
     socket.join(user.roomId);
     io.to(user.roomId).emit("addClientInfo", {
       usersInfo: getRoomUsers(roomId).map((v) => ({
@@ -57,6 +69,7 @@ io.on("connection", (socket) => {
         moves: v.moves,
         score: v.score,
         plus: v.plus,
+        status: v.status,
       })),
     });
   });
@@ -72,11 +85,16 @@ io.on("connection", (socket) => {
     socket.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
   });
 
+  // userId, status
+  socket.on("updateStatus", ({ userInfo, roomId }) => {
+    updateUserStatus(userInfo, roomId);
+    io.to(roomId).emit("updateClientInfoStatus", { userInfo: userInfo });
+  });
+
   socket.on("disconnect", () => {
     connectedClients = connectedClients.filter(
       (clientId) => clientId !== socket.id
     );
-
     // Emit the updated list of connected clients to all clients
     io.emit("connected clients", connectedClients);
 
