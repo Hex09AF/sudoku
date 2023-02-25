@@ -1,6 +1,6 @@
 import { useSubmit } from "@remix-run/react";
 import debounce from "lodash.debounce";
-import type { SetStateAction } from "react";
+import { SetStateAction, useMemo } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
 import type { Board } from "~/declares/interaces/Board";
@@ -10,6 +10,7 @@ import type { Pair } from "~/declares/interaces/Pair";
 import { checkValid, isEnemyCell, isMatchCell, isUserCell } from "~/utils/game";
 import Score from "../Score";
 import Cell from "./Cell";
+import CountDown from "./CountDown";
 
 type BoardGameProps = {
   solveBoard: Board;
@@ -250,6 +251,15 @@ const BoardGame = ({
 
   const curUser = gameMoves.find((v) => v.userId === userId);
 
+  const isPlay = useMemo(() => {
+    const readyUsers = gameMoves.filter((v) => v.status === "READY");
+    return readyUsers.length === gameMoves.length;
+  }, [gameMoves]);
+
+  const onFinish = () => {
+    console.log("hit");
+  };
+
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
@@ -290,6 +300,7 @@ const BoardGame = ({
           </div>
         )}
         <div className="game-flex-wrapper">
+          {isPlay && <CountDown onFinish={onFinish} />}
           <div className="game-wrapper">
             <div className="game">
               <table className="game-table">
@@ -337,7 +348,6 @@ const BoardGame = ({
               </table>
             </div>
           </div>
-
           <div className="game-intro">
             <p>🕹️ Play with arrow and number keys</p>
           </div>

@@ -1,0 +1,20 @@
+import { useEffect } from "react";
+import { useCountdown } from "~/hooks/useCountDown";
+
+type CountDownProps = {
+  onFinish: Function;
+};
+
+const CountDown = ({ onFinish }: CountDownProps) => {
+  const { count, formatCountdown } = useCountdown(5);
+
+  useEffect(() => {
+    if (Math.floor(count) === 5000) {
+      onFinish();
+    }
+  }, [count, onFinish]);
+
+  return <div>The game will start in {formatCountdown()}</div>;
+};
+
+export default CountDown;
