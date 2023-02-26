@@ -257,7 +257,9 @@ const BoardGame = ({
   }, [gameMoves]);
 
   const onFinish = () => {
-    console.log("hit");
+    if (gameMoves[0].userId === userId) {
+      console.log("FIRST HIT");
+    }
   };
 
   return (
