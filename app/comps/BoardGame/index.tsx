@@ -258,8 +258,8 @@ const BoardGame = ({
 
   const onFinish = () => {
     if (gameMoves[0].userId === userId) {
-      console.log("FIRST HIT");
     }
+    setIsGameStart(true);
   };
 
   return (
@@ -302,7 +302,7 @@ const BoardGame = ({
           </div>
         )}
         <div className="game-flex-wrapper">
-          {isPlay && <CountDown onFinish={onFinish} />}
+          {isPlay && gameMoves.length >= 2 && <CountDown onFinish={onFinish} />}
           <div className="game-wrapper">
             <div className="game">
               <table className="game-table">
