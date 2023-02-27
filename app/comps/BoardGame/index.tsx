@@ -1,7 +1,6 @@
 import { useSubmit } from "@remix-run/react";
 import debounce from "lodash.debounce";
-import { SetStateAction, useMemo } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
 import type { Board } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
@@ -13,6 +12,7 @@ import Cell from "./Cell";
 import CountDown from "./CountDown";
 
 type BoardGameProps = {
+  initGameStatus: string;
   solveBoard: Board;
   initBoard: Board;
   userId: UserId;
@@ -23,6 +23,7 @@ type BoardGameProps = {
 };
 
 const BoardGame = ({
+  initGameStatus,
   solveBoard,
   initBoard,
   roomId,
@@ -33,7 +34,7 @@ const BoardGame = ({
   const submit = useSubmit();
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [isGameStart, setIsGameStart] = useState(false);
+  const [gameStatus, setGameStatus] = useState(initGameStatus);
 
   // Info of the first person enter the room will be the init value
   const [gameMoves, setGameMoves] = useState(
@@ -65,6 +66,7 @@ const BoardGame = ({
       formData.append("userId", userId);
       formData.append("newCurUserMoves", JSON.stringify(moves));
       formData.append("newScore", JSON.stringify(score));
+      formData.append("intent", "updateGameMoves");
       submit(formData, {
         method: "post",
         action: `/solo/${roomId}`,
@@ -172,7 +174,7 @@ const BoardGame = ({
     roomId,
     sayHello,
     socket,
-    isGameStart,
+    gameStatus,
     gameMoves,
     initBoard,
     curBoard,
@@ -258,8 +260,17 @@ const BoardGame = ({
 
   const onFinish = () => {
     if (gameMoves[0].userId === userId) {
+      const formData = new FormData();
+      formData.append("intent", "updateGameStatus");
+      formData.append("roomId", roomId);
+      formData.append("gameStatus", "START");
+      submit(formData, {
+        method: "post",
+        action: `/solo/${roomId}`,
+        replace: true,
+      });
     }
-    setIsGameStart(true);
+    setGameStatus("START");
   };
 
   return (
@@ -277,7 +288,7 @@ const BoardGame = ({
       </div>
 
       <div className="game-info">
-        {!isGameStart && (
+        {gameStatus === "READY" && (
           <div className="start-button-c">
             <button
               className="start-button"
@@ -302,7 +313,9 @@ const BoardGame = ({
           </div>
         )}
         <div className="game-flex-wrapper">
-          {isPlay && gameMoves.length >= 2 && <CountDown onFinish={onFinish} />}
+          {isPlay && gameMoves.length >= 2 && gameStatus === "READY" && (
+            <CountDown onFinish={onFinish} />
+          )}
           <div className="game-wrapper">
             <div className="game">
               <table className="game-table">
@@ -327,7 +340,7 @@ const BoardGame = ({
                             selectCell={selectCell}
                             setSelectCell={setSelectCell}
                             cellIdx={{ row: idx, col: idx2 }}
-                            cellVal={isGameStart ? val : 0}
+                            cellVal={gameStatus === "START" ? val : 0}
                             key={idx * 10 + idx2}
                             isConflictRow={canRowXNumberY[idx][val] > 1}
                             isConflictCol={canColXNumberY[idx2][val] > 1}

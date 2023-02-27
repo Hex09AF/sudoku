@@ -13,7 +13,13 @@ import { useSocket } from "~/context";
 import mergeMovesWithBoard from "~/helper/merge";
 import SOLVE from "~/helper/solve";
 import stylesUrl from "~/styles/index.css";
-import { getMoves, getRoom, joinRoom, updateMoves } from "~/utils/room.server";
+import {
+  getMoves,
+  getRoom,
+  joinRoom,
+  updateMoves,
+  updateGameStatus,
+} from "~/utils/room.server";
 import { requireUserId } from "~/utils/session.server";
 
 export const links: LinksFunction = () => {
@@ -23,16 +29,25 @@ export const links: LinksFunction = () => {
 export const action = async ({ request }: ActionArgs) => {
   if (request.method == "POST") {
     const form = await request.formData();
-    const userId = form.get("userId") + "";
-    const roomId = form.get("roomId") + "";
-    const newCurUserMoves = form.get("newCurUserMoves") + "";
-    const newScore = Number(form.get("newScore"));
-    await updateMoves({
-      roomId,
-      userId,
-      moves: newCurUserMoves,
-      score: newScore,
-    });
+    const intent = form.get("intent") + "";
+
+    if (intent === "updateGameMoves") {
+      const userId = form.get("userId") + "";
+      const roomId = form.get("roomId") + "";
+      const newCurUserMoves = form.get("newCurUserMoves") + "";
+      const newScore = Number(form.get("newScore"));
+      await updateMoves({
+        roomId,
+        userId,
+        moves: newCurUserMoves,
+        score: newScore,
+      });
+    }
+    if (intent === "updateGameStatus") {
+      const roomId = form.get("roomId") + "";
+      const gameStatus = form.get("gameStatus") + "";
+      await updateGameStatus({ gameStatus, id: roomId });
+    }
   }
   return "";
 };
@@ -67,6 +82,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   return json({
     solveBoard,
     roomId: room.id,
+    gameStatus: room.gameStatus,
     board,
     userId,
     moves,
@@ -94,6 +110,7 @@ export default function SoloRoom() {
 
   return (
     <BoardGame
+      initGameStatus={data.gameStatus}
       solveBoard={data.solveBoard}
       initGameMoves={data.moves}
       userId={data.userId}
