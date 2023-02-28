@@ -71,45 +71,14 @@ export async function updateMoves({
   } catch {}
 }
 
-export async function joinRoom({
-  roomId,
-  userId,
-}: {
-  roomId: string;
-  userId: string;
-}) {
-  try {
-    const room = await db.room.findUnique({
-      where: {
-        id: roomId,
-      },
-      include: { users: true },
-    });
-
-    const user = room?.users.filter((v) => v.userId === userId);
-
-    if (!user?.length) {
-      await db.usersOnRooms.create({
-        data: {
-          roomId,
-          userId,
-          moves: "[]",
-          score: 0,
-          role: room?.gameStatus === "READY" ? "JOIN" : "VIEWER",
-        },
-      });
-    }
-  } catch {
-    console.error("ERROR");
-  }
-}
-
 export async function updateGameStatus({
   gameStatus,
   id,
+  readyUsers,
 }: {
   gameStatus: string;
   id: string;
+  readyUsers: string[];
 }) {
   try {
     await db.room.update({
@@ -119,6 +88,24 @@ export async function updateGameStatus({
       where: {
         id,
       },
+    });
+    readyUsers.forEach(async (userId) => {
+      await db.usersOnRooms.upsert({
+        where: {
+          userId_roomId: {
+            userId,
+            roomId: id,
+          },
+        },
+        create: {
+          roomId: id,
+          userId,
+          moves: "[]",
+          score: 0,
+          role: "PLAYER",
+        },
+        update: {},
+      });
     });
   } catch {}
 }

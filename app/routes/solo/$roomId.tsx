@@ -16,7 +16,6 @@ import stylesUrl from "~/styles/index.css";
 import {
   getMoves,
   getRoom,
-  joinRoom,
   updateMoves,
   updateGameStatus,
 } from "~/utils/room.server";
@@ -46,7 +45,9 @@ export const action = async ({ request }: ActionArgs) => {
     if (intent === "updateGameStatus") {
       const roomId = form.get("roomId") + "";
       const gameStatus = form.get("gameStatus") + "";
-      await updateGameStatus({ gameStatus, id: roomId });
+      const readyUsers = JSON.parse(form.get("readyUsers") + "");
+      console.log(readyUsers);
+      await updateGameStatus({ gameStatus, id: roomId, readyUsers });
     }
   }
   return "";
@@ -61,16 +62,16 @@ export const loader: LoaderFunction = async ({ params, request }) => {
   if (!room) {
     throw json("Not Found", { status: 404 });
   }
-  await joinRoom({ userId, roomId: params.roomId });
   const moveData = await getMoves({ roomId: params.roomId });
   const moves = moveData?.map((v) => {
     return {
       userId: v.userId,
       moves: JSON.parse(v?.moves || "[]"),
       score: v.score,
-      status: v.role === "PLAYER" ? "PLAY" : "NOT_READY",
+      status: v.role === "PLAYER" ? "PLAYING" : "NOT_READY",
     };
   });
+  console.log(moves);
   const userMoves = moves?.find((v) => v.userId == userId);
   const board = mergeMovesWithBoard(
     moves,
@@ -86,6 +87,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     board,
     userId,
     moves,
+    curUserStatus: userMoves?.status || "NOT_READY",
     curUserMoves: userMoves?.moves || [],
     curScore: userMoves?.score || 0,
   });
@@ -104,7 +106,7 @@ export default function SoloRoom() {
       score: data.curScore,
       moves: data.curUserMoves,
       plus: 0,
-      status: "NOT_READY",
+      status: data.curUserStatus,
     });
   }, [socket, data]);
 

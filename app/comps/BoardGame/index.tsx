@@ -34,8 +34,6 @@ const BoardGame = ({
   const submit = useSubmit();
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [gameStatus, setGameStatus] = useState(initGameStatus);
-
   // Info of the first person enter the room will be the init value
   const [gameMoves, setGameMoves] = useState(
     initGameMoves.filter((v) => v.userId == userId)
@@ -150,6 +148,7 @@ const BoardGame = ({
 
       if (
         !e.repeat &&
+        initGameStatus === "START" &&
         checkValid(
           value,
           gameMoves,
@@ -174,7 +173,7 @@ const BoardGame = ({
     roomId,
     sayHello,
     socket,
-    gameStatus,
+    initGameStatus,
     gameMoves,
     initBoard,
     curBoard,
@@ -259,18 +258,19 @@ const BoardGame = ({
   }, [gameMoves]);
 
   const onFinish = () => {
-    if (gameMoves[0].userId === userId) {
-      const formData = new FormData();
-      formData.append("intent", "updateGameStatus");
-      formData.append("roomId", roomId);
-      formData.append("gameStatus", "START");
-      submit(formData, {
-        method: "post",
-        action: `/solo/${roomId}`,
-        replace: true,
-      });
-    }
-    setGameStatus("START");
+    const formData = new FormData();
+    formData.append("intent", "updateGameStatus");
+    formData.append("roomId", roomId);
+    formData.append("gameStatus", "START");
+    const readyUsers = gameMoves
+      .filter((v) => v.status === "READY")
+      .map((v) => v.userId);
+    formData.append("readyUsers", JSON.stringify(readyUsers));
+    submit(formData, {
+      method: "post",
+      action: `/solo/${roomId}`,
+      replace: true,
+    });
   };
 
   return (
@@ -288,7 +288,7 @@ const BoardGame = ({
       </div>
 
       <div className="game-info">
-        {gameStatus === "READY" && (
+        {initGameStatus === "READY" && (
           <div className="start-button-c">
             <button
               className="start-button"
@@ -313,7 +313,7 @@ const BoardGame = ({
           </div>
         )}
         <div className="game-flex-wrapper">
-          {isPlay && gameMoves.length >= 2 && gameStatus === "READY" && (
+          {isPlay && gameMoves.length >= 2 && initGameStatus === "READY" && (
             <CountDown onFinish={onFinish} />
           )}
           <div className="game-wrapper">
@@ -340,7 +340,7 @@ const BoardGame = ({
                             selectCell={selectCell}
                             setSelectCell={setSelectCell}
                             cellIdx={{ row: idx, col: idx2 }}
-                            cellVal={gameStatus === "START" ? val : 0}
+                            cellVal={initGameStatus === "START" ? val : 0}
                             key={idx * 10 + idx2}
                             isConflictRow={canRowXNumberY[idx][val] > 1}
                             isConflictCol={canColXNumberY[idx2][val] > 1}

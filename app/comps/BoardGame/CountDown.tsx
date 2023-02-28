@@ -12,7 +12,7 @@ const CountDown = ({ onFinish }: CountDownProps) => {
     if (Math.floor(count) === 5000) {
       onFinish();
     }
-  }, [count, onFinish]);
+  }, [count]);
 
   return <div>The game will start in {formatCountdown()}</div>;
 };
