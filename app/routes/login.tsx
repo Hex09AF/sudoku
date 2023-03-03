@@ -134,6 +134,7 @@ export default function Login() {
               <label htmlFor="username-input">Username</label>
               <input
                 type="text"
+                autoFocus
                 id="username-input"
                 name="username"
                 defaultValue={actionData?.fields?.username}

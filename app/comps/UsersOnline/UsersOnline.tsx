@@ -1,26 +1,33 @@
-import type { Room, UsersOnRooms } from "@prisma/client";
 import type { SerializeFrom } from "@remix-run/node";
 import { useEffect, useState } from "react";
+import EmptyUser from "~/assets/empty-users.jpeg";
 import { useSocket } from "~/context";
 import hashToAvatar from "~/helper/hash";
-import EmptyUser from "~/assets/empty-users.jpeg";
 
 type UsersOnlineProps = {
-  rooms: SerializeFrom<
-    (Room & {
-      users: UsersOnRooms[];
-    })[]
-  >;
+  user: SerializeFrom<{ id: string; username: string }> | null;
 };
 
-export default function UsersOnline({ rooms }: UsersOnlineProps) {
+export default function UsersOnline({ user }: UsersOnlineProps) {
   const [show, setShow] = useState(false);
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<
+    {
+      socketId: string;
+      username?: string;
+      userId?: string;
+    }[]
+  >([]);
   const socket = useSocket();
 
   useEffect(() => {
     if (!socket) return;
-    socket.emit("get connected clients");
+    socket.on("connect", () => {
+      socket.emit("get connected clients", { user, socketId: socket.id });
+    });
+  }, [socket, user]);
+
+  useEffect(() => {
+    if (!socket) return;
     socket.on("connected clients", (listUserOnline) => {
       setUsers(listUserOnline);
     });
@@ -31,15 +38,15 @@ export default function UsersOnline({ rooms }: UsersOnlineProps) {
       <div className="list-user">
         {users.length > 0 ? (
           users.map((v) => (
-            <div className="user-info" key={v}>
+            <div className="user-info" key={v.socketId}>
               <img
                 className="user-info__avatar"
-                src={hashToAvatar(v)}
+                src={hashToAvatar(v?.userId ? v.userId : v.socketId)}
                 alt="avatar"
                 width={48}
                 height={48}
               />
-              {v}
+              {v?.userId ? v.username : "Guest"}
             </div>
           ))
         ) : (

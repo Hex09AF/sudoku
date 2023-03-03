@@ -23,7 +23,7 @@ export default function Score({
       <div>{isUser ? "MY" : ""} SCORE</div>
       <h2>{score || 0}</h2>
       <MyPoint />
-      {status}
+      {status === "NOT_READY" ? "NOT READY" : status}
     </div>
   );
 }

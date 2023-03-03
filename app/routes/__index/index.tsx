@@ -38,7 +38,7 @@ export default function Lobby() {
             <LookUp />
           </div>
           <form onSubmit={getRoom} ref={getRoomFormRef}>
-            <input name="idRoom" placeholder="Find room..." />
+            <input name="idRoom" placeholder="Type the room id.." />
           </form>
         </label>
         {data.rooms.length > 0 ? (

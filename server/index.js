@@ -40,10 +40,18 @@ let connectedClients = [];
 // from a client
 io.on("connection", (socket) => {
   // from this point you are on the WS connection with a specific client
-  connectedClients.push(socket.id);
-  io.emit("connected clients", connectedClients);
-  socket.on("get connected clients", () => {
-    socket.emit("connected clients", connectedClients);
+  connectedClients.push({ socketId: socket.id });
+  socket.on("get connected clients", ({ user, socketId }) => {
+    if (user) {
+      const curUser = connectedClients.find(
+        (client) => client.socketId === socketId
+      );
+      if (curUser) {
+        curUser.userId = user.id;
+        curUser.username = user.username;
+      }
+    }
+    io.emit("connected clients", connectedClients);
   });
 
   socket.on("event", (data) => {
@@ -93,7 +101,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     connectedClients = connectedClients.filter(
-      (clientId) => clientId !== socket.id
+      (client) => client.socketId !== socket.id
     );
     // Emit the updated list of connected clients to all clients
     io.emit("connected clients", connectedClients);

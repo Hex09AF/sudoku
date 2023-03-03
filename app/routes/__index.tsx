@@ -59,7 +59,7 @@ export default function Index() {
           userId={"USER_LOCAL_ID"}
           initBoard={data.board}
         />
-        <UsersOnline rooms={data.rooms} />
+        <UsersOnline rooms={data.rooms} user={data.user} />
       </div>
     </div>
   );
