@@ -3,6 +3,16 @@ import type { GameMove } from "~/declares/interaces/GameMove";
 import type { Pair } from "~/declares/interaces/Pair";
 import type { UserId } from "~/declares/interaces/Id";
 
+const getCellUserId = (gameMoves: GameMove[], pair: Pair) => {
+  let userId = "";
+  gameMoves?.forEach((user) => {
+    user?.moves?.forEach((move) => {
+      if (move[0] == pair.row && move[1] == pair.col) userId = user.userId;
+    });
+  });
+  return userId;
+};
+
 const isEnemyCell = (gameMoves: GameMove[], userId: UserId, pair: Pair) => {
   let flag = false;
   const usersInfo = gameMoves.filter((user) => user.userId != userId);
@@ -52,4 +62,11 @@ function randBetween(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-export { isEnemyCell, isMatchCell, isUserCell, checkValid, randBetween };
+export {
+  getCellUserId,
+  isEnemyCell,
+  isMatchCell,
+  isUserCell,
+  checkValid,
+  randBetween,
+};

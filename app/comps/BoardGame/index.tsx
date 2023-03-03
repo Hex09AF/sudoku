@@ -6,7 +6,13 @@ import type { Board } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interaces/Id";
 import type { Pair } from "~/declares/interaces/Pair";
-import { checkValid, isEnemyCell, isMatchCell, isUserCell } from "~/utils/game";
+import {
+  checkValid,
+  getCellUserId,
+  isEnemyCell,
+  isMatchCell,
+  isUserCell,
+} from "~/utils/game";
 import Score from "../Score";
 import Cell from "./Cell";
 import CountDown from "./CountDown";
@@ -278,6 +284,7 @@ const BoardGame = ({
       <div className="score-wrapper">
         {gameMoves.map((userInRoom) => (
           <Score
+            userId={userInRoom.userId}
             isUser={userInRoom.userId == userId}
             key={userInRoom.userId}
             score={userInRoom.score}
@@ -325,6 +332,10 @@ const BoardGame = ({
                       {row.map((val, idx2) => {
                         return (
                           <Cell
+                            userId={getCellUserId(gameMoves, {
+                              row: idx,
+                              col: idx2,
+                            })}
                             isEnemy={isEnemyCell(gameMoves, userId, {
                               row: idx,
                               col: idx2,
@@ -333,7 +344,7 @@ const BoardGame = ({
                               row: idx,
                               col: idx2,
                             })}
-                            isUserCell={isUserCell(gameMoves, userId, {
+                            isUser={isUserCell(gameMoves, userId, {
                               row: idx,
                               col: idx2,
                             })}

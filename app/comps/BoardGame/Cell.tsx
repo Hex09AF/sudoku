@@ -1,9 +1,11 @@
 import type { SetStateAction } from "react";
 import type { Pair } from "~/declares/interaces/Pair";
+import hashToAvatar from "~/helper/hash";
 
 type CellProps = {
+  userId: string;
   isEnemy: boolean;
-  isUserCell: boolean;
+  isUser: boolean;
   isSameValue: boolean;
   isDefault: boolean;
   isConflictSquare: boolean;
@@ -17,6 +19,7 @@ type CellProps = {
 };
 
 const Cell = ({
+  userId,
   setSelectCell,
   selectCell,
   cellIdx,
@@ -26,14 +29,19 @@ const Cell = ({
   isConflictSquare,
   isDefault,
   isSameValue,
-  isUserCell,
+  isUser,
   isEnemy,
   isMatchCell,
 }: CellProps) => {
+  const avatarStyle = {
+    ["--avatar-image-cell" as any]: `url("${hashToAvatar(userId)}")`,
+  };
+
+  const isUserCell = isEnemy || isUser;
+
   const isSelecting =
     selectCell.row === cellIdx.row && selectCell.col === cellIdx.col;
   const selectedCellClass = isSelecting ? " cell-selected " : "";
-
   const isSameRow = selectCell.row === cellIdx.row;
   const isSameCol = selectCell.col === cellIdx.col;
   const isSameSquare =
@@ -50,21 +58,15 @@ const Cell = ({
   const numberClass = isNumber ? " number " : "";
 
   const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
-  const isUnMatchCellClas = isUserCell && !isMatchCell;
+  const isUnMatchCellClass = isUserCell && !isMatchCell;
+
   const conflictCellClass =
-    (isConflictCol || isConflictRow || isConflictSquare || isUnMatchCellClas) &&
-    !isMatchCell
+    (isConflictCol || isConflictRow || isConflictSquare) && isUnMatchCellClass
       ? " number-conflict "
       : "";
+  const conflictValueClass = conflictCellClass ? " default-conflict " : "";
 
-  const conflictValueClass =
-    (isConflictCol || isConflictRow || isConflictSquare || isUnMatchCellClas) &&
-    (!isDefault || isUserCell) &&
-    !isMatchCell
-      ? " default-conflict "
-      : "";
-
-  const isUserClass = isUserCell ? " user-cell " : "";
+  const isUserClass = isUser ? " user-cell " : "";
   const isEnemyClass = isEnemy ? " enemy-cell " : "";
   /**
    *
@@ -76,6 +78,7 @@ const Cell = ({
   return (
     <>
       <td
+        style={avatarStyle}
         className={
           `game-cell` +
           isEnemyClass +

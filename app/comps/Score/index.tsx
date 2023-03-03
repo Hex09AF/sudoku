@@ -1,7 +1,9 @@
 import { useCallback } from "react";
+import hashToAvatar from "~/helper/hash";
 import Point from "./point";
 
 type ScoreProps = {
+  userId: string;
   score: number;
   plusPoint: number;
   isUser: boolean;
@@ -9,6 +11,7 @@ type ScoreProps = {
 };
 
 export default function Score({
+  userId,
   score,
   plusPoint,
   isUser,
@@ -16,10 +19,12 @@ export default function Score({
 }: ScoreProps) {
   const MyPoint = useCallback(() => <Point plusPoint={plusPoint} />, [score]);
 
+  const avatarStyle = {
+    ["--avatar-image" as any]: `url(${hashToAvatar(userId)})`,
+  };
+
   return (
-    <div
-      className={`score-info user-cell ${isUser ? "user-cell" : "enemy-cell"}`}
-    >
+    <div style={avatarStyle} className={`score-info`}>
       <div>{isUser ? "MY" : ""} SCORE</div>
       <h2>{score || 0}</h2>
       <MyPoint />

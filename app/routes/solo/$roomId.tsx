@@ -46,7 +46,7 @@ export const action = async ({ request }: ActionArgs) => {
       const roomId = form.get("roomId") + "";
       const gameStatus = form.get("gameStatus") + "";
       const readyUsers = JSON.parse(form.get("readyUsers") + "");
-      console.log(readyUsers);
+
       await updateGameStatus({ gameStatus, id: roomId, readyUsers });
     }
   }
@@ -71,7 +71,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
       status: v.role === "PLAYER" ? "PLAYING" : "NOT_READY",
     };
   });
-  console.log(moves);
+
   const userMoves = moves?.find((v) => v.userId == userId);
   const board = mergeMovesWithBoard(
     moves,

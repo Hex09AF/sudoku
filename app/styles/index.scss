@@ -139,10 +139,10 @@ table {
 
   &.number-conflict {
     background-color: #f7cfd6;
-  }
 
-  .cell-value.default-conflict {
-    color: #e12120;
+    .cell-value.default-conflict {
+      color: #e12120;
+    }
   }
 
   &.cell-selected {
@@ -160,8 +160,10 @@ table {
     background-color: #cbdbed;
   }
 
+  &.enemy-cell,
   &.user-cell {
     &::before {
+      border-radius: 50%;
       content: "";
       display: block;
       position: absolute;
@@ -170,21 +172,7 @@ table {
       right: 0;
       width: 16px;
       height: 16px;
-      background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
-    }
-  }
-
-  &.enemy-cell {
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      background-size: cover;
-      top: 0;
-      left: 0;
-      width: 16px;
-      height: 16px;
-      background-image: url("https://partyanimals.com/static/img/characters_Coco_avatar@2x.a6aa14ee.png");
+      background-image: var(--avatar-image-cell);
     }
   }
 }
@@ -480,33 +468,19 @@ svg:not(:root) {
   align-items: center;
   justify-content: center;
   padding: 10px;
-  &.user-cell {
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      background-size: cover;
-      top: -16px;
-      right: -16px;
-      width: 32px;
-      height: 32px;
-      background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
-    }
+  &::before {
+    border-radius: 50%;
+    content: "";
+    display: block;
+    position: absolute;
+    background-size: cover;
+    top: -16px;
+    right: -16px;
+    width: 32px;
+    height: 32px;
+    background-image: var(--avatar-image);
   }
 
-  &.enemy-cell {
-    &::before {
-      content: "";
-      display: block;
-      position: absolute;
-      background-size: cover;
-      top: -16px;
-      left: -16px;
-      width: 32px;
-      height: 32px;
-      background-image: url("https://partyanimals.com/static/img/characters_Coco_avatar@2x.a6aa14ee.png");
-    }
-  }
   h2 {
     color: white;
   }

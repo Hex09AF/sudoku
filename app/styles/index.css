@@ -135,7 +135,7 @@ table {
 .game-cell.number-conflict {
   background-color: #f7cfd6;
 }
-.game-cell .cell-value.default-conflict {
+.game-cell.number-conflict .cell-value.default-conflict {
   color: #e12120;
 }
 .game-cell.cell-selected {
@@ -150,7 +150,8 @@ table {
 .game-cell.number-hightlight {
   background-color: #cbdbed;
 }
-.game-cell.user-cell::before {
+.game-cell.enemy-cell::before, .game-cell.user-cell::before {
+  border-radius: 50%;
   content: "";
   display: block;
   position: absolute;
@@ -159,18 +160,7 @@ table {
   right: 0;
   width: 16px;
   height: 16px;
-  background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
-}
-.game-cell.enemy-cell::before {
-  content: "";
-  display: block;
-  position: absolute;
-  background-size: cover;
-  top: 0;
-  left: 0;
-  width: 16px;
-  height: 16px;
-  background-image: url("https://partyanimals.com/static/img/characters_Coco_avatar@2x.a6aa14ee.png");
+  background-image: var(--avatar-image-cell);
 }
 
 .game-cell:nth-child(3n) {
@@ -455,7 +445,8 @@ svg:not(:root) {
   justify-content: center;
   padding: 10px;
 }
-.score-info.user-cell::before {
+.score-info::before {
+  border-radius: 50%;
   content: "";
   display: block;
   position: absolute;
@@ -464,18 +455,7 @@ svg:not(:root) {
   right: -16px;
   width: 32px;
   height: 32px;
-  background-image: url("https://partyanimals.com/static/img/characters_Macchiato_avatar@2x.2c32853a.png");
-}
-.score-info.enemy-cell::before {
-  content: "";
-  display: block;
-  position: absolute;
-  background-size: cover;
-  top: -16px;
-  left: -16px;
-  width: 32px;
-  height: 32px;
-  background-image: url("https://partyanimals.com/static/img/characters_Coco_avatar@2x.a6aa14ee.png");
+  background-image: var(--avatar-image);
 }
 .score-info h2 {
   color: white;
