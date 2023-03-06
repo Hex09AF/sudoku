@@ -46,7 +46,6 @@ export const action = async ({ request }: ActionArgs) => {
       const roomId = form.get("roomId") + "";
       const gameStatus = form.get("gameStatus") + "";
       const readyUsers = JSON.parse(form.get("readyUsers") + "");
-
       await updateGameStatus({ gameStatus, id: roomId, readyUsers });
     }
   }

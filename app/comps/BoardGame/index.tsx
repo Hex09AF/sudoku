@@ -40,8 +40,9 @@ const BoardGame = ({
   const submit = useSubmit();
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  // Info of the first person enter the room will be the init value
-  const [gameMoves, setGameMoves] = useState(
+  const [gameMoves, setGameMoves] = useState(initGameMoves);
+
+  const [usersInRoom, setUsersInRoom] = useState(
     initGameMoves.filter((v) => v.userId == userId)
   );
 
@@ -93,6 +94,36 @@ const BoardGame = ({
         return newBoardValue;
       });
       setGameMoves((preState) => {
+        const curInfo = preState.find((v) => v.userId == userId);
+
+        if (curInfo) {
+          if (solveBoard[selectCell.row][selectCell.col] == value) {
+            curInfo.plus = 50;
+            curInfo.score += 50;
+          } else {
+            curInfo.plus = -100;
+            curInfo.score += -100;
+          }
+
+          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+            return v[0] == selectCell.row && v[1] == selectCell.col;
+          });
+          if (isExistCell != -1) {
+            curInfo.moves[isExistCell] = [
+              selectCell.row,
+              selectCell.col,
+              value,
+            ];
+          } else {
+            curInfo.moves.push([selectCell.row, selectCell.col, value]);
+          }
+          sayHello({ moves: curInfo.moves, score: curInfo.score });
+          socket.emit("updateInfo", { userInfo: curInfo, roomId });
+          return JSON.parse(JSON.stringify(preState));
+        }
+        return preState;
+      });
+      setUsersInRoom((preState) => {
         const curInfo = preState.find((v) => v.userId == userId);
 
         if (curInfo) {
@@ -234,9 +265,19 @@ const BoardGame = ({
         }
         return JSON.parse(JSON.stringify(preUsers));
       });
+      setUsersInRoom((preUsers) => {
+        const curUser = preUsers.find((user) => user.userId == userInfo.userId);
+        if (curUser) {
+          curUser.moves = userInfo.moves;
+          curUser.plus = userInfo.plus;
+          curUser.score = userInfo.score;
+          curUser.status = userInfo.status;
+        }
+        return JSON.parse(JSON.stringify(preUsers));
+      });
     });
     socket.on("updateClientInfoStatus", ({ userInfo }) => {
-      setGameMoves((preUsers) => {
+      setUsersInRoom((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
           curUser.status = userInfo.status;
@@ -245,14 +286,17 @@ const BoardGame = ({
       });
     });
     socket.on("removeClientInfo", ({ userInfo }) => {
-      setGameMoves((preUsers) => {
+      setUsersInRoom((preUsers) => {
         const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
         return JSON.parse(JSON.stringify(newUsers));
       });
     });
 
     socket.on("addClientInfo", ({ usersInfo }) => {
-      setGameMoves(usersInfo);
+      setUsersInRoom((preUsers) => {
+        if (preUsers.length > usersInfo.length) return preUsers;
+        return usersInfo;
+      });
     });
   }, [socket]);
 
@@ -282,7 +326,7 @@ const BoardGame = ({
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
-        {gameMoves.map((userInRoom) => (
+        {usersInRoom.map((userInRoom) => (
           <Score
             userId={userInRoom.userId}
             isUser={userInRoom.userId == userId}

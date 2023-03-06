@@ -20,6 +20,5 @@ export default function hashToAvatar(str: string) {
     idx += c.charCodeAt(0);
     idx %= mod;
   }
-  console.log(userImages[idx]);
   return userImages[idx];
 }

@@ -58,10 +58,11 @@ const Cell = ({
   const numberClass = isNumber ? " number " : "";
 
   const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
-  const isUnMatchCellClass = isUserCell && !isMatchCell;
 
   const conflictCellClass =
-    (isConflictCol || isConflictRow || isConflictSquare) && isUnMatchCellClass
+    (isConflictCol || isConflictRow || isConflictSquare) &&
+    isNumber &&
+    !isMatchCell
       ? " number-conflict "
       : "";
   const conflictValueClass = conflictCellClass ? " default-conflict " : "";

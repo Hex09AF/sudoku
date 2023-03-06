@@ -14,6 +14,7 @@ import {
 } from "~/utils/game";
 import Score from "../Score";
 import Cell from "./Cell";
+import { json } from "@remix-run/node";
 
 type BoardGameProps = {
   solveBoard: Board;
@@ -300,7 +301,7 @@ const BoardGame = ({
                             row: idx,
                             col: idx2,
                           })}
-                          isUserCell={isUserCell(gameMoves, userId, {
+                          isUser={isUserCell(gameMoves, userId, {
                             row: idx,
                             col: idx2,
                           })}

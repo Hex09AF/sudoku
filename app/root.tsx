@@ -17,6 +17,10 @@ import indexStyles from "~/styles/index.css";
 import Rubik from "./comps/Rubik";
 import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
+import favicon from "~/assets/favicon/apple-touch-icon.png";
+import favicon16 from "~/assets/favicon/favicon-16x16.png";
+import favicon32 from "~/assets/favicon/favicon-32x32.png";
+import faviconManifest from "~/assets/favicon/site.webmanifest";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
@@ -29,6 +33,24 @@ export const links: LinksFunction = () => {
     { rel: "stylesheet", href: globalStyles },
     { rel: "stylesheet", href: headerStyles },
     { rel: "stylesheet", href: indexStyles },
+    {
+      rel: "apple-touch-icon",
+      sizes: "180x180",
+      href: favicon,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      sizes: "32x32",
+      href: favicon32,
+    },
+    {
+      rel: "icon",
+      type: "image/png",
+      sizes: "16x16",
+      href: favicon16,
+    },
+    { rel: "manifest", href: faviconManifest },
   ];
 };
 

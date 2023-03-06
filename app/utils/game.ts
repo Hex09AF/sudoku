@@ -46,7 +46,11 @@ const checkValid = (
   curBoard: Board,
   pair: Pair
 ) => {
-  if (value === 0) return isUserCell(gameMoves, userId, pair);
+  if (value === 0)
+    return (
+      !isMatchCell(solveBoard, curBoard, pair) &&
+      isUserCell(gameMoves, userId, pair)
+    );
   return (
     !isEnemyCell(gameMoves, userId, pair) &&
     pair.row >= 0 &&

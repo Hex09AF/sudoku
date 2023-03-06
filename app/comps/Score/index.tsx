@@ -25,7 +25,7 @@ export default function Score({
 
   return (
     <div style={avatarStyle} className={`score-info`}>
-      <div>{isUser ? "MY" : ""} SCORE</div>
+      <div>{isUser ? "MY" : ""} SCORES</div>
       <h2>{score || 0}</h2>
       <MyPoint />
       {status === "NOT_READY" ? "NOT READY" : status}

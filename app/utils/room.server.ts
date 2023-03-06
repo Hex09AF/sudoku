@@ -89,7 +89,8 @@ export async function updateGameStatus({
         id,
       },
     });
-    readyUsers.forEach(async (userId) => {
+
+    for (const userId of readyUsers) {
       await db.usersOnRooms.upsert({
         where: {
           userId_roomId: {
@@ -106,6 +107,6 @@ export async function updateGameStatus({
         },
         update: {},
       });
-    });
+    }
   } catch {}
 }
