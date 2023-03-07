@@ -84,13 +84,13 @@ io.on("connection", (socket) => {
 
   socket.on("play", (boardValue) => {
     const user = getCurrentUser(socket.id);
-    socket.to(user.roomId).emit("play", boardValue);
+    io.to(user.roomId).emit("play", boardValue);
   });
 
   // userId, roomId, score, moves, plus
   socket.on("updateInfo", ({ userInfo, roomId }) => {
     updateUser(userInfo, roomId);
-    socket.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
+    io.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
   });
 
   // userId, status

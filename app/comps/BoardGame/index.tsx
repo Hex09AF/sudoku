@@ -46,7 +46,6 @@ const BoardGame = ({
   );
 
   const submit = useSubmit();
-  const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
   const [usersInRoom, setUsersInRoom] = useState(
     initGameMoves.filter((v) => v.userId == userId)
@@ -69,164 +68,113 @@ const BoardGame = ({
     [boardState.context.selectCell]
   );
 
-  useEffect(() => {
-    if (!socket) return;
-    if (sudokuWrapperRef === null) return;
-    const currentSudokuRef = sudokuWrapperRef.current;
+  const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
+    const newBoardValue = JSON.parse(JSON.stringify(boardState.context.board));
+    newBoardValue[boardState.context.selectCell.row][
+      boardState.context.selectCell.col
+    ] = value;
+    console.log(boardState.context.board, "VALUE", value);
+    socket?.emit("play", newBoardValue);
 
-    const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
-      boardSend({ type: "FILL", value });
-      const newBoardValue = JSON.parse(
-        JSON.stringify(boardState.context.board)
-      );
-      newBoardValue[boardState.context.selectCell.row][
-        boardState.context.selectCell.col
-      ] = value;
-      socket.emit("play", newBoardValue);
-      send({
-        type: "GAME.FILL",
-        value: {
-          solveBoard,
-          selectCell: boardState.context.selectCell,
-          userId,
+    const curInfo = JSON.parse(
+      JSON.stringify(gameState.context.players.find((v) => v.userId == userId))
+    );
+
+    if (curInfo) {
+      if (
+        solveBoard[boardState.context.selectCell.row][
+          boardState.context.selectCell.col
+        ] == value
+      ) {
+        curInfo.plus = 50;
+        curInfo.score += 50;
+      } else {
+        curInfo.plus = -100;
+        curInfo.score += -100;
+      }
+
+      const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+        return (
+          v[0] == boardState.context.selectCell.row &&
+          v[1] == boardState.context.selectCell.col
+        );
+      });
+      if (isExistCell != -1) {
+        curInfo.moves[isExistCell] = [
+          boardState.context.selectCell.row,
+          boardState.context.selectCell.col,
+          value,
+        ];
+      } else {
+        curInfo.moves.push([
+          boardState.context.selectCell.row,
+          boardState.context.selectCell.col,
+          value,
+        ]);
+      }
+      socket?.emit("updateInfo", { userInfo: curInfo, roomId });
+      sayHello({ moves: curInfo.moves, score: curInfo.score });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let value = -1;
+
+    if ("1234567890".includes(e.key)) {
+      value = Number.parseInt(e.key, 10);
+    } else if (e.key === "Backspace") {
+      value = 0;
+    } else if (e.key === "ArrowUp") {
+      boardSend({
+        type: "MOVE",
+        pair: {
+          row: (boardState.context.selectCell.row - 1 + 9) % 9,
+          col: boardState.context.selectCell.col,
         },
       });
-      const curInfo = gameState.context.players.find((v) => v.userId == userId);
-
-      if (curInfo) {
-        if (
-          solveBoard[boardState.context.selectCell.row][
-            boardState.context.selectCell.col
-          ] == value
-        ) {
-          curInfo.plus = 50;
-          curInfo.score += 50;
-        } else {
-          curInfo.plus = -100;
-          curInfo.score += -100;
-        }
-
-        const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-          return (
-            v[0] == boardState.context.selectCell.row &&
-            v[1] == boardState.context.selectCell.col
-          );
-        });
-        if (isExistCell != -1) {
-          curInfo.moves[isExistCell] = [
-            boardState.context.selectCell.row,
-            boardState.context.selectCell.col,
-            value,
-          ];
-        } else {
-          curInfo.moves.push([
-            boardState.context.selectCell.row,
-            boardState.context.selectCell.col,
-            value,
-          ]);
-        }
-        sayHello({ moves: curInfo.moves, score: curInfo.score });
-        socket.emit("updateInfo", { userInfo: curInfo, roomId });
-      }
-      setUsersInRoom((preState) => {
-        const curInfo = preState.find((v) => v.userId == userId);
-
-        if (curInfo) {
-          if (
-            solveBoard[boardState.context.selectCell.row][
-              boardState.context.selectCell.col
-            ] == value
-          ) {
-            curInfo.plus = 50;
-            curInfo.score += 50;
-          } else {
-            curInfo.plus = -100;
-            curInfo.score += -100;
-          }
-
-          return JSON.parse(JSON.stringify(preState));
-        }
-        return preState;
+    } else if (e.key === "ArrowLeft") {
+      boardSend({
+        type: "MOVE",
+        pair: {
+          row: boardState.context.selectCell.row,
+          col: (boardState.context.selectCell.col - 1 + 9) % 9,
+        },
       });
-    };
+    } else if (e.key === "ArrowRight") {
+      boardSend({
+        type: "MOVE",
+        pair: {
+          row: boardState.context.selectCell.row,
+          col: (boardState.context.selectCell.col + 1) % 9,
+        },
+      });
+    } else if (e.key === "ArrowDown") {
+      boardSend({
+        type: "MOVE",
+        pair: {
+          row: (boardState.context.selectCell.row + 1) % 9,
+          col: boardState.context.selectCell.col,
+        },
+      });
+    }
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      let value = -1;
-      if ("1234567890".includes(e.key)) {
-        value = Number.parseInt(e.key, 10);
-      } else if (e.key === "Backspace") {
-        value = 0;
-      } else if (e.key === "ArrowUp") {
-        boardSend({
-          type: "MOVE",
-          pair: {
-            row: (boardState.context.selectCell.row - 1 + 9) % 9,
-            col: boardState.context.selectCell.col,
-          },
-        });
-      } else if (e.key === "ArrowLeft") {
-        boardSend({
-          type: "MOVE",
-          pair: {
-            row: boardState.context.selectCell.row,
-            col: (boardState.context.selectCell.col - 1 + 9) % 9,
-          },
-        });
-      } else if (e.key === "ArrowRight") {
-        boardSend({
-          type: "MOVE",
-          pair: {
-            row: boardState.context.selectCell.row,
-            col: (boardState.context.selectCell.col + 1) % 9,
-          },
-        });
-      } else if (e.key === "ArrowDown") {
-        boardSend({
-          type: "MOVE",
-          pair: {
-            row: (boardState.context.selectCell.row + 1) % 9,
-            col: boardState.context.selectCell.col,
-          },
-        });
-      }
-
-      if (
-        !e.repeat &&
-        initGameStatus === "START" &&
-        value !== -1 &&
-        checkValid(
-          value,
-          gameState.context.players,
-          userId,
-          initBoard,
-          solveBoard,
-          boardState.context.board,
-          boardState.context.selectCell
-        )
-      ) {
-        makeMove(boardState.context.selectCell, value, userId);
-      }
-    };
-    currentSudokuRef?.addEventListener("keydown", handleKeyDown);
-
-    return function cleanup() {
-      if (currentSudokuRef)
-        currentSudokuRef?.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [
-    send,
-    boardSend,
-    boardState,
-    gameState,
-    roomId,
-    sayHello,
-    socket,
-    initGameStatus,
-    initBoard,
-    solveBoard,
-    userId,
-    sudokuWrapperRef,
-  ]);
+    if (
+      !e.repeat &&
+      initGameStatus === "START" &&
+      value !== -1 &&
+      checkValid(
+        value,
+        gameState.context.players,
+        userId,
+        initBoard,
+        solveBoard,
+        boardState.context.board,
+        boardState.context.selectCell
+      )
+    ) {
+      makeMove(boardState.context.selectCell, value, userId);
+    }
+  };
 
   useEffect(() => {
     if (!socket) return;
@@ -320,7 +268,7 @@ const BoardGame = ({
   };
 
   return (
-    <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
+    <div className="sudoku-wrapper" tabIndex={-1} onKeyDown={handleKeyDown}>
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score
