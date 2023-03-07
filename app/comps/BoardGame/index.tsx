@@ -1,7 +1,9 @@
 import { useSubmit } from "@remix-run/react";
+import { useMachine } from "@xstate/react";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
+import { assign, createMachine } from "xstate";
 import type { Board } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interaces/Id";
@@ -28,6 +30,161 @@ type BoardGameProps = {
   initGameMoves: GameMove[];
 };
 
+interface IGame {
+  players: GameMove[];
+}
+
+interface IBoard {
+  board: Board;
+  solveBoard: Board;
+  selectCell: Pair;
+  canRowXNumberY: any[][];
+  canColXNumberY: any[][];
+  canSquareXYNumberZ: any[][];
+}
+
+const createGameMachine = ({ initGameMoves }: { initGameMoves: GameMove[] }) =>
+  createMachine<IGame>({
+    predictableActionArguments: true,
+    id: "game",
+    context: {
+      players: initGameMoves,
+    },
+    states: {
+      playing: {
+        on: {
+          "GAME.FILL": {
+            actions: [
+              assign({
+                players: (context, event) => {
+                  const curInfo = context.players.find(
+                    (v) => v.userId == event.userId
+                  ) as GameMove;
+
+                  if (
+                    event.solveBoard[event.selectCell.row][
+                      event.selectCell.col
+                    ] == event.value
+                  ) {
+                    curInfo.plus = 50;
+                    curInfo.score += 50;
+                  } else {
+                    curInfo.plus = -100;
+                    curInfo.score += -100;
+                  }
+
+                  const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+                    return (
+                      v[0] == event.selectCell.row &&
+                      v[1] == event.selectCell.col
+                    );
+                  });
+                  if (isExistCell != -1) {
+                    curInfo.moves[isExistCell] = [
+                      event.selectCell.row,
+                      event.selectCell.col,
+                      event.value,
+                    ];
+                  } else {
+                    curInfo.moves.push([
+                      event.selectCell.row,
+                      event.selectCell.col,
+                      event.value,
+                    ]);
+                  }
+
+                  return JSON.parse(JSON.stringify(context));
+                },
+              }),
+            ],
+          },
+        },
+      },
+    },
+  });
+
+const createBoardMachine = ({
+  board,
+  solveBoard,
+}: {
+  board: Board;
+  solveBoard: Board;
+}) =>
+  createMachine<IBoard>(
+    {
+      predictableActionArguments: true,
+      id: "board",
+      context: {
+        board,
+        solveBoard,
+        selectCell: { row: 4, col: 4 },
+        canRowXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
+        canColXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
+        canSquareXYNumberZ: new Array(3)
+          .fill(0)
+          .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
+      },
+      initial: "playing",
+      states: {
+        playing: {
+          on: {
+            SET_COMPLETED: {
+              actions: [assign({ board: [[]] }), "updateCanArray"],
+            },
+            MOVE: {
+              actions: assign({
+                selectCell: (_, event) => event.pair,
+              }),
+            },
+            FILL: {
+              actions: [
+                assign({
+                  board: (ctx, event) => {
+                    const newBoardValue = JSON.parse(JSON.stringify(ctx.board));
+                    newBoardValue[ctx.selectCell.row][ctx.selectCell.col] =
+                      event.value;
+                    return newBoardValue;
+                  },
+                }),
+              ],
+            },
+          },
+        },
+      },
+    },
+    {
+      actions: {
+        updateCanArray: assign((ctx) => {
+          let newCanRowXNumberY = new Array(9)
+            .fill(0)
+            .map(() => new Array(10).fill(0));
+          let newCanColXNumberY = new Array(9)
+            .fill(0)
+            .map(() => new Array(10).fill(0));
+          let newCanSquareXYNumberZ = new Array(3)
+            .fill(0)
+            .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)));
+          for (let i = 0; i < 9; ++i) {
+            for (let j = 0; j < 9; ++j) {
+              if (ctx.board[i][j] === 0) continue;
+              newCanRowXNumberY[i][ctx.board[i][j]] += 1;
+              newCanColXNumberY[j][ctx.board[i][j]] += 1;
+              newCanSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
+                ctx.board[i][j]
+              ] += 1;
+            }
+          }
+          return {
+            ...ctx,
+            CanRowXNumberY: newCanRowXNumberY,
+            CanColXNumberY: newCanColXNumberY,
+            CanSquareXYNumberZ: newCanSquareXYNumberZ,
+          };
+        }),
+      },
+    }
+  );
+
 const BoardGame = ({
   initGameStatus,
   solveBoard,
@@ -37,6 +194,12 @@ const BoardGame = ({
   socket,
   initGameMoves,
 }: BoardGameProps) => {
+  const [state, send] = useMachine(createGameMachine({ initGameMoves }));
+
+  const [boardState, boardSend] = useMachine(
+    createBoardMachine({ board: initBoard, solveBoard })
+  );
+
   const submit = useSubmit();
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -45,19 +208,19 @@ const BoardGame = ({
   const [usersInRoom, setUsersInRoom] = useState(
     initGameMoves.filter((v) => v.userId == userId)
   );
-
-  const [selectCell, setSelectCell] = useState<Pair>({ row: 4, col: 4 });
-
+  //
   const [curBoard, setCurBoard] = useState(initBoard);
-
-  const [firstBoard] = useState(initBoard);
-
+  //
+  const [selectCell, setSelectCell] = useState<Pair>({ row: 4, col: 4 });
+  //
   const [canRowXNumberY, setCanRowXNumberY] = useState(
     new Array(9).fill(0).map(() => new Array(10).fill(0))
   );
+  //
   const [canColXNumberY, setCanColXNumberY] = useState(
     new Array(9).fill(0).map(() => new Array(10).fill(0))
   );
+  //
   const [canSquareXYNumberZ, setCanSquareXYNumberZ] = useState(
     new Array(3)
       .fill(0)
@@ -87,43 +250,22 @@ const BoardGame = ({
     const currentSudokuRef = sudokuWrapperRef.current;
 
     const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
+      boardSend({ type: "FILL", value: { value, userId: userId } });
       setCurBoard((preState) => {
         const newBoardValue = JSON.parse(JSON.stringify(preState));
         newBoardValue[selectCell.row][selectCell.col] = value;
         socket.emit("play", newBoardValue);
         return newBoardValue;
       });
-      setGameMoves((preState) => {
-        const curInfo = preState.find((v) => v.userId == userId);
-
-        if (curInfo) {
-          if (solveBoard[selectCell.row][selectCell.col] == value) {
-            curInfo.plus = 50;
-            curInfo.score += 50;
-          } else {
-            curInfo.plus = -100;
-            curInfo.score += -100;
-          }
-
-          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-            return v[0] == selectCell.row && v[1] == selectCell.col;
-          });
-          if (isExistCell != -1) {
-            curInfo.moves[isExistCell] = [
-              selectCell.row,
-              selectCell.col,
-              value,
-            ];
-          } else {
-            curInfo.moves.push([selectCell.row, selectCell.col, value]);
-          }
-          sayHello({ moves: curInfo.moves, score: curInfo.score });
-          socket.emit("updateInfo", { userInfo: curInfo, roomId });
-          return JSON.parse(JSON.stringify(preState));
-        }
-        return preState;
+      send({
+        type: "GAME.FILL",
+        value: {
+          solveBoard,
+          selectCell: boardState.context.selectCell,
+          userId,
+        },
       });
-      setUsersInRoom((preState) => {
+      setGameMoves((preState) => {
         const curInfo = preState.find((v) => v.userId == userId);
 
         if (curInfo) {
@@ -162,21 +304,49 @@ const BoardGame = ({
       } else if (e.key === "Backspace") {
         value = 0;
       } else if (e.key === "ArrowUp") {
+        boardSend({
+          type: "MOVE",
+          pair: {
+            row: -1,
+            col: 0,
+          },
+        });
         setSelectCell((preState) => ({
           row: (preState.row - 1 + 9) % 9,
           col: preState.col,
         }));
       } else if (e.key === "ArrowLeft") {
+        boardSend({
+          type: "MOVE",
+          pair: {
+            row: 0,
+            col: -1,
+          },
+        });
         setSelectCell((preState) => ({
           row: preState.row,
           col: (preState.col - 1 + 9) % 9,
         }));
       } else if (e.key === "ArrowRight") {
+        boardSend({
+          type: "MOVE",
+          pair: {
+            row: 0,
+            col: 1,
+          },
+        });
         setSelectCell((preState) => ({
           row: preState.row,
           col: (preState.col + 1) % 9,
         }));
       } else if (e.key === "ArrowDown") {
+        boardSend({
+          type: "MOVE",
+          pair: {
+            row: 1,
+            col: 0,
+          },
+        });
         setSelectCell((preState) => ({
           row: (preState.row + 1) % 9,
           col: preState.col,
@@ -186,6 +356,7 @@ const BoardGame = ({
       if (
         !e.repeat &&
         initGameStatus === "START" &&
+        value !== -1 &&
         checkValid(
           value,
           gameMoves,
@@ -194,8 +365,7 @@ const BoardGame = ({
           solveBoard,
           curBoard,
           selectCell
-        ) &&
-        value !== -1
+        )
       ) {
         makeMove(selectCell, value, userId);
       }
@@ -265,19 +435,9 @@ const BoardGame = ({
         }
         return JSON.parse(JSON.stringify(preUsers));
       });
-      setUsersInRoom((preUsers) => {
-        const curUser = preUsers.find((user) => user.userId == userInfo.userId);
-        if (curUser) {
-          curUser.moves = userInfo.moves;
-          curUser.plus = userInfo.plus;
-          curUser.score = userInfo.score;
-          curUser.status = userInfo.status;
-        }
-        return JSON.parse(JSON.stringify(preUsers));
-      });
     });
     socket.on("updateClientInfoStatus", ({ userInfo }) => {
-      setUsersInRoom((preUsers) => {
+      setGameMoves((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
           curUser.status = userInfo.status;
@@ -323,19 +483,29 @@ const BoardGame = ({
     });
   };
 
+  console.log(usersInRoom, "?usersInRoom");
+
+  console.log(gameMoves, "GAMOVE MOVES");
+
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
-        {usersInRoom.map((userInRoom) => (
-          <Score
-            userId={userInRoom.userId}
-            isUser={userInRoom.userId == userId}
-            key={userInRoom.userId}
-            score={userInRoom.score}
-            plusPoint={userInRoom.plus || 0}
-            status={userInRoom.status}
-          />
-        ))}
+        {usersInRoom
+          .filter(
+            (v) =>
+              gameMoves.some((userInRoom) => userInRoom.userId == v.userId) ||
+              v.status != "PLAYING"
+          )
+          .map((userInRoom) => (
+            <Score
+              userId={userInRoom.userId}
+              isUser={userInRoom.userId == userId}
+              key={userInRoom.userId}
+              score={userInRoom.score}
+              plusPoint={userInRoom.plus || 0}
+              status={userInRoom.status}
+            />
+          ))}
       </div>
 
       <div className="game-info">
@@ -353,9 +523,9 @@ const BoardGame = ({
                   roomId,
                 });
               }}
-              disabled={gameMoves.length < 2}
+              disabled={usersInRoom.length < 2}
             >
-              {gameMoves.length < 2
+              {usersInRoom.length < 2
                 ? "Wait for another player to start.."
                 : curUser?.status === "READY"
                 ? "Remove ready"
@@ -404,7 +574,7 @@ const BoardGame = ({
                                 (idx2 / 3) >> 0
                               ][val] > 1
                             }
-                            isDefault={firstBoard[idx][idx2] !== 0}
+                            isDefault={initBoard[idx][idx2] !== 0}
                             isSameValue={
                               !!curBoard[selectCell.row][selectCell.col] &&
                               curBoard[selectCell.row][selectCell.col] === val
