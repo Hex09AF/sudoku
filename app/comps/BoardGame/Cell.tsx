@@ -9,7 +9,7 @@ type CellProps = {
   isSameValue: boolean;
   isDefault: boolean;
   isConflictSquare: boolean;
-  setSelectCell: React.Dispatch<SetStateAction<Pair>>;
+  setSelectCell: Function;
   selectCell: Pair;
   cellIdx: Pair;
   cellVal: number;

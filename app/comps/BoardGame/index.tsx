@@ -3,11 +3,11 @@ import { useMachine } from "@xstate/react";
 import debounce from "lodash.debounce";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Socket } from "socket.io-client";
-import { assign, createMachine } from "xstate";
 import type { Board } from "~/declares/interaces/Board";
 import type { GameMove } from "~/declares/interaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interaces/Id";
 import type { Pair } from "~/declares/interaces/Pair";
+import { createBoardMachine, createGameMachine } from "~/machine/game";
 import {
   checkValid,
   getCellUserId,
@@ -30,161 +30,6 @@ type BoardGameProps = {
   initGameMoves: GameMove[];
 };
 
-interface IGame {
-  players: GameMove[];
-}
-
-interface IBoard {
-  board: Board;
-  solveBoard: Board;
-  selectCell: Pair;
-  canRowXNumberY: any[][];
-  canColXNumberY: any[][];
-  canSquareXYNumberZ: any[][];
-}
-
-const createGameMachine = ({ initGameMoves }: { initGameMoves: GameMove[] }) =>
-  createMachine<IGame>({
-    predictableActionArguments: true,
-    id: "game",
-    context: {
-      players: initGameMoves,
-    },
-    states: {
-      playing: {
-        on: {
-          "GAME.FILL": {
-            actions: [
-              assign({
-                players: (context, event) => {
-                  const curInfo = context.players.find(
-                    (v) => v.userId == event.userId
-                  ) as GameMove;
-
-                  if (
-                    event.solveBoard[event.selectCell.row][
-                      event.selectCell.col
-                    ] == event.value
-                  ) {
-                    curInfo.plus = 50;
-                    curInfo.score += 50;
-                  } else {
-                    curInfo.plus = -100;
-                    curInfo.score += -100;
-                  }
-
-                  const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-                    return (
-                      v[0] == event.selectCell.row &&
-                      v[1] == event.selectCell.col
-                    );
-                  });
-                  if (isExistCell != -1) {
-                    curInfo.moves[isExistCell] = [
-                      event.selectCell.row,
-                      event.selectCell.col,
-                      event.value,
-                    ];
-                  } else {
-                    curInfo.moves.push([
-                      event.selectCell.row,
-                      event.selectCell.col,
-                      event.value,
-                    ]);
-                  }
-
-                  return JSON.parse(JSON.stringify(context));
-                },
-              }),
-            ],
-          },
-        },
-      },
-    },
-  });
-
-const createBoardMachine = ({
-  board,
-  solveBoard,
-}: {
-  board: Board;
-  solveBoard: Board;
-}) =>
-  createMachine<IBoard>(
-    {
-      predictableActionArguments: true,
-      id: "board",
-      context: {
-        board,
-        solveBoard,
-        selectCell: { row: 4, col: 4 },
-        canRowXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
-        canColXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
-        canSquareXYNumberZ: new Array(3)
-          .fill(0)
-          .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
-      },
-      initial: "playing",
-      states: {
-        playing: {
-          on: {
-            SET_COMPLETED: {
-              actions: [assign({ board: [[]] }), "updateCanArray"],
-            },
-            MOVE: {
-              actions: assign({
-                selectCell: (_, event) => event.pair,
-              }),
-            },
-            FILL: {
-              actions: [
-                assign({
-                  board: (ctx, event) => {
-                    const newBoardValue = JSON.parse(JSON.stringify(ctx.board));
-                    newBoardValue[ctx.selectCell.row][ctx.selectCell.col] =
-                      event.value;
-                    return newBoardValue;
-                  },
-                }),
-              ],
-            },
-          },
-        },
-      },
-    },
-    {
-      actions: {
-        updateCanArray: assign((ctx) => {
-          let newCanRowXNumberY = new Array(9)
-            .fill(0)
-            .map(() => new Array(10).fill(0));
-          let newCanColXNumberY = new Array(9)
-            .fill(0)
-            .map(() => new Array(10).fill(0));
-          let newCanSquareXYNumberZ = new Array(3)
-            .fill(0)
-            .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)));
-          for (let i = 0; i < 9; ++i) {
-            for (let j = 0; j < 9; ++j) {
-              if (ctx.board[i][j] === 0) continue;
-              newCanRowXNumberY[i][ctx.board[i][j]] += 1;
-              newCanColXNumberY[j][ctx.board[i][j]] += 1;
-              newCanSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
-                ctx.board[i][j]
-              ] += 1;
-            }
-          }
-          return {
-            ...ctx,
-            CanRowXNumberY: newCanRowXNumberY,
-            CanColXNumberY: newCanColXNumberY,
-            CanSquareXYNumberZ: newCanSquareXYNumberZ,
-          };
-        }),
-      },
-    }
-  );
-
 const BoardGame = ({
   initGameStatus,
   solveBoard,
@@ -194,7 +39,7 @@ const BoardGame = ({
   socket,
   initGameMoves,
 }: BoardGameProps) => {
-  const [state, send] = useMachine(createGameMachine({ initGameMoves }));
+  const [gameState, send] = useMachine(createGameMachine({ initGameMoves }));
 
   const [boardState, boardSend] = useMachine(
     createBoardMachine({ board: initBoard, solveBoard })
@@ -203,28 +48,8 @@ const BoardGame = ({
   const submit = useSubmit();
   const sudokuWrapperRef = useRef<HTMLDivElement>(null);
 
-  const [gameMoves, setGameMoves] = useState(initGameMoves);
-
   const [usersInRoom, setUsersInRoom] = useState(
     initGameMoves.filter((v) => v.userId == userId)
-  );
-  //
-  const [curBoard, setCurBoard] = useState(initBoard);
-  //
-  const [selectCell, setSelectCell] = useState<Pair>({ row: 4, col: 4 });
-  //
-  const [canRowXNumberY, setCanRowXNumberY] = useState(
-    new Array(9).fill(0).map(() => new Array(10).fill(0))
-  );
-  //
-  const [canColXNumberY, setCanColXNumberY] = useState(
-    new Array(9).fill(0).map(() => new Array(10).fill(0))
-  );
-  //
-  const [canSquareXYNumberZ, setCanSquareXYNumberZ] = useState(
-    new Array(3)
-      .fill(0)
-      .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)))
   );
 
   const sayHello = useCallback(
@@ -241,7 +66,7 @@ const BoardGame = ({
         replace: true,
       });
     }, 1000),
-    [selectCell]
+    [boardState.context.selectCell]
   );
 
   useEffect(() => {
@@ -250,13 +75,14 @@ const BoardGame = ({
     const currentSudokuRef = sudokuWrapperRef.current;
 
     const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
-      boardSend({ type: "FILL", value: { value, userId: userId } });
-      setCurBoard((preState) => {
-        const newBoardValue = JSON.parse(JSON.stringify(preState));
-        newBoardValue[selectCell.row][selectCell.col] = value;
-        socket.emit("play", newBoardValue);
-        return newBoardValue;
-      });
+      boardSend({ type: "FILL", value });
+      const newBoardValue = JSON.parse(
+        JSON.stringify(boardState.context.board)
+      );
+      newBoardValue[boardState.context.selectCell.row][
+        boardState.context.selectCell.col
+      ] = value;
+      socket.emit("play", newBoardValue);
       send({
         type: "GAME.FILL",
         value: {
@@ -265,11 +91,52 @@ const BoardGame = ({
           userId,
         },
       });
-      setGameMoves((preState) => {
+      const curInfo = gameState.context.players.find((v) => v.userId == userId);
+
+      if (curInfo) {
+        if (
+          solveBoard[boardState.context.selectCell.row][
+            boardState.context.selectCell.col
+          ] == value
+        ) {
+          curInfo.plus = 50;
+          curInfo.score += 50;
+        } else {
+          curInfo.plus = -100;
+          curInfo.score += -100;
+        }
+
+        const isExistCell = curInfo.moves.findIndex((v: number[]) => {
+          return (
+            v[0] == boardState.context.selectCell.row &&
+            v[1] == boardState.context.selectCell.col
+          );
+        });
+        if (isExistCell != -1) {
+          curInfo.moves[isExistCell] = [
+            boardState.context.selectCell.row,
+            boardState.context.selectCell.col,
+            value,
+          ];
+        } else {
+          curInfo.moves.push([
+            boardState.context.selectCell.row,
+            boardState.context.selectCell.col,
+            value,
+          ]);
+        }
+        sayHello({ moves: curInfo.moves, score: curInfo.score });
+        socket.emit("updateInfo", { userInfo: curInfo, roomId });
+      }
+      setUsersInRoom((preState) => {
         const curInfo = preState.find((v) => v.userId == userId);
 
         if (curInfo) {
-          if (solveBoard[selectCell.row][selectCell.col] == value) {
+          if (
+            solveBoard[boardState.context.selectCell.row][
+              boardState.context.selectCell.col
+            ] == value
+          ) {
             curInfo.plus = 50;
             curInfo.score += 50;
           } else {
@@ -277,20 +144,6 @@ const BoardGame = ({
             curInfo.score += -100;
           }
 
-          const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-            return v[0] == selectCell.row && v[1] == selectCell.col;
-          });
-          if (isExistCell != -1) {
-            curInfo.moves[isExistCell] = [
-              selectCell.row,
-              selectCell.col,
-              value,
-            ];
-          } else {
-            curInfo.moves.push([selectCell.row, selectCell.col, value]);
-          }
-          sayHello({ moves: curInfo.moves, score: curInfo.score });
-          socket.emit("updateInfo", { userInfo: curInfo, roomId });
           return JSON.parse(JSON.stringify(preState));
         }
         return preState;
@@ -307,50 +160,34 @@ const BoardGame = ({
         boardSend({
           type: "MOVE",
           pair: {
-            row: -1,
-            col: 0,
+            row: (boardState.context.selectCell.row - 1 + 9) % 9,
+            col: boardState.context.selectCell.col,
           },
         });
-        setSelectCell((preState) => ({
-          row: (preState.row - 1 + 9) % 9,
-          col: preState.col,
-        }));
       } else if (e.key === "ArrowLeft") {
         boardSend({
           type: "MOVE",
           pair: {
-            row: 0,
-            col: -1,
+            row: boardState.context.selectCell.row,
+            col: (boardState.context.selectCell.col - 1 + 9) % 9,
           },
         });
-        setSelectCell((preState) => ({
-          row: preState.row,
-          col: (preState.col - 1 + 9) % 9,
-        }));
       } else if (e.key === "ArrowRight") {
         boardSend({
           type: "MOVE",
           pair: {
-            row: 0,
-            col: 1,
+            row: boardState.context.selectCell.row,
+            col: (boardState.context.selectCell.col + 1) % 9,
           },
         });
-        setSelectCell((preState) => ({
-          row: preState.row,
-          col: (preState.col + 1) % 9,
-        }));
       } else if (e.key === "ArrowDown") {
         boardSend({
           type: "MOVE",
           pair: {
-            row: 1,
-            col: 0,
+            row: (boardState.context.selectCell.row + 1) % 9,
+            col: boardState.context.selectCell.col,
           },
         });
-        setSelectCell((preState) => ({
-          row: (preState.row + 1) % 9,
-          col: preState.col,
-        }));
       }
 
       if (
@@ -359,15 +196,15 @@ const BoardGame = ({
         value !== -1 &&
         checkValid(
           value,
-          gameMoves,
+          gameState.context.players,
           userId,
           initBoard,
           solveBoard,
-          curBoard,
-          selectCell
+          boardState.context.board,
+          boardState.context.selectCell
         )
       ) {
-        makeMove(selectCell, value, userId);
+        makeMove(boardState.context.selectCell, value, userId);
       }
     };
     currentSudokuRef?.addEventListener("keydown", handleKeyDown);
@@ -377,55 +214,28 @@ const BoardGame = ({
         currentSudokuRef?.removeEventListener("keydown", handleKeyDown);
     };
   }, [
+    send,
+    boardSend,
+    boardState,
+    gameState,
     roomId,
     sayHello,
     socket,
     initGameStatus,
-    gameMoves,
     initBoard,
-    curBoard,
     solveBoard,
     userId,
     sudokuWrapperRef,
-    selectCell,
   ]);
 
   useEffect(() => {
-    const updateCanArray = () => {
-      let newCanRowXNumberY = new Array(9)
-        .fill(0)
-        .map(() => new Array(10).fill(0));
-      let newCanColXNumberY = new Array(9)
-        .fill(0)
-        .map(() => new Array(10).fill(0));
-      let newCanSquareXYNumberZ = new Array(3)
-        .fill(0)
-        .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)));
-      for (let i = 0; i < 9; ++i) {
-        for (let j = 0; j < 9; ++j) {
-          if (curBoard[i][j] === 0) continue;
-          newCanRowXNumberY[i][curBoard[i][j]] += 1;
-          newCanColXNumberY[j][curBoard[i][j]] += 1;
-          newCanSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
-            curBoard[i][j]
-          ] += 1;
-        }
-      }
-
-      setCanRowXNumberY(newCanRowXNumberY);
-      setCanColXNumberY(newCanColXNumberY);
-      setCanSquareXYNumberZ(newCanSquareXYNumberZ);
-    };
-    updateCanArray();
-  }, [curBoard]);
-
-  useEffect(() => {
     if (!socket) return;
-    socket.on("play", (boardValue) => {
-      setCurBoard(boardValue);
-    });
-    socket.on("updateClientInfo", ({ userInfo }) => {
-      setGameMoves((preUsers) => {
+    const handleUpdateBoard = (boardValue) => {
+      boardSend({ type: "UPDATE", board: boardValue });
+    };
+
+    const handleUpdateClientInfo = ({ userInfo }) => {
+      setUsersInRoom((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
           curUser.moves = userInfo.moves;
@@ -435,47 +245,73 @@ const BoardGame = ({
         }
         return JSON.parse(JSON.stringify(preUsers));
       });
-    });
-    socket.on("updateClientInfoStatus", ({ userInfo }) => {
-      setGameMoves((preUsers) => {
+
+      send({ type: "GAME.UPDATE", userInfo });
+    };
+    const handleUpdateStatus = ({ userInfo }) => {
+      setUsersInRoom((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
           curUser.status = userInfo.status;
         }
         return JSON.parse(JSON.stringify(preUsers));
       });
-    });
-    socket.on("removeClientInfo", ({ userInfo }) => {
+    };
+    const handleRemoveClient = ({ userInfo }) => {
       setUsersInRoom((preUsers) => {
         const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
         return JSON.parse(JSON.stringify(newUsers));
       });
-    });
-
-    socket.on("addClientInfo", ({ usersInfo }) => {
+    };
+    const handleAddClient = ({ usersInfo }) => {
       setUsersInRoom((preUsers) => {
         if (preUsers.length > usersInfo.length) return preUsers;
         return usersInfo;
       });
-    });
-  }, [socket]);
+    };
 
-  const curUser = gameMoves.find((v) => v.userId === userId);
+    socket.on("play", handleUpdateBoard);
+    socket.on("updateClientInfo", handleUpdateClientInfo);
+    socket.on("updateClientInfoStatus", handleUpdateStatus);
+    socket.on("removeClientInfo", handleRemoveClient);
+    socket.on("addClientInfo", handleAddClient);
+    return () => {
+      socket.off("play", handleUpdateBoard);
+      socket.off("updateClientInfo", handleUpdateClientInfo);
+      socket.off("updateClientInfoStatus", handleUpdateStatus);
+      socket.off("removeClientInfo", handleRemoveClient);
+      socket.off("addClientInfo", handleAddClient);
+    };
+  }, [socket, boardSend, send]);
+
+  const curUser = usersInRoom.find((v) => v.userId === userId);
 
   const isPlay = useMemo(() => {
-    const readyUsers = gameMoves.filter((v) => v.status === "READY");
-    return readyUsers.length === gameMoves.length;
-  }, [gameMoves]);
+    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    return readyUsers.length === usersInRoom.length;
+  }, [usersInRoom]);
 
   const onFinish = () => {
     const formData = new FormData();
     formData.append("intent", "updateGameStatus");
     formData.append("roomId", roomId);
     formData.append("gameStatus", "START");
-    const readyUsers = gameMoves
-      .filter((v) => v.status === "READY")
-      .map((v) => v.userId);
-    formData.append("readyUsers", JSON.stringify(readyUsers));
+    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    formData.append(
+      "readyUsers",
+      JSON.stringify(readyUsers.map((v) => v.userId))
+    );
+    for (const user of readyUsers) {
+      socket?.emit("updateStatus", {
+        userInfo: {
+          userId: userId,
+          status: "PLAYING",
+        },
+        roomId,
+      });
+      user.status = "PLAYING";
+    }
+    send({ type: "GAME.UPDATE.ALL", usersInfo: readyUsers });
     submit(formData, {
       method: "post",
       action: `/solo/${roomId}`,
@@ -483,29 +319,19 @@ const BoardGame = ({
     });
   };
 
-  console.log(usersInRoom, "?usersInRoom");
-
-  console.log(gameMoves, "GAMOVE MOVES");
-
   return (
     <div className="sudoku-wrapper" ref={sudokuWrapperRef} tabIndex={-1}>
       <div className="score-wrapper">
-        {usersInRoom
-          .filter(
-            (v) =>
-              gameMoves.some((userInRoom) => userInRoom.userId == v.userId) ||
-              v.status != "PLAYING"
-          )
-          .map((userInRoom) => (
-            <Score
-              userId={userInRoom.userId}
-              isUser={userInRoom.userId == userId}
-              key={userInRoom.userId}
-              score={userInRoom.score}
-              plusPoint={userInRoom.plus || 0}
-              status={userInRoom.status}
-            />
-          ))}
+        {usersInRoom.map((userInRoom) => (
+          <Score
+            userId={userInRoom.userId}
+            isUser={userInRoom.userId == userId}
+            key={userInRoom.userId}
+            score={userInRoom.score}
+            plusPoint={userInRoom.plus || 0}
+            status={userInRoom.status}
+          />
+        ))}
       </div>
 
       <div className="game-info">
@@ -534,50 +360,72 @@ const BoardGame = ({
           </div>
         )}
         <div className="game-flex-wrapper">
-          {isPlay && gameMoves.length >= 2 && initGameStatus === "READY" && (
+          {isPlay && usersInRoom.length >= 2 && initGameStatus === "READY" && (
             <CountDown onFinish={onFinish} />
           )}
           <div className="game-wrapper">
             <div className="game">
               <table className="game-table">
                 <tbody>
-                  {curBoard.map((row, idx) => (
+                  {boardState.context.board.map((row, idx) => (
                     <tr key={idx} className="game-row">
                       {row.map((val, idx2) => {
                         return (
                           <Cell
-                            userId={getCellUserId(gameMoves, {
+                            userId={getCellUserId(gameState.context.players, {
                               row: idx,
                               col: idx2,
                             })}
-                            isEnemy={isEnemyCell(gameMoves, userId, {
-                              row: idx,
-                              col: idx2,
-                            })}
-                            isMatchCell={isMatchCell(solveBoard, curBoard, {
-                              row: idx,
-                              col: idx2,
-                            })}
-                            isUser={isUserCell(gameMoves, userId, {
-                              row: idx,
-                              col: idx2,
-                            })}
-                            selectCell={selectCell}
-                            setSelectCell={setSelectCell}
+                            isEnemy={isEnemyCell(
+                              gameState.context.players,
+                              userId,
+                              {
+                                row: idx,
+                                col: idx2,
+                              }
+                            )}
+                            isMatchCell={isMatchCell(
+                              solveBoard,
+                              boardState.context.board,
+                              {
+                                row: idx,
+                                col: idx2,
+                              }
+                            )}
+                            isUser={isUserCell(
+                              gameState.context.players,
+                              userId,
+                              {
+                                row: idx,
+                                col: idx2,
+                              }
+                            )}
+                            selectCell={boardState.context.selectCell}
+                            setSelectCell={(pair: Pair) => {
+                              boardSend({ type: "MOVE", pair });
+                            }}
                             cellIdx={{ row: idx, col: idx2 }}
                             cellVal={initGameStatus === "START" ? val : 0}
                             key={idx * 10 + idx2}
-                            isConflictRow={canRowXNumberY[idx][val] > 1}
-                            isConflictCol={canColXNumberY[idx2][val] > 1}
+                            isConflictRow={
+                              boardState.context.canRowXNumberY[idx][val] > 1
+                            }
+                            isConflictCol={
+                              boardState.context.canColXNumberY[idx2][val] > 1
+                            }
                             isConflictSquare={
-                              canSquareXYNumberZ[(idx / 3) >> 0][
-                                (idx2 / 3) >> 0
-                              ][val] > 1
+                              boardState.context.canSquareXYNumberZ[
+                                (idx / 3) >> 0
+                              ][(idx2 / 3) >> 0][val] > 1
                             }
                             isDefault={initBoard[idx][idx2] !== 0}
                             isSameValue={
-                              !!curBoard[selectCell.row][selectCell.col] &&
-                              curBoard[selectCell.row][selectCell.col] === val
+                              !!boardState.context.board[
+                                boardState.context.selectCell.row
+                              ][boardState.context.selectCell.col] &&
+                              boardState.context.board[
+                                boardState.context.selectCell.row
+                              ][boardState.context.selectCell.col] === val
                             }
                           />
                         );
