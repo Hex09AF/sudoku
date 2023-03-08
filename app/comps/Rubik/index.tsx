@@ -45,7 +45,6 @@ export default function Rubik() {
 
   return (
     <div className="rubik-wrapper">
-      Hello
       <div className="rubik-layout" ref={rubik}>
         {Array(49)
           .fill(0)
@@ -53,8 +52,7 @@ export default function Rubik() {
             return (
               <div key={idx} className="rubik-cell">
                 {colors.map((v) => (
-                  <div key={v} className={`rubik-cell-color ${v}`}>
-                  </div>
+                  <div key={v} className={`rubik-cell-color ${v}`}></div>
                 ))}
               </div>
             );

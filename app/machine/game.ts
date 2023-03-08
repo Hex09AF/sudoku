@@ -1,7 +1,7 @@
 import { assign, createMachine } from "xstate";
-import type { Board } from "~/declares/interaces/Board";
-import type { GameMove } from "~/declares/interaces/GameMove";
-import type { Pair } from "~/declares/interaces/Pair";
+import type { Board } from "~/declares/interfaces/Board";
+import type { GameMove } from "~/declares/interfaces/GameMove";
+import type { Pair } from "~/declares/interfaces/Pair";
 
 interface IGame {
   players: GameMove[];

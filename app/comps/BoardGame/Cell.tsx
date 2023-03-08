@@ -1,5 +1,4 @@
-import type { SetStateAction } from "react";
-import type { Pair } from "~/declares/interaces/Pair";
+import type { Pair } from "~/declares/interfaces/Pair";
 import hashToAvatar from "~/helper/hash";
 
 type CellProps = {

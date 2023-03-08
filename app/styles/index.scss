@@ -130,7 +130,7 @@ table {
   }
 
   &.table-hightlight {
-    background-color: #f2f2f3;
+    background-color: #ffffe8;
   }
 
   &.number .cell-value {
@@ -145,10 +145,6 @@ table {
     }
   }
 
-  &.cell-selected {
-    background-color: #dcdcdc;
-  }
-
   &.match-cell {
     background-color: #c7f5d8;
     .cell-value {
@@ -158,6 +154,10 @@ table {
 
   &.number-hightlight {
     background-color: #cbdbed;
+  }
+
+  &.cell-selected {
+    background-color: #f4f4bd;
   }
 
   &.enemy-cell,

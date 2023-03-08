@@ -1,12 +1,12 @@
 import { useSubmit } from "@remix-run/react";
 import { useMachine } from "@xstate/react";
 import debounce from "lodash.debounce";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Socket } from "socket.io-client";
-import type { Board } from "~/declares/interaces/Board";
-import type { GameMove } from "~/declares/interaces/GameMove";
-import type { RoomId, UserId } from "~/declares/interaces/Id";
-import type { Pair } from "~/declares/interaces/Pair";
+import type { Board } from "~/declares/interfaces/Board";
+import type { GameMove } from "~/declares/interfaces/GameMove";
+import type { RoomId, UserId } from "~/declares/interfaces/Id";
+import type { Pair } from "~/declares/interfaces/Pair";
 import { createBoardMachine, createGameMachine } from "~/machine/game";
 import {
   checkValid,
@@ -51,7 +51,7 @@ const BoardGame = ({
     initGameMoves.filter((v) => v.userId == userId)
   );
 
-  const sayHello = useCallback(
+  const postGameMoves = useCallback(
     debounce(({ moves, score }) => {
       const formData = new FormData();
       formData.append("roomId", roomId);
@@ -64,7 +64,7 @@ const BoardGame = ({
         action: `/solo/${roomId}`,
         replace: true,
       });
-    }, 1000),
+    }, 650),
     [boardState.context.selectCell]
   );
 
@@ -73,7 +73,7 @@ const BoardGame = ({
     newBoardValue[boardState.context.selectCell.row][
       boardState.context.selectCell.col
     ] = value;
-    console.log(boardState.context.board, "VALUE", value);
+
     socket?.emit("play", newBoardValue);
 
     const curInfo = JSON.parse(
@@ -113,7 +113,7 @@ const BoardGame = ({
         ]);
       }
       socket?.emit("updateInfo", { userInfo: curInfo, roomId });
-      sayHello({ moves: curInfo.moves, score: curInfo.score });
+      postGameMoves({ moves: curInfo.moves, score: curInfo.score });
     }
   };
 

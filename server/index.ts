@@ -1,30 +1,30 @@
-const path = require("path");
-const { createServer } = require("http");
-const fs = require("fs");
+import path from "path";
+import { createServer } from "http";
+import fs from "fs";
 
-const express = require("express");
-const { Server } = require("socket.io");
-const compression = require("compression");
-const morgan = require("morgan");
-const { createRequestHandler } = require("@remix-run/express");
+import express from "express";
+import { Server } from "socket.io";
+import compression from "compression";
+import morgan from "morgan";
+import { createRequestHandler } from "@remix-run/express";
 
-const MODE = process.env.NODE_ENV;
-const BUILD_DIR = path.join(process.cwd(), "../build");
-
-if (!fs.existsSync(BUILD_DIR)) {
-  console.warn(
-    "Build directory doesn't exist, please run `npm run dev` or `npm run build` before starting the server."
-  );
-}
-
-const {
+import {
   userJoin,
   getCurrentUser,
   userLeave,
   getRoomUsers,
   updateUser,
   updateUserStatus,
-} = require("./utils/users");
+} from "./utils/users";
+
+const MODE = process.env.NODE_ENV;
+const BUILD_DIR = path.join(process.cwd(), "server/build");
+
+if (!fs.existsSync(BUILD_DIR)) {
+  console.warn(
+    "Build directory doesn't exist, please run `npm run dev` or `npm run build` before starting the server."
+  );
+}
 
 const app = express();
 
@@ -126,10 +126,10 @@ app.use(morgan("tiny"));
 app.all(
   "*",
   MODE === "production"
-    ? createRequestHandler({ build: require("../build") })
+    ? createRequestHandler({ build: require("./build") })
     : (req, res, next) => {
         purgeRequireCache();
-        const build = require("../build");
+        const build = require("./build");
         return createRequestHandler({ build, mode: MODE })(req, res, next);
       }
 );

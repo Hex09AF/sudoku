@@ -1,4 +1,4 @@
-import type { LSKey } from "~/declares/interaces/local-storage";
+import type { LSKey } from "~/declares/interfaces/local-storage";
 
 export class LSService {
   private static _instance: LSService;

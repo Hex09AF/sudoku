@@ -127,7 +127,7 @@ table {
   display: block;
 }
 .game-cell.table-hightlight {
-  background-color: #f2f2f3;
+  background-color: #ffffe8;
 }
 .game-cell.number .cell-value {
   color: #187bcd;
@@ -138,9 +138,6 @@ table {
 .game-cell.number-conflict .cell-value.default-conflict {
   color: #e12120;
 }
-.game-cell.cell-selected {
-  background-color: #dcdcdc;
-}
 .game-cell.match-cell {
   background-color: #c7f5d8;
 }
@@ -149,6 +146,9 @@ table {
 }
 .game-cell.number-hightlight {
   background-color: #cbdbed;
+}
+.game-cell.cell-selected {
+  background-color: #f4f4bd;
 }
 .game-cell.enemy-cell::before, .game-cell.user-cell::before {
   border-radius: 50%;
