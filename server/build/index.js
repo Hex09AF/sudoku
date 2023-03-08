@@ -836,7 +836,7 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
     [boardState.context.selectCell]
   ), makeMove = (pair, value, userPlayId) => {
     let newBoardValue = JSON.parse(JSON.stringify(boardState.context.board));
-    newBoardValue[boardState.context.selectCell.row][boardState.context.selectCell.col] = value, socket == null || socket.emit("play", newBoardValue);
+    newBoardValue[boardState.context.selectCell.row][boardState.context.selectCell.col] = value, socket == null || socket.emit("GAME:PLAY_A_MOVE" /* CLIENT_PLAY */, newBoardValue);
     let curInfo = JSON.parse(
       JSON.stringify(gameState.context.players.find((v) => v.userId == userId))
     );
@@ -851,7 +851,10 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
         boardState.context.selectCell.row,
         boardState.context.selectCell.col,
         value
-      ]), socket == null || socket.emit("updateInfo", { userInfo: curInfo, roomId }), postGameMoves({ moves: curInfo.moves, score: curInfo.score });
+      ]), socket == null || socket.emit("CLIENT:GAME:UPDATE_CLIENT" /* CLIENT_UPDATE_CLIENT */, {
+        userInfo: curInfo,
+        roomId
+      }), postGameMoves({ moves: curInfo.moves, score: curInfo.score });
     }
   }, handleKeyDown = (e) => {
     let value = -1;
@@ -912,30 +915,35 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
     }, handleAddClient = ({ usersInfo }) => {
       setUsersInRoom((preUsers) => preUsers.length > usersInfo.length ? preUsers : usersInfo);
     };
-    return socket.on("play", handleUpdateBoard), socket.on("updateClientInfo", handleUpdateClientInfo), socket.on("updateClientInfoStatus", handleUpdateStatus), socket.on("removeClientInfo", handleRemoveClient), socket.on("addClientInfo", handleAddClient), () => {
-      socket.off("play", handleUpdateBoard), socket.off("updateClientInfo", handleUpdateClientInfo), socket.off("updateClientInfoStatus", handleUpdateStatus), socket.off("removeClientInfo", handleRemoveClient), socket.off("addClientInfo", handleAddClient);
+    return socket.on("SERVER:GAME:PLAY_A_MOVE" /* SERVER_CLIENT_PLAY */, handleUpdateBoard), socket.on("SERVER:GAME:UPDATE_CLIENT" /* SERVER_UPDATE_CLIENT */, handleUpdateClientInfo), socket.on("SERVER:GAME:UPDATE_CLIENT_STATUS" /* SERVER_UPDATE_CLIENT_STATUS */, handleUpdateStatus), socket.on("SERVER:GAME:REMOVE_CLIENT" /* SERVER_REMOVE_CLIENT */, handleRemoveClient), socket.on("SERVER:GAME:ADD_CLIENT" /* SERVER_ADD_CLIENT */, handleAddClient), () => {
+      socket.off("SERVER:GAME:PLAY_A_MOVE" /* SERVER_CLIENT_PLAY */, handleUpdateBoard), socket.off("SERVER:GAME:UPDATE_CLIENT" /* SERVER_UPDATE_CLIENT */, handleUpdateClientInfo), socket.off("SERVER:GAME:UPDATE_CLIENT_STATUS" /* SERVER_UPDATE_CLIENT_STATUS */, handleUpdateStatus), socket.off("SERVER:GAME:REMOVE_CLIENT" /* SERVER_REMOVE_CLIENT */, handleRemoveClient), socket.off("SERVER:GAME:ADD_CLIENT" /* SERVER_ADD_CLIENT */, handleAddClient);
     };
   }, [socket, boardSend, send]);
   let curUser = usersInRoom.find((v) => v.userId === userId), isPlay = (0, import_react11.useMemo)(() => usersInRoom.filter((v) => v.status === "READY").length === usersInRoom.length, [usersInRoom]), onFinish = () => {
     let formData = new FormData();
     formData.append("intent", "updateGameStatus"), formData.append("roomId", roomId), formData.append("gameStatus", "START");
-    let readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    let readyUsers = JSON.parse(
+      JSON.stringify(usersInRoom.filter((v) => v.status === "READY"))
+    );
     formData.append(
       "readyUsers",
       JSON.stringify(readyUsers.map((v) => v.userId))
     );
     for (let user of readyUsers)
-      socket == null || socket.emit("updateStatus", {
+      user.userId === userId && (socket == null || socket.emit("CLIENT:GAME:UPDATE_CLIENT_STATUS" /* CLIENT_UPDATE_CLIENT_STATUS */, {
         userInfo: {
-          userId,
+          userId: user.userId,
           status: "PLAYING"
         },
         roomId
-      }), user.status = "PLAYING";
-    send({ type: "GAME.UPDATE.ALL", usersInfo: readyUsers }), submit(formData, {
+      }));
+    submit(formData, {
       method: "post",
       action: `/solo/${roomId}`,
       replace: !0
+    }), send({
+      type: "GAME.UPDATE.ALL",
+      usersInfo: readyUsers.map((v) => ({ ...v, status: "PLAYING" }))
     });
   };
   return /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "sudoku-wrapper", tabIndex: -1, onKeyDown: handleKeyDown, children: [
@@ -952,13 +960,13 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
       !1,
       {
         fileName: "app/comps/BoardGame/index.tsx",
-        lineNumber: 274,
+        lineNumber: 286,
         columnNumber: 11
       },
       this
     )) }, void 0, !1, {
       fileName: "app/comps/BoardGame/index.tsx",
-      lineNumber: 272,
+      lineNumber: 284,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "game-info", children: [
@@ -968,7 +976,7 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
           className: "start-button",
           type: "button",
           onClick: () => {
-            socket == null || socket.emit("updateStatus", {
+            socket == null || socket.emit("CLIENT:GAME:UPDATE_CLIENT_STATUS" /* CLIENT_UPDATE_CLIENT_STATUS */, {
               userInfo: {
                 userId,
                 status: (curUser == null ? void 0 : curUser.status) === "READY" ? "NOT_READY" : "READY"
@@ -983,19 +991,19 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
         !1,
         {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 288,
+          lineNumber: 300,
           columnNumber: 13
         },
         this
       ) }, void 0, !1, {
         fileName: "app/comps/BoardGame/index.tsx",
-        lineNumber: 287,
+        lineNumber: 299,
         columnNumber: 11
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "game-flex-wrapper", children: [
         isPlay && usersInRoom.length >= 2 && initGameStatus === "READY" && /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)(CountDown_default, { onFinish }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 312,
+          lineNumber: 324,
           columnNumber: 13
         }, this),
         /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "game-wrapper", children: /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "game", children: /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("table", { className: "game-table", children: /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("tbody", { children: boardState.context.board.map((row, idx) => /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("tr", { className: "game-row", children: row.map((val, idx2) => /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)(
@@ -1045,53 +1053,53 @@ var import_jsx_dev_runtime9 = require("react/jsx-dev-runtime"), BoardGame = ({
           !1,
           {
             fileName: "app/comps/BoardGame/index.tsx",
-            lineNumber: 322,
+            lineNumber: 334,
             columnNumber: 27
           },
           this
         )) }, idx, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 319,
+          lineNumber: 331,
           columnNumber: 21
         }, this)) }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 317,
+          lineNumber: 329,
           columnNumber: 17
         }, this) }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 316,
+          lineNumber: 328,
           columnNumber: 15
         }, this) }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 315,
+          lineNumber: 327,
           columnNumber: 13
         }, this) }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 314,
+          lineNumber: 326,
           columnNumber: 11
         }, this),
         /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("div", { className: "game-intro", children: /* @__PURE__ */ (0, import_jsx_dev_runtime9.jsxDEV)("p", { children: "\u{1F579}\uFE0F Play with arrow and number keys" }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 388,
+          lineNumber: 400,
           columnNumber: 13
         }, this) }, void 0, !1, {
           fileName: "app/comps/BoardGame/index.tsx",
-          lineNumber: 387,
+          lineNumber: 399,
           columnNumber: 11
         }, this)
       ] }, void 0, !0, {
         fileName: "app/comps/BoardGame/index.tsx",
-        lineNumber: 310,
+        lineNumber: 322,
         columnNumber: 9
       }, this)
     ] }, void 0, !0, {
       fileName: "app/comps/BoardGame/index.tsx",
-      lineNumber: 285,
+      lineNumber: 297,
       columnNumber: 7
     }, this)
   ] }, void 0, !0, {
     fileName: "app/comps/BoardGame/index.tsx",
-    lineNumber: 271,
+    lineNumber: 283,
     columnNumber: 5
   }, this);
 }, BoardGame_default = BoardGame;
@@ -1277,7 +1285,7 @@ var import_jsx_dev_runtime10 = require("react/jsx-dev-runtime"), links2 = () => 
 function SoloRoom() {
   let data = (0, import_react12.useLoaderData)(), socket = useSocket();
   return (0, import_react13.useEffect)(() => {
-    !socket || !data || socket.emit("joinRoom", {
+    !socket || !data || socket.emit("CLIENT:GAME:JOIN_ROOM" /* CLIENT_JOIN_ROOM */, {
       userId: data.userId,
       roomId: data.roomId,
       score: data.curScore,
@@ -1300,7 +1308,7 @@ function SoloRoom() {
     !1,
     {
       fileName: "app/routes/solo/$roomId.tsx",
-      lineNumber: 113,
+      lineNumber: 114,
       columnNumber: 5
     },
     this
@@ -1623,10 +1631,10 @@ function UsersOnline({ user }) {
   let [show, setShow] = (0, import_react16.useState)(!1), [users, setUsers] = (0, import_react16.useState)([]), socket = useSocket();
   return (0, import_react16.useEffect)(() => {
     !socket || socket.on("connect", () => {
-      socket.emit("get connected clients", { user, socketId: socket.id });
+      socket.emit("CLIENT:CONNECTED" /* CLIENT_CONNECTED */, { user, socketId: socket.id });
     });
   }, [socket, user]), (0, import_react16.useEffect)(() => {
-    !socket || socket.on("connected clients", (listUserOnline) => {
+    !socket || socket.on("SERVER:CLIENT:CONNECTED" /* SERVER_CLIENT_CONNECTED */, (listUserOnline) => {
       setUsers(listUserOnline);
     });
   }, [socket]), /* @__PURE__ */ (0, import_jsx_dev_runtime13.jsxDEV)("div", { className: `list-user-c ${show ? "" : "show"}`, children: [
@@ -1644,7 +1652,7 @@ function UsersOnline({ user }) {
         !1,
         {
           fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-          lineNumber: 42,
+          lineNumber: 43,
           columnNumber: 15
         },
         this
@@ -1652,26 +1660,26 @@ function UsersOnline({ user }) {
       v != null && v.userId ? v.username : "Guest"
     ] }, v.socketId, !0, {
       fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-      lineNumber: 41,
+      lineNumber: 42,
       columnNumber: 13
     }, this)) : /* @__PURE__ */ (0, import_jsx_dev_runtime13.jsxDEV)("div", { className: "empty-info empty-user", children: [
       /* @__PURE__ */ (0, import_jsx_dev_runtime13.jsxDEV)("img", { src: empty_users_default, alt: "empty user" }, void 0, !1, {
         fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-        lineNumber: 54,
+        lineNumber: 55,
         columnNumber: 13
       }, this),
       /* @__PURE__ */ (0, import_jsx_dev_runtime13.jsxDEV)("span", { className: "empty-text", children: "People not join the game yet." }, void 0, !1, {
         fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-        lineNumber: 55,
+        lineNumber: 56,
         columnNumber: 13
       }, this)
     ] }, void 0, !0, {
       fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-      lineNumber: 53,
+      lineNumber: 54,
       columnNumber: 11
     }, this) }, void 0, !1, {
       fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-      lineNumber: 38,
+      lineNumber: 39,
       columnNumber: 7
     }, this),
     /* @__PURE__ */ (0, import_jsx_dev_runtime13.jsxDEV)(
@@ -1687,14 +1695,14 @@ function UsersOnline({ user }) {
       !1,
       {
         fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-        lineNumber: 59,
+        lineNumber: 60,
         columnNumber: 7
       },
       this
     )
   ] }, void 0, !0, {
     fileName: "app/comps/UsersOnline/UsersOnline.tsx",
-    lineNumber: 37,
+    lineNumber: 38,
     columnNumber: 5
   }, this);
 }
@@ -2165,7 +2173,7 @@ function Login() {
 }
 
 // server-assets-manifest:@remix-run/dev/assets-manifest
-var assets_manifest_default = { version: "eb92f8ee", entry: { module: "/build/entry.client-QC3RJXW4.js", imports: ["/build/_shared/chunk-SZTH422T.js", "/build/_shared/chunk-DF3EUDCN.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-5AJCBSGT.js", imports: ["/build/_shared/chunk-JNKTGLQ6.js", "/build/_shared/chunk-JCRALK6Z.js"], hasAction: !0, hasLoader: !1, hasCatchBoundary: !0, hasErrorBoundary: !1 }, "routes/__index": { id: "routes/__index", parentId: "root", path: void 0, index: void 0, caseSensitive: void 0, module: "/build/routes/__index-XQF2B44M.js", imports: ["/build/_shared/chunk-N4GJFGYA.js", "/build/_shared/chunk-XCSNGQWA.js", "/build/_shared/chunk-UEO7475F.js"], hasAction: !1, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/__index/index": { id: "routes/__index/index", parentId: "routes/__index", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/__index/index-BLCKDDH7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-TZI7TBBN.js", imports: ["/build/_shared/chunk-UEO7475F.js"], hasAction: !0, hasLoader: !1, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-CG5UQZAS.js", imports: void 0, hasAction: !0, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/solo/$roomId": { id: "routes/solo/$roomId", parentId: "root", path: "solo/:roomId", index: void 0, caseSensitive: void 0, module: "/build/routes/solo/$roomId-EY37PYMV.js", imports: ["/build/_shared/chunk-N4GJFGYA.js", "/build/_shared/chunk-XCSNGQWA.js", "/build/_shared/chunk-UEO7475F.js"], hasAction: !0, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 } }, url: "/build/manifest-EB92F8EE.js" };
+var assets_manifest_default = { version: "0c943597", entry: { module: "/build/entry.client-QC3RJXW4.js", imports: ["/build/_shared/chunk-SZTH422T.js", "/build/_shared/chunk-DF3EUDCN.js"] }, routes: { root: { id: "root", parentId: void 0, path: "", index: void 0, caseSensitive: void 0, module: "/build/root-5AJCBSGT.js", imports: ["/build/_shared/chunk-JNKTGLQ6.js", "/build/_shared/chunk-JCRALK6Z.js"], hasAction: !0, hasLoader: !1, hasCatchBoundary: !0, hasErrorBoundary: !1 }, "routes/__index": { id: "routes/__index", parentId: "root", path: void 0, index: void 0, caseSensitive: void 0, module: "/build/routes/__index-3DNUT5A4.js", imports: ["/build/_shared/chunk-N4GJFGYA.js", "/build/_shared/chunk-XCSNGQWA.js", "/build/_shared/chunk-UEO7475F.js"], hasAction: !1, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/__index/index": { id: "routes/__index/index", parentId: "routes/__index", path: void 0, index: !0, caseSensitive: void 0, module: "/build/routes/__index/index-BLCKDDH7.js", imports: void 0, hasAction: !1, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/login": { id: "routes/login", parentId: "root", path: "login", index: void 0, caseSensitive: void 0, module: "/build/routes/login-TZI7TBBN.js", imports: ["/build/_shared/chunk-UEO7475F.js"], hasAction: !0, hasLoader: !1, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/logout": { id: "routes/logout", parentId: "root", path: "logout", index: void 0, caseSensitive: void 0, module: "/build/routes/logout-CG5UQZAS.js", imports: void 0, hasAction: !0, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 }, "routes/solo/$roomId": { id: "routes/solo/$roomId", parentId: "root", path: "solo/:roomId", index: void 0, caseSensitive: void 0, module: "/build/routes/solo/$roomId-P3URMZ4B.js", imports: ["/build/_shared/chunk-N4GJFGYA.js", "/build/_shared/chunk-XCSNGQWA.js", "/build/_shared/chunk-UEO7475F.js"], hasAction: !0, hasLoader: !0, hasCatchBoundary: !1, hasErrorBoundary: !1 } }, url: "/build/manifest-0C943597.js" };
 
 // server-entry-module:@remix-run/dev/server-build
 var assetsBuildDirectory = "public/build", future = { v2_meta: !1 }, publicPath = "/build/", entry = { module: entry_server_exports }, routes = {

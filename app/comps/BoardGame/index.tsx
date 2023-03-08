@@ -7,11 +7,8 @@ import type { Board } from "~/declares/interfaces/Board";
 import type { GameMove } from "~/declares/interfaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interfaces/Id";
 import type { Pair } from "~/declares/interfaces/Pair";
-import {
-  SocketEvent,
-  UserInfoStatus,
-  UserInRoom,
-} from "~/declares/interfaces/Socket";
+import { SocketEvent } from "~/declares/interfaces/Socket";
+import type { UserInfoStatus, UserInRoom } from "~/declares/interfaces/Socket";
 import { createBoardMachine, createGameMachine } from "~/machine/game";
 import {
   checkValid,
@@ -252,26 +249,33 @@ const BoardGame = ({
     formData.append("intent", "updateGameStatus");
     formData.append("roomId", roomId);
     formData.append("gameStatus", "START");
-    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    const readyUsers = JSON.parse(
+      JSON.stringify(usersInRoom.filter((v) => v.status === "READY"))
+    ) as GameMove[];
     formData.append(
       "readyUsers",
       JSON.stringify(readyUsers.map((v) => v.userId))
     );
+
     for (const user of readyUsers) {
-      socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
-        userInfo: {
-          userId: userId,
-          status: "PLAYING",
-        },
-        roomId,
-      });
-      user.status = "PLAYING";
+      if (user.userId === userId) {
+        socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
+          userInfo: {
+            userId: user.userId,
+            status: "PLAYING",
+          },
+          roomId,
+        });
+      }
     }
-    send({ type: "GAME.UPDATE.ALL", usersInfo: readyUsers });
     submit(formData, {
       method: "post",
       action: `/solo/${roomId}`,
       replace: true,
+    });
+    send({
+      type: "GAME.UPDATE.ALL",
+      usersInfo: readyUsers.map((v) => ({ ...v, status: "PLAYING" })),
     });
   };
 
