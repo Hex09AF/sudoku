@@ -2,6 +2,7 @@ import type { SerializeFrom } from "@remix-run/node";
 import { useEffect, useState } from "react";
 import EmptyUser from "~/assets/empty-users.jpeg";
 import { useSocket } from "~/context";
+import { SocketEvent } from "~/declares/interfaces/Socket";
 import hashToAvatar from "~/helper/hash";
 
 type UsersOnlineProps = {
@@ -22,13 +23,13 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
   useEffect(() => {
     if (!socket) return;
     socket.on("connect", () => {
-      socket.emit("get connected clients", { user, socketId: socket.id });
+      socket.emit(SocketEvent.CLIENT_CONNECTED, { user, socketId: socket.id });
     });
   }, [socket, user]);
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("connected clients", (listUserOnline) => {
+    socket.on(SocketEvent.SERVER_CLIENT_CONNECTED, (listUserOnline) => {
       setUsers(listUserOnline);
     });
   }, [socket]);

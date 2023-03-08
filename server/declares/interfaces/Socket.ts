@@ -17,11 +17,34 @@ export enum SocketEvent {
   SERVER_REMOVE_CLIENT = "SERVER:GAME:REMOVE_CLIENT",
 }
 
-export interface UserInfo {
+export interface ConnectedClient {
+  socketId: string;
+  userId?: string;
+  username?: string;
+}
+
+export interface InfoConnected {
+  user: {
+    id: string;
+    username: string;
+  };
+  socketId: string;
+}
+
+export interface InfoJoinRoom {
   userId: string;
-  moves: number[][];
+  roomId: string;
   score: number;
+  moves: number[][];
   plus: number;
+  status: string;
+}
+
+export interface GameMove {
+  moves: number[][];
+  userId: string;
+  score: number;
+  plus?: number;
   status: string;
 }
 

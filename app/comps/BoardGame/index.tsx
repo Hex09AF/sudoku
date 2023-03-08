@@ -7,6 +7,11 @@ import type { Board } from "~/declares/interfaces/Board";
 import type { GameMove } from "~/declares/interfaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interfaces/Id";
 import type { Pair } from "~/declares/interfaces/Pair";
+import {
+  SocketEvent,
+  UserInfoStatus,
+  UserInRoom,
+} from "~/declares/interfaces/Socket";
 import { createBoardMachine, createGameMachine } from "~/machine/game";
 import {
   checkValid,
@@ -74,11 +79,11 @@ const BoardGame = ({
       boardState.context.selectCell.col
     ] = value;
 
-    socket?.emit("play", newBoardValue);
+    socket?.emit(SocketEvent.CLIENT_PLAY, newBoardValue);
 
     const curInfo = JSON.parse(
       JSON.stringify(gameState.context.players.find((v) => v.userId == userId))
-    );
+    ) as GameMove;
 
     if (curInfo) {
       if (
@@ -112,7 +117,10 @@ const BoardGame = ({
           value,
         ]);
       }
-      socket?.emit("updateInfo", { userInfo: curInfo, roomId });
+      socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT, {
+        userInfo: curInfo,
+        roomId,
+      });
       postGameMoves({ moves: curInfo.moves, score: curInfo.score });
     }
   };
@@ -178,11 +186,11 @@ const BoardGame = ({
 
   useEffect(() => {
     if (!socket) return;
-    const handleUpdateBoard = (boardValue) => {
+    const handleUpdateBoard = (boardValue: Board) => {
       boardSend({ type: "UPDATE", board: boardValue });
     };
 
-    const handleUpdateClientInfo = ({ userInfo }) => {
+    const handleUpdateClientInfo = ({ userInfo }: { userInfo: GameMove }) => {
       setUsersInRoom((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
@@ -196,7 +204,7 @@ const BoardGame = ({
 
       send({ type: "GAME.UPDATE", userInfo });
     };
-    const handleUpdateStatus = ({ userInfo }) => {
+    const handleUpdateStatus = ({ userInfo }: { userInfo: UserInfoStatus }) => {
       setUsersInRoom((preUsers) => {
         const curUser = preUsers.find((user) => user.userId == userInfo.userId);
         if (curUser) {
@@ -205,30 +213,30 @@ const BoardGame = ({
         return JSON.parse(JSON.stringify(preUsers));
       });
     };
-    const handleRemoveClient = ({ userInfo }) => {
+    const handleRemoveClient = ({ userInfo }: { userInfo: UserInRoom }) => {
       setUsersInRoom((preUsers) => {
         const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
         return JSON.parse(JSON.stringify(newUsers));
       });
     };
-    const handleAddClient = ({ usersInfo }) => {
+    const handleAddClient = ({ usersInfo }: { usersInfo: GameMove[] }) => {
       setUsersInRoom((preUsers) => {
         if (preUsers.length > usersInfo.length) return preUsers;
         return usersInfo;
       });
     };
 
-    socket.on("play", handleUpdateBoard);
-    socket.on("updateClientInfo", handleUpdateClientInfo);
-    socket.on("updateClientInfoStatus", handleUpdateStatus);
-    socket.on("removeClientInfo", handleRemoveClient);
-    socket.on("addClientInfo", handleAddClient);
+    socket.on(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
+    socket.on(SocketEvent.SERVER_UPDATE_CLIENT, handleUpdateClientInfo);
+    socket.on(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
+    socket.on(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
+    socket.on(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
     return () => {
-      socket.off("play", handleUpdateBoard);
-      socket.off("updateClientInfo", handleUpdateClientInfo);
-      socket.off("updateClientInfoStatus", handleUpdateStatus);
-      socket.off("removeClientInfo", handleRemoveClient);
-      socket.off("addClientInfo", handleAddClient);
+      socket.off(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
+      socket.off(SocketEvent.SERVER_UPDATE_CLIENT, handleUpdateClientInfo);
+      socket.off(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
+      socket.off(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
+      socket.off(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
     };
   }, [socket, boardSend, send]);
 
@@ -250,7 +258,7 @@ const BoardGame = ({
       JSON.stringify(readyUsers.map((v) => v.userId))
     );
     for (const user of readyUsers) {
-      socket?.emit("updateStatus", {
+      socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
         userInfo: {
           userId: userId,
           status: "PLAYING",
@@ -289,7 +297,7 @@ const BoardGame = ({
               className="start-button"
               type="button"
               onClick={() => {
-                socket?.emit("updateStatus", {
+                socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
                   userInfo: {
                     userId,
                     status: curUser?.status === "READY" ? "NOT_READY" : "READY",

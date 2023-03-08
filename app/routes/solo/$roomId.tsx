@@ -20,6 +20,7 @@ import {
   updateGameStatus,
 } from "~/utils/room.server";
 import { requireUserId } from "~/utils/session.server";
+import { SocketEvent } from "~/declares/interfaces/Socket";
 
 export const links: LinksFunction = () => {
   return [{ rel: "stylesheet", href: stylesUrl }];
@@ -99,7 +100,7 @@ export default function SoloRoom() {
   useEffect(() => {
     if (!socket) return;
     if (!data) return;
-    socket.emit("joinRoom", {
+    socket.emit(SocketEvent.CLIENT_JOIN_ROOM, {
       userId: data.userId,
       roomId: data.roomId,
       score: data.curScore,

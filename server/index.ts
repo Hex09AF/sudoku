@@ -1,20 +1,29 @@
-import path from "path";
-import { createServer } from "http";
 import fs from "fs";
+import { createServer } from "http";
+import path from "path";
 
-import express from "express";
-import { Server } from "socket.io";
-import compression from "compression";
-import morgan from "morgan";
 import { createRequestHandler } from "@remix-run/express";
+import compression from "compression";
+import express from "express";
+import morgan from "morgan";
+import { Server } from "socket.io";
+
+import type {
+  ConnectedClient,
+  GameMove,
+  InfoConnected,
+  InfoJoinRoom,
+  UserInfoStatus,
+} from "./declares/interfaces/Socket";
+import { SocketEvent } from "./declares/interfaces/Socket";
 
 import {
-  userJoin,
   getCurrentUser,
-  userLeave,
   getRoomUsers,
   updateUser,
   updateUserStatus,
+  userJoin,
+  userLeave,
 } from "./utils/users";
 
 const MODE = process.env.NODE_ENV;
@@ -28,88 +37,113 @@ if (!fs.existsSync(BUILD_DIR)) {
 
 const app = express();
 
-// You need to create the HTTP server from the Express app
 const httpServer = createServer(app);
 
-// And then attach the socket.io server to the HTTP server
+// Attach the socket.io server to the HTTP server
 const io = new Server(httpServer);
 
-let connectedClients = [];
+let connectedClients: ConnectedClient[] = [];
 
-// Then you can use `io` to listen the `connection` event and get a socket
-// from a client
 io.on("connection", (socket) => {
   // from this point you are on the WS connection with a specific client
+
+  /**
+   * CLIENT WAITING LIST
+   */
   connectedClients.push({ socketId: socket.id });
-  socket.on("get connected clients", ({ user, socketId }) => {
-    if (user) {
-      const curUser = connectedClients.find(
-        (client) => client.socketId === socketId
-      );
-      if (curUser) {
-        curUser.userId = user.id;
-        curUser.username = user.username;
+  socket.on(
+    SocketEvent.CLIENT_CONNECTED,
+    ({ user, socketId }: InfoConnected) => {
+      if (user) {
+        const curUser = connectedClients.find(
+          (client) => client.socketId === socketId
+        );
+        if (curUser) {
+          curUser.userId = user.id;
+          curUser.username = user.username;
+        }
       }
+      io.emit(SocketEvent.SERVER_CLIENT_CONNECTED, connectedClients);
     }
-    io.emit("connected clients", connectedClients);
-  });
+  );
 
-  socket.on("event", (data) => {
-    socket.emit("event", "pong");
-  });
+  /**
+   * CLIENT JOIN A ROOM
+   */
+  socket.on(
+    SocketEvent.CLIENT_JOIN_ROOM,
+    ({ userId, roomId, score, moves, plus, status }: InfoJoinRoom) => {
+      const isExistUser = getCurrentUser(socket.id);
+      if (isExistUser) return;
+      const user = userJoin(
+        socket.id,
+        userId,
+        roomId,
+        score,
+        moves,
+        plus,
+        status
+      );
+      socket.join(user.roomId);
+      io.to(user.roomId).emit(SocketEvent.SERVER_ADD_CLIENT, {
+        usersInfo: getRoomUsers(roomId).map((v) => ({
+          userId: v.userId,
+          moves: v.moves,
+          score: v.score,
+          plus: v.plus,
+          status: v.status,
+        })),
+      });
+    }
+  );
 
-  socket.on("joinRoom", ({ userId, roomId, score, moves, plus, status }) => {
-    const isExistUser = getCurrentUser(socket.id);
-    if (isExistUser) return;
-    const user = userJoin(
-      socket.id,
-      userId,
-      roomId,
-      score,
-      moves,
-      plus,
-      status
-    );
-    socket.join(user.roomId);
-    io.to(user.roomId).emit("addClientInfo", {
-      usersInfo: getRoomUsers(roomId).map((v) => ({
-        userId: v.userId,
-        moves: v.moves,
-        score: v.score,
-        plus: v.plus,
-        status: v.status,
-      })),
-    });
-  });
-
-  socket.on("play", (boardValue) => {
+  /**
+   * CLIENT PLAY A MOVE
+   */
+  socket.on(SocketEvent.CLIENT_PLAY, (boardValue: number[][]) => {
     const user = getCurrentUser(socket.id);
-    io.to(user.roomId).emit("play", boardValue);
+    if (user)
+      io.to(user.roomId).emit(SocketEvent.SERVER_CLIENT_PLAY, boardValue);
   });
 
-  // userId, roomId, score, moves, plus
-  socket.on("updateInfo", ({ userInfo, roomId }) => {
-    updateUser(userInfo, roomId);
-    io.to(roomId).emit("updateClientInfo", { userInfo: userInfo });
-  });
+  /**
+   * UPDATE CLIENT INFO IN A ROOM
+   */
+  socket.on(
+    SocketEvent.CLIENT_UPDATE_CLIENT,
+    ({ userInfo, roomId }: { userInfo: GameMove; roomId: string }) => {
+      updateUser(userInfo, roomId);
+      io.to(roomId).emit(SocketEvent.SERVER_UPDATE_CLIENT, {
+        userInfo: userInfo,
+      });
+    }
+  );
 
-  // userId, status
-  socket.on("updateStatus", ({ userInfo, roomId }) => {
-    updateUserStatus(userInfo, roomId);
-    io.to(roomId).emit("updateClientInfoStatus", { userInfo: userInfo });
-  });
+  /**
+   * UPDATE CLIENT INFO WHEN THEY CHANGE THEIR STATUS IN A ROOM
+   */
+  socket.on(
+    SocketEvent.CLIENT_UPDATE_CLIENT_STATUS,
+    ({ userInfo, roomId }: { userInfo: UserInfoStatus; roomId: string }) => {
+      updateUserStatus(userInfo, roomId);
+      io.to(roomId).emit(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, {
+        userInfo: userInfo,
+      });
+    }
+  );
 
   socket.on("disconnect", () => {
     connectedClients = connectedClients.filter(
       (client) => client.socketId !== socket.id
     );
-    // Emit the updated list of connected clients to all clients
-    io.emit("connected clients", connectedClients);
+    io.emit(SocketEvent.SERVER_CLIENT_CONNECTED, connectedClients);
 
     const user = userLeave(socket.id);
 
     if (user) {
-      io.to(user.roomId).emit("removeClientInfo", { userInfo: user });
+      io.to(user.roomId).emit(SocketEvent.SERVER_REMOVE_CLIENT, {
+        userInfo: user,
+      });
     }
   });
 });

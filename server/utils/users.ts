@@ -1,7 +1,20 @@
-const users = [];
+import type {
+  GameMove,
+  UserInfoStatus,
+  UserInRoom,
+} from "server/declares/interfaces/Socket";
 
-// Join user to chat
-function userJoin(id, userId, roomId, score, moves, plus, status) {
+const users: UserInRoom[] = [];
+
+function userJoin(
+  id: string,
+  userId: string,
+  roomId: string,
+  score: number,
+  moves: number[][],
+  plus: number,
+  status: string
+) {
   const user = { id, userId, roomId, score, moves, plus, status };
 
   users.push(user);
@@ -9,7 +22,7 @@ function userJoin(id, userId, roomId, score, moves, plus, status) {
   return user;
 }
 
-function updateUser(userInfo, roomId) {
+function updateUser(userInfo: GameMove, roomId: string) {
   const user = users.find(
     (user) => user.userId == userInfo.userId && user.roomId == roomId
   );
@@ -20,7 +33,7 @@ function updateUser(userInfo, roomId) {
   }
 }
 
-function updateUserStatus(userInfo, roomId) {
+function updateUserStatus(userInfo: UserInfoStatus, roomId: string) {
   const user = users.find(
     (user) => user.userId == userInfo.userId && user.roomId == roomId
   );
@@ -29,13 +42,11 @@ function updateUserStatus(userInfo, roomId) {
   }
 }
 
-// Get current user
-function getCurrentUser(id) {
+function getCurrentUser(id: string) {
   return users.find((user) => user.id === id);
 }
 
-// User leaves chat
-function userLeave(id) {
+function userLeave(id: string) {
   const index = users.findIndex((user) => user.id === id);
 
   if (index !== -1) {
@@ -43,12 +54,11 @@ function userLeave(id) {
   }
 }
 
-// Get room users
-function getRoomUsers(roomId) {
+function getRoomUsers(roomId: string) {
   return users.filter((user) => user.roomId === roomId);
 }
 
-module.exports = {
+export {
   userJoin,
   getCurrentUser,
   userLeave,
