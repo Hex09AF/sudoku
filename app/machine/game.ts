@@ -5,9 +5,6 @@ import type { Pair } from "~/declares/interfaces/Pair";
 
 interface IGame {
   players: GameMove[];
-}
-
-interface IBoard {
   board: Board;
   solveBoard: Board;
   selectCell: Pair;
@@ -16,17 +13,41 @@ interface IBoard {
   canSquareXYNumberZ: any[][];
 }
 
-const createGameMachine = ({ initGameMoves }: { initGameMoves: GameMove[] }) =>
-  createMachine<IGame>({
+const gameMachine = createMachine<IGame>(
+  {
     predictableActionArguments: true,
     id: "game",
     initial: "playing",
-    context: {
-      players: initGameMoves,
-    },
+    entry: ["updateCanArray"],
     states: {
       playing: {
         on: {
+          UPDATE: {
+            actions: [
+              assign({ board: (_, event) => event.board }),
+              "updateCanArray",
+            ],
+          },
+          MOVE: {
+            actions: assign({
+              selectCell: (_, event) => {
+                return event.pair;
+              },
+            }),
+          },
+          FILL: {
+            actions: [
+              assign({
+                board: (ctx, event) => {
+                  const newBoardValue = JSON.parse(JSON.stringify(ctx.board));
+                  newBoardValue[ctx.selectCell.row][ctx.selectCell.col] =
+                    event.value;
+                  return newBoardValue;
+                },
+              }),
+              "updateCanArray",
+            ],
+          },
           "GAME.UPDATE.ALL": {
             actions: [
               assign({
@@ -102,95 +123,38 @@ const createGameMachine = ({ initGameMoves }: { initGameMoves: GameMove[] }) =>
         },
       },
     },
-  });
-
-const createBoardMachine = ({
-  board,
-  solveBoard,
-}: {
-  board: Board;
-  solveBoard: Board;
-}) =>
-  createMachine<IBoard>(
-    {
-      predictableActionArguments: true,
-      id: "board",
-      context: {
-        board,
-        solveBoard,
-        selectCell: { row: 4, col: 4 },
-        canRowXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
-        canColXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
-        canSquareXYNumberZ: new Array(3)
+  },
+  {
+    actions: {
+      updateCanArray: assign((ctx) => {
+        let newCanRowXNumberY = new Array(9)
           .fill(0)
-          .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
-      },
-      initial: "playing",
-      entry: ["updateCanArray"],
-      states: {
-        playing: {
-          on: {
-            UPDATE: {
-              actions: [
-                assign({ board: (_, event) => event.board }),
-                "updateCanArray",
-              ],
-            },
-            MOVE: {
-              actions: assign({
-                selectCell: (_, event) => {
-                  return event.pair;
-                },
-              }),
-            },
-            FILL: {
-              actions: [
-                assign({
-                  board: (ctx, event) => {
-                    const newBoardValue = JSON.parse(JSON.stringify(ctx.board));
-                    newBoardValue[ctx.selectCell.row][ctx.selectCell.col] =
-                      event.value;
-                    return newBoardValue;
-                  },
-                }),
-                "updateCanArray",
-              ],
-            },
-          },
-        },
-      },
-    },
-    {
-      actions: {
-        updateCanArray: assign((ctx) => {
-          let newCanRowXNumberY = new Array(9)
-            .fill(0)
-            .map(() => new Array(10).fill(0));
-          let newCanColXNumberY = new Array(9)
-            .fill(0)
-            .map(() => new Array(10).fill(0));
-          let newCanSquareXYNumberZ = new Array(3)
-            .fill(0)
-            .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)));
-          for (let i = 0; i < 9; ++i) {
-            for (let j = 0; j < 9; ++j) {
-              if (ctx.board[i][j] === 0) continue;
-              newCanRowXNumberY[i][ctx.board[i][j]] += 1;
-              newCanColXNumberY[j][ctx.board[i][j]] += 1;
-              newCanSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
-                ctx.board[i][j]
-              ] += 1;
-            }
+          .map(() => new Array(10).fill(0));
+        let newCanColXNumberY = new Array(9)
+          .fill(0)
+          .map(() => new Array(10).fill(0));
+        let newCanSquareXYNumberZ = new Array(3)
+          .fill(0)
+          .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0)));
+        for (let i = 0; i < 9; ++i) {
+          for (let j = 0; j < 9; ++j) {
+            if (ctx.board[i][j] === 0) continue;
+            newCanRowXNumberY[i][ctx.board[i][j]] += 1;
+            newCanColXNumberY[j][ctx.board[i][j]] += 1;
+            newCanSquareXYNumberZ[(i / 3) >> 0][(j / 3) >> 0][
+              ctx.board[i][j]
+            ] += 1;
           }
-          return {
-            ...ctx,
-            canRowXNumberY: newCanRowXNumberY,
-            canColXNumberY: newCanColXNumberY,
-            canSquareXYNumberZ: newCanSquareXYNumberZ,
-          };
-        }),
-      },
-    }
-  );
+        }
+        return {
+          ...ctx,
+          canRowXNumberY: newCanRowXNumberY,
+          canColXNumberY: newCanColXNumberY,
+          canSquareXYNumberZ: newCanSquareXYNumberZ,
+        };
+      }),
+    },
+  }
+);
 
-export { createBoardMachine, createGameMachine };
+export { gameMachine };

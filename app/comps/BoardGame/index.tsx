@@ -9,7 +9,7 @@ import type { RoomId, UserId } from "~/declares/interfaces/Id";
 import type { Pair } from "~/declares/interfaces/Pair";
 import { SocketEvent } from "~/declares/interfaces/Socket";
 import type { UserInfoStatus, UserInRoom } from "~/declares/interfaces/Socket";
-import { createBoardMachine, createGameMachine } from "~/machine/game";
+import { gameMachine } from "~/machine/game";
 import {
   checkValid,
   getCellUserId,
@@ -41,17 +41,35 @@ const BoardGame = ({
   socket,
   initGameMoves,
 }: BoardGameProps) => {
-  const [gameState, send] = useMachine(createGameMachine({ initGameMoves }));
-
-  const [boardState, boardSend] = useMachine(
-    createBoardMachine({ board: initBoard, solveBoard })
-  );
+  const [gameState, send] = useMachine(gameMachine, {
+    context: {
+      players: initGameMoves,
+      board: initBoard,
+      solveBoard,
+      selectCell: { row: 4, col: 4 },
+      canRowXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
+      canColXNumberY: new Array(9).fill(0).map(() => new Array(10).fill(0)),
+      canSquareXYNumberZ: new Array(3)
+        .fill(0)
+        .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
+    },
+  });
 
   const submit = useSubmit();
 
   const [usersInRoom, setUsersInRoom] = useState(
     initGameMoves.filter((v) => v.userId == userId)
   );
+
+  const curUser = useMemo(
+    () => usersInRoom.find((v) => v.userId === userId),
+    [usersInRoom, userId]
+  );
+
+  const isPlay = useMemo(() => {
+    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    return readyUsers.length === usersInRoom.length;
+  }, [usersInRoom]);
 
   const postGameMoves = useCallback(
     debounce(({ moves, score }) => {
@@ -67,27 +85,23 @@ const BoardGame = ({
         replace: true,
       });
     }, 650),
-    [boardState.context.selectCell]
+    [gameState.context.selectCell]
   );
 
   const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
-    const newBoardValue = JSON.parse(JSON.stringify(boardState.context.board));
-    newBoardValue[boardState.context.selectCell.row][
-      boardState.context.selectCell.col
-    ] = value;
+    const newBoardValue = JSON.parse(JSON.stringify(gameState.context.board));
+    newBoardValue[pair.row][pair.col] = value;
 
     socket?.emit(SocketEvent.CLIENT_PLAY, newBoardValue);
 
     const curInfo = JSON.parse(
-      JSON.stringify(gameState.context.players.find((v) => v.userId == userId))
+      JSON.stringify(
+        gameState.context.players.find((v) => v.userId == userPlayId)
+      )
     ) as GameMove;
 
     if (curInfo) {
-      if (
-        solveBoard[boardState.context.selectCell.row][
-          boardState.context.selectCell.col
-        ] == value
-      ) {
+      if (solveBoard[pair.row][pair.col] == value) {
         curInfo.plus = 50;
         curInfo.score += 50;
       } else {
@@ -96,23 +110,12 @@ const BoardGame = ({
       }
 
       const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-        return (
-          v[0] == boardState.context.selectCell.row &&
-          v[1] == boardState.context.selectCell.col
-        );
+        return v[0] == pair.row && v[1] == pair.col;
       });
       if (isExistCell != -1) {
-        curInfo.moves[isExistCell] = [
-          boardState.context.selectCell.row,
-          boardState.context.selectCell.col,
-          value,
-        ];
+        curInfo.moves[isExistCell] = [pair.row, pair.col, value];
       } else {
-        curInfo.moves.push([
-          boardState.context.selectCell.row,
-          boardState.context.selectCell.col,
-          value,
-        ]);
+        curInfo.moves.push([pair.row, pair.col, value]);
       }
       socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT, {
         userInfo: curInfo,
@@ -124,43 +127,27 @@ const BoardGame = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     let value = -1;
-
     if ("1234567890".includes(e.key)) {
       value = Number.parseInt(e.key, 10);
     } else if (e.key === "Backspace") {
       value = 0;
-    } else if (e.key === "ArrowUp") {
-      boardSend({
-        type: "MOVE",
-        pair: {
-          row: (boardState.context.selectCell.row - 1 + 9) % 9,
-          col: boardState.context.selectCell.col,
-        },
-      });
-    } else if (e.key === "ArrowLeft") {
-      boardSend({
-        type: "MOVE",
-        pair: {
-          row: boardState.context.selectCell.row,
-          col: (boardState.context.selectCell.col - 1 + 9) % 9,
-        },
-      });
-    } else if (e.key === "ArrowRight") {
-      boardSend({
-        type: "MOVE",
-        pair: {
-          row: boardState.context.selectCell.row,
-          col: (boardState.context.selectCell.col + 1) % 9,
-        },
-      });
-    } else if (e.key === "ArrowDown") {
-      boardSend({
-        type: "MOVE",
-        pair: {
-          row: (boardState.context.selectCell.row + 1) % 9,
-          col: boardState.context.selectCell.col,
-        },
-      });
+    } else {
+      const arrowMap = {
+        ArrowUp: { row: -1, col: 0 },
+        ArrowLeft: { row: 0, col: -1 },
+        ArrowRight: { row: 0, col: 1 },
+        ArrowDown: { row: 1, col: 0 },
+      };
+      const mapping = arrowMap[e.key as keyof typeof arrowMap];
+      if (mapping) {
+        send({
+          type: "MOVE",
+          pair: {
+            row: (gameState.context.selectCell.row + mapping.row + 9) % 9,
+            col: (gameState.context.selectCell.col + mapping.col + 9) % 9,
+          },
+        });
+      }
     }
 
     if (
@@ -173,18 +160,18 @@ const BoardGame = ({
         userId,
         initBoard,
         solveBoard,
-        boardState.context.board,
-        boardState.context.selectCell
+        gameState.context.board,
+        gameState.context.selectCell
       )
     ) {
-      makeMove(boardState.context.selectCell, value, userId);
+      makeMove(gameState.context.selectCell, value, userId);
     }
   };
 
   useEffect(() => {
     if (!socket) return;
     const handleUpdateBoard = (boardValue: Board) => {
-      boardSend({ type: "UPDATE", board: boardValue });
+      send({ type: "UPDATE", board: boardValue });
     };
 
     const handleUpdateClientInfo = ({ userInfo }: { userInfo: GameMove }) => {
@@ -235,39 +222,26 @@ const BoardGame = ({
       socket.off(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
       socket.off(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
     };
-  }, [socket, boardSend, send]);
-
-  const curUser = usersInRoom.find((v) => v.userId === userId);
-
-  const isPlay = useMemo(() => {
-    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
-    return readyUsers.length === usersInRoom.length;
-  }, [usersInRoom]);
+  }, [socket, send]);
 
   const onFinish = () => {
     const formData = new FormData();
     formData.append("intent", "updateGameStatus");
     formData.append("roomId", roomId);
     formData.append("gameStatus", "START");
-    const readyUsers = JSON.parse(
-      JSON.stringify(usersInRoom.filter((v) => v.status === "READY"))
-    ) as GameMove[];
+    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
     formData.append(
       "readyUsers",
       JSON.stringify(readyUsers.map((v) => v.userId))
     );
 
-    for (const user of readyUsers) {
-      if (user.userId === userId) {
-        socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
-          userInfo: {
-            userId: user.userId,
-            status: "PLAYING",
-          },
-          roomId,
-        });
-      }
-    }
+    socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
+      userInfo: {
+        userId: userId,
+        status: "PLAYING",
+      },
+      roomId,
+    });
     submit(formData, {
       method: "post",
       action: `/solo/${roomId}`,
@@ -327,7 +301,7 @@ const BoardGame = ({
             <div className="game">
               <table className="game-table">
                 <tbody>
-                  {boardState.context.board.map((row, idx) => (
+                  {gameState.context.board.map((row, idx) => (
                     <tr key={idx} className="game-row">
                       {row.map((val, idx2) => {
                         return (
@@ -346,7 +320,7 @@ const BoardGame = ({
                             )}
                             isMatchCell={isMatchCell(
                               solveBoard,
-                              boardState.context.board,
+                              gameState.context.board,
                               {
                                 row: idx,
                                 col: idx2,
@@ -360,32 +334,32 @@ const BoardGame = ({
                                 col: idx2,
                               }
                             )}
-                            selectCell={boardState.context.selectCell}
+                            selectCell={gameState.context.selectCell}
                             setSelectCell={(pair: Pair) => {
-                              boardSend({ type: "MOVE", pair });
+                              send({ type: "MOVE", pair });
                             }}
                             cellIdx={{ row: idx, col: idx2 }}
                             cellVal={initGameStatus === "START" ? val : 0}
                             key={idx * 10 + idx2}
                             isConflictRow={
-                              boardState.context.canRowXNumberY[idx][val] > 1
+                              gameState.context.canRowXNumberY[idx][val] > 1
                             }
                             isConflictCol={
-                              boardState.context.canColXNumberY[idx2][val] > 1
+                              gameState.context.canColXNumberY[idx2][val] > 1
                             }
                             isConflictSquare={
-                              boardState.context.canSquareXYNumberZ[
+                              gameState.context.canSquareXYNumberZ[
                                 (idx / 3) >> 0
                               ][(idx2 / 3) >> 0][val] > 1
                             }
                             isDefault={initBoard[idx][idx2] !== 0}
                             isSameValue={
-                              !!boardState.context.board[
-                                boardState.context.selectCell.row
-                              ][boardState.context.selectCell.col] &&
-                              boardState.context.board[
-                                boardState.context.selectCell.row
-                              ][boardState.context.selectCell.col] === val
+                              !!gameState.context.board[
+                                gameState.context.selectCell.row
+                              ][gameState.context.selectCell.col] &&
+                              gameState.context.board[
+                                gameState.context.selectCell.row
+                              ][gameState.context.selectCell.col] === val
                             }
                           />
                         );

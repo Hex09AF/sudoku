@@ -25,6 +25,9 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
     socket.on("connect", () => {
       socket.emit(SocketEvent.CLIENT_CONNECTED, { user, socketId: socket.id });
     });
+    return () => {
+      socket.off("connect");
+    };
   }, [socket, user]);
 
   useEffect(() => {
@@ -32,6 +35,9 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
     socket.on(SocketEvent.SERVER_CLIENT_CONNECTED, (listUserOnline) => {
       setUsers(listUserOnline);
     });
+    return () => {
+      socket.off(SocketEvent.SERVER_CLIENT_CONNECTED);
+    };
   }, [socket]);
 
   return (
