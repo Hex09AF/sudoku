@@ -3,7 +3,7 @@ import type { Board } from "~/declares/interfaces/Board";
 import type { GameMove } from "~/declares/interfaces/GameMove";
 import type { Pair } from "~/declares/interfaces/Pair";
 
-interface IGame {
+interface GameContext {
   players: GameMove[];
   board: Board;
   solveBoard: Board;
@@ -13,15 +13,33 @@ interface IGame {
   canSquareXYNumberZ: any[][];
 }
 
-const gameMachine = createMachine<IGame>(
+function checkWin(ctx: GameContext) {
+  return false;
+}
+
+function checkDraw(ctx: GameContext) {
+  return true;
+}
+
+function notExistWrongMove(ctx: GameContext) {
+  return true;
+}
+
+const gameMachine = createMachine<GameContext>(
   {
     predictableActionArguments: true,
     id: "game",
     initial: "playing",
     entry: ["updateCanArray"],
     states: {
+      winner: {},
+      draw: {},
       playing: {
         on: {
+          "": [
+            { target: "winner", cond: "checkWin" },
+            { target: "draw", cond: "checkDraw" },
+          ],
           UPDATE: {
             actions: [
               assign({ board: (_, event) => event.board }),
@@ -36,6 +54,7 @@ const gameMachine = createMachine<IGame>(
             }),
           },
           FILL: {
+            cond: "notExistWrongMove",
             actions: [
               assign({
                 board: (ctx, event) => {
@@ -153,6 +172,11 @@ const gameMachine = createMachine<IGame>(
           canSquareXYNumberZ: newCanSquareXYNumberZ,
         };
       }),
+    },
+    guards: {
+      checkWin,
+      checkDraw,
+      notExistWrongMove,
     },
   }
 );
