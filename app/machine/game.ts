@@ -14,14 +14,17 @@ interface GameContext {
 }
 
 function checkWin(ctx: GameContext) {
+  // console.log("checkWin");
   return false;
 }
 
 function checkDraw(ctx: GameContext) {
-  return true;
+  // console.log("checkDraw");
+  return false;
 }
 
 function notExistWrongMove(ctx: GameContext) {
+  console.log(ctx, "CTX");
   return true;
 }
 
@@ -35,12 +38,13 @@ const gameMachine = createMachine<GameContext>(
       winner: {},
       draw: {},
       playing: {
+        always: [
+          { target: "winner", cond: "checkWin" },
+          { target: "draw", cond: "checkDraw" },
+        ],
         on: {
-          "": [
-            { target: "winner", cond: "checkWin" },
-            { target: "draw", cond: "checkDraw" },
-          ],
           UPDATE: {
+            cond: "notExistWrongMove",
             actions: [
               assign({ board: (_, event) => event.board }),
               "updateCanArray",
@@ -52,20 +56,6 @@ const gameMachine = createMachine<GameContext>(
                 return event.pair;
               },
             }),
-          },
-          FILL: {
-            cond: "notExistWrongMove",
-            actions: [
-              assign({
-                board: (ctx, event) => {
-                  const newBoardValue = JSON.parse(JSON.stringify(ctx.board));
-                  newBoardValue[ctx.selectCell.row][ctx.selectCell.col] =
-                    event.value;
-                  return newBoardValue;
-                },
-              }),
-              "updateCanArray",
-            ],
           },
           "GAME.UPDATE.ALL": {
             actions: [

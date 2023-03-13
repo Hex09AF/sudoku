@@ -92,7 +92,7 @@ const BoardGame = ({
     const newBoardValue = JSON.parse(JSON.stringify(gameState.context.board));
     newBoardValue[pair.row][pair.col] = value;
 
-    socket?.emit(SocketEvent.CLIENT_PLAY, newBoardValue);
+    socket?.emit(SocketEvent.CLIENT_PLAY, { pair, value, userPlayId });
 
     const curInfo = JSON.parse(
       JSON.stringify(
