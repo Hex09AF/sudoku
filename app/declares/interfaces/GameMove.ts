@@ -6,4 +6,5 @@ export type GameMove = {
   score: number;
   plus?: number;
   status: string;
+  socketStatus: string;
 };

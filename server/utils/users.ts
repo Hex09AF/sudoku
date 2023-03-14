@@ -6,16 +6,26 @@ import type {
 
 const users: UserInRoom[] = [];
 
-function userJoin(
-  id: string,
-  userId: string,
-  roomId: string,
-  score: number,
-  moves: number[][],
-  plus: number,
-  status: string
-) {
-  const user = { id, userId, roomId, score, moves, plus, status };
+function userJoin({
+  id,
+  userId,
+  roomId,
+  score,
+  moves,
+  plus,
+  status,
+  socketStatus,
+}: {
+  id: string;
+  userId: string;
+  roomId: string;
+  score: number;
+  moves: number[][];
+  plus: number;
+  status: string;
+  socketStatus: string;
+}) {
+  const user = { id, userId, roomId, score, moves, plus, status, socketStatus };
 
   users.push(user);
 

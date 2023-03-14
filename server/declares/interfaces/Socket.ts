@@ -38,6 +38,7 @@ export interface InfoJoinRoom {
   moves: number[][];
   plus: number;
   status: string;
+  socketStatus: string;
 }
 
 export interface GameMove {
@@ -61,4 +62,5 @@ export interface UserInRoom {
   moves: number[][];
   plus?: number;
   status: string;
+  socketStatus: string;
 }

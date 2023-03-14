@@ -25,6 +25,8 @@ import {
   userJoin,
   userLeave,
 } from "./utils/users";
+import { Pair } from "./declares/interfaces/Pair";
+import { UserId } from "./declares/interfaces/Id";
 
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "server/build");
@@ -72,18 +74,27 @@ io.on("connection", (socket) => {
    */
   socket.on(
     SocketEvent.CLIENT_JOIN_ROOM,
-    ({ userId, roomId, score, moves, plus, status }: InfoJoinRoom) => {
+    ({
+      userId,
+      roomId,
+      score,
+      moves,
+      plus,
+      status,
+      socketStatus,
+    }: InfoJoinRoom) => {
       const isExistUser = getCurrentUser(socket.id);
       if (isExistUser) return;
-      const user = userJoin(
-        socket.id,
+      const user = userJoin({
+        id: socket.id,
         userId,
         roomId,
         score,
         moves,
         plus,
-        status
-      );
+        status,
+        socketStatus,
+      });
       socket.join(user.roomId);
       io.to(user.roomId).emit(SocketEvent.SERVER_ADD_CLIENT, {
         usersInfo: getRoomUsers(roomId).map((v) => ({
@@ -92,6 +103,7 @@ io.on("connection", (socket) => {
           score: v.score,
           plus: v.plus,
           status: v.status,
+          socketStatus: v.socketStatus,
         })),
       });
     }
@@ -100,11 +112,26 @@ io.on("connection", (socket) => {
   /**
    * CLIENT PLAY A MOVE
    */
-  socket.on(SocketEvent.CLIENT_PLAY, (boardValue: number[][]) => {
-    const user = getCurrentUser(socket.id);
-    if (user)
-      io.to(user.roomId).emit(SocketEvent.SERVER_CLIENT_PLAY, boardValue);
-  });
+  socket.on(
+    SocketEvent.CLIENT_PLAY,
+    ({
+      pair,
+      value,
+      userPlayId,
+    }: {
+      pair: Pair;
+      value: number;
+      userPlayId: UserId;
+    }) => {
+      const user = getCurrentUser(socket.id);
+      if (user)
+        io.to(user.roomId).emit(SocketEvent.SERVER_CLIENT_PLAY, {
+          pair,
+          value,
+          userPlayId,
+        });
+    }
+  );
 
   /**
    * UPDATE CLIENT INFO IN A ROOM

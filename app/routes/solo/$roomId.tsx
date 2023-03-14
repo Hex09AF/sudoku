@@ -69,6 +69,7 @@ export const loader: LoaderFunction = async ({ params, request }) => {
       moves: JSON.parse(v?.moves || "[]"),
       score: v.score,
       status: v.role === "PLAYER" ? "PLAYING" : "NOT_READY",
+      socketStatus: "OFFLINE",
     };
   });
 
@@ -105,6 +106,7 @@ export default function SoloRoom() {
       roomId: data.roomId,
       score: data.curScore,
       moves: data.curUserMoves,
+      socketStatus: "ONLINE",
       plus: 0,
       status: data.curUserStatus,
     });

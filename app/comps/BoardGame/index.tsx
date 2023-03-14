@@ -1,14 +1,18 @@
 import { useSubmit } from "@remix-run/react";
 import { useMachine } from "@xstate/react";
 import debounce from "lodash.debounce";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import type { Socket } from "socket.io-client";
 import type { Board } from "~/declares/interfaces/Board";
 import type { GameMove } from "~/declares/interfaces/GameMove";
 import type { RoomId, UserId } from "~/declares/interfaces/Id";
 import type { Pair } from "~/declares/interfaces/Pair";
-import { SocketEvent } from "~/declares/interfaces/Socket";
 import type { UserInfoStatus, UserInRoom } from "~/declares/interfaces/Socket";
+import { SocketEvent } from "~/declares/interfaces/Socket";
+import {
+  SUDOKU_CALLBACK,
+  SUDOKU_EVENT,
+} from "~/declares/sudoku-machine/sudoku.machine.type";
 import { gameMachine } from "~/machine/game";
 import {
   checkValid,
@@ -52,24 +56,21 @@ const BoardGame = ({
       canSquareXYNumberZ: new Array(3)
         .fill(0)
         .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
+      winner: null,
+    },
+    actions: {
+      [SUDOKU_CALLBACK.updateGameMovesToDB]: (context, event) => {
+        const { userPlayId } = event;
+        const { players } = context;
+        if (userPlayId === userId) {
+          const curInfo = players.find((v) => v.userId == userPlayId);
+          if (curInfo) {
+            postGameMoves({ moves: curInfo.moves, score: curInfo.score });
+          }
+        }
+      },
     },
   });
-
-  const submit = useSubmit();
-
-  const [usersInRoom, setUsersInRoom] = useState(
-    initGameMoves.filter((v) => v.userId == userId)
-  );
-
-  const curUser = useMemo(
-    () => usersInRoom.find((v) => v.userId === userId),
-    [usersInRoom, userId]
-  );
-
-  const isPlay = useMemo(() => {
-    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
-    return readyUsers.length === usersInRoom.length;
-  }, [usersInRoom]);
 
   const postGameMoves = useCallback(
     debounce(({ moves, score }) => {
@@ -88,42 +89,21 @@ const BoardGame = ({
     [gameState.context.selectCell]
   );
 
-  const makeMove = (pair: Pair, value: number, userPlayId: UserId) => {
-    const newBoardValue = JSON.parse(JSON.stringify(gameState.context.board));
-    newBoardValue[pair.row][pair.col] = value;
+  const submit = useSubmit();
 
-    socket?.emit(SocketEvent.CLIENT_PLAY, { pair, value, userPlayId });
+  const usersInRoom = gameState.context.players.filter(
+    (player) => player.socketStatus !== "HEHE"
+  );
 
-    const curInfo = JSON.parse(
-      JSON.stringify(
-        gameState.context.players.find((v) => v.userId == userPlayId)
-      )
-    ) as GameMove;
+  const curUser = useMemo(
+    () => usersInRoom.find((v) => v.userId === userId),
+    [usersInRoom, userId]
+  );
 
-    if (curInfo) {
-      if (solveBoard[pair.row][pair.col] == value) {
-        curInfo.plus = 50;
-        curInfo.score += 50;
-      } else {
-        curInfo.plus = -100;
-        curInfo.score += -100;
-      }
-
-      const isExistCell = curInfo.moves.findIndex((v: number[]) => {
-        return v[0] == pair.row && v[1] == pair.col;
-      });
-      if (isExistCell != -1) {
-        curInfo.moves[isExistCell] = [pair.row, pair.col, value];
-      } else {
-        curInfo.moves.push([pair.row, pair.col, value]);
-      }
-      socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT, {
-        userInfo: curInfo,
-        roomId,
-      });
-      postGameMoves({ moves: curInfo.moves, score: curInfo.score });
-    }
-  };
+  const isPlay = useMemo(() => {
+    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
+    return readyUsers.length === usersInRoom.length;
+  }, [usersInRoom]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     let value = -1;
@@ -141,7 +121,7 @@ const BoardGame = ({
       const mapping = arrowMap[e.key as keyof typeof arrowMap];
       if (mapping) {
         send({
-          type: "MOVE",
+          type: SUDOKU_EVENT.move,
           pair: {
             row: (gameState.context.selectCell.row + mapping.row + 9) % 9,
             col: (gameState.context.selectCell.col + mapping.col + 9) % 9,
@@ -164,60 +144,47 @@ const BoardGame = ({
         gameState.context.selectCell
       )
     ) {
-      makeMove(gameState.context.selectCell, value, userId);
+      socket?.emit(SocketEvent.CLIENT_PLAY, {
+        pair: gameState.context.selectCell,
+        value,
+        userPlayId: userId,
+      });
     }
   };
 
   useEffect(() => {
     if (!socket) return;
-    const handleUpdateBoard = (boardValue: Board) => {
-      send({ type: "UPDATE", board: boardValue });
+    const handleUpdateBoard = ({
+      pair,
+      value,
+      userPlayId,
+    }: {
+      pair: Pair;
+      value: number;
+      userPlayId: UserId;
+    }) => {
+      send({ type: SUDOKU_EVENT.fill, pair, value, userPlayId });
     };
 
-    const handleUpdateClientInfo = ({ userInfo }: { userInfo: GameMove }) => {
-      setUsersInRoom((preUsers) => {
-        const curUser = preUsers.find((user) => user.userId == userInfo.userId);
-        if (curUser) {
-          curUser.moves = userInfo.moves;
-          curUser.plus = userInfo.plus;
-          curUser.score = userInfo.score;
-          curUser.status = userInfo.status;
-        }
-        return JSON.parse(JSON.stringify(preUsers));
-      });
-
-      send({ type: "GAME.UPDATE", userInfo });
-    };
     const handleUpdateStatus = ({ userInfo }: { userInfo: UserInfoStatus }) => {
-      setUsersInRoom((preUsers) => {
-        const curUser = preUsers.find((user) => user.userId == userInfo.userId);
-        if (curUser) {
-          curUser.status = userInfo.status;
-        }
-        return JSON.parse(JSON.stringify(preUsers));
-      });
+      send({ type: SUDOKU_EVENT.updateUserStatus, userInfo });
     };
     const handleRemoveClient = ({ userInfo }: { userInfo: UserInRoom }) => {
-      setUsersInRoom((preUsers) => {
-        const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
-        return JSON.parse(JSON.stringify(newUsers));
-      });
+      // setUsersInRoom((preUsers) => {
+      //   const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
+      //   return JSON.parse(JSON.stringify(newUsers));
+      // });
     };
     const handleAddClient = ({ usersInfo }: { usersInfo: GameMove[] }) => {
-      setUsersInRoom((preUsers) => {
-        if (preUsers.length > usersInfo.length) return preUsers;
-        return usersInfo;
-      });
+      send({ type: SUDOKU_EVENT.bulkUsers, usersInfo });
     };
 
     socket.on(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
-    socket.on(SocketEvent.SERVER_UPDATE_CLIENT, handleUpdateClientInfo);
     socket.on(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
     socket.on(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
     socket.on(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
     return () => {
       socket.off(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
-      socket.off(SocketEvent.SERVER_UPDATE_CLIENT, handleUpdateClientInfo);
       socket.off(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
       socket.off(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
       socket.off(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
@@ -246,10 +213,6 @@ const BoardGame = ({
       method: "post",
       action: `/solo/${roomId}`,
       replace: true,
-    });
-    send({
-      type: "GAME.UPDATE.ALL",
-      usersInfo: readyUsers.map((v) => ({ ...v, status: "PLAYING" })),
     });
   };
 
@@ -336,7 +299,7 @@ const BoardGame = ({
                             )}
                             selectCell={gameState.context.selectCell}
                             setSelectCell={(pair: Pair) => {
-                              send({ type: "MOVE", pair });
+                              send({ type: SUDOKU_EVENT.move, pair });
                             }}
                             cellIdx={{ row: idx, col: idx2 }}
                             cellVal={initGameStatus === "START" ? val : 0}
