@@ -12,6 +12,7 @@ import { SocketEvent } from "~/declares/interfaces/Socket";
 import {
   SUDOKU_CALLBACK,
   SUDOKU_EVENT,
+  SUDOKU_STATE,
 } from "~/declares/sudoku-machine/sudoku.machine.type";
 import { gameMachine } from "~/machine/game";
 import {
@@ -221,6 +222,7 @@ const BoardGame = ({
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score
+            winner={gameState.context.winner}
             userId={userInRoom.userId}
             isUser={userInRoom.userId == userId}
             key={userInRoom.userId}
@@ -269,6 +271,9 @@ const BoardGame = ({
                       {row.map((val, idx2) => {
                         return (
                           <Cell
+                            isHightLight={gameState.matches(
+                              SUDOKU_STATE.playing
+                            )}
                             userId={getCellUserId(gameState.context.players, {
                               row: idx,
                               col: idx2,

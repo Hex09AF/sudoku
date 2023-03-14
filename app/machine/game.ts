@@ -94,6 +94,7 @@ const gameMachine = createMachine<GameContext>(
           return findingWinner.userId;
         },
       }),
+
       [A.executeFill]: assign((context, event) => {
         const { board, solveBoard, players } = context;
         const { pair, value, userPlayId } = event;
@@ -125,11 +126,13 @@ const gameMachine = createMachine<GameContext>(
           board,
         };
       }),
+
       [A.executeMove]: assign({
         selectCell: (_, event) => {
           return event.pair;
         },
       }),
+
       [A.executeBulkUsers]: assign({
         players: (context, event) => {
           const { usersInfo } = event;
@@ -151,6 +154,7 @@ const gameMachine = createMachine<GameContext>(
           return players;
         },
       }),
+
       [A.executeUpdateUserStatus]: assign({
         players: (context, event) => {
           const { userInfo } = event;
@@ -164,6 +168,7 @@ const gameMachine = createMachine<GameContext>(
           return players;
         },
       }),
+
       [A.executeUpdateCanArray]: assign((ctx) => {
         let newCanRowXNumberY = new Array(9)
           .fill(0)
@@ -185,7 +190,6 @@ const gameMachine = createMachine<GameContext>(
           }
         }
         return {
-          ...ctx,
           canRowXNumberY: newCanRowXNumberY,
           canColXNumberY: newCanColXNumberY,
           canSquareXYNumberZ: newCanSquareXYNumberZ,

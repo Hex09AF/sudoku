@@ -1,8 +1,10 @@
 import { useCallback } from "react";
+import type { UserId } from "~/declares/interfaces/Id";
 import hashToAvatar from "~/helper/hash";
 import Point from "./point";
 
 type ScoreProps = {
+  winner: UserId | null;
   userId: string;
   score: number;
   plusPoint: number;
@@ -11,6 +13,7 @@ type ScoreProps = {
 };
 
 export default function Score({
+  winner,
   userId,
   score,
   plusPoint,
@@ -28,7 +31,17 @@ export default function Score({
       <div>{isUser ? "MY" : ""} SCORES</div>
       <h2>{score || 0}</h2>
       <MyPoint />
-      {status === "NOT_READY" ? "NOT READY" : status}
+      {winner ? (
+        winner === userId ? (
+          <div>Victory</div>
+        ) : (
+          <div>Defeat</div>
+        )
+      ) : status === "NOT_READY" ? (
+        "NOT READY"
+      ) : (
+        status
+      )}
     </div>
   );
 }

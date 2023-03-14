@@ -2,6 +2,7 @@ import type { Pair } from "~/declares/interfaces/Pair";
 import hashToAvatar from "~/helper/hash";
 
 type CellProps = {
+  isHightLight: boolean;
   userId: string;
   isEnemy: boolean;
   isUser: boolean;
@@ -18,6 +19,7 @@ type CellProps = {
 };
 
 const Cell = ({
+  isHightLight,
   userId,
   setSelectCell,
   selectCell,
@@ -68,6 +70,8 @@ const Cell = ({
 
   const isUserClass = isUser ? " user-cell " : "";
   const isEnemyClass = isEnemy ? " enemy-cell " : "";
+
+  const endingClass = isHightLight ? "" : " ending-cell ";
   /**
    *
    */
@@ -81,6 +85,7 @@ const Cell = ({
         style={avatarStyle}
         className={
           `game-cell` +
+          endingClass +
           isEnemyClass +
           isUserClass +
           selectedCellClass +

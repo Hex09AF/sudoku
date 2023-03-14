@@ -175,6 +175,10 @@ table {
       background-image: var(--avatar-image-cell);
     }
   }
+
+  &.ending-cell {
+    background-color: unset;
+  }
 }
 
 .game-cell:nth-child(3n) {
