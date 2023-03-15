@@ -1,6 +1,9 @@
 import type { ActionArgs, LinksFunction } from "@remix-run/node";
 import { useActionData, useSearchParams } from "@remix-run/react";
-import stylesUrl from "~/styles/login.css";
+import { Button } from "~/comps/Button";
+import { Field } from "~/comps/Field";
+import { Input } from "~/comps/Input";
+import stylesUrl from "~/styles/login/login.css";
 import { db } from "~/utils/db.server";
 import { badRequest } from "~/utils/request.server";
 import { createUserSession, login, register } from "~/utils/session.server";
@@ -67,9 +70,6 @@ export const action = async ({ request }: ActionArgs) => {
 
   switch (loginType) {
     case "login": {
-      // login to get the user
-      // if there's no user, return the fields and a formError
-      // if there is a user, create their session and redirect to /
       const user = await login({ username, password });
       if (!user) {
         return badRequest({
@@ -92,8 +92,6 @@ export const action = async ({ request }: ActionArgs) => {
           formError: `User with username ${username} already exists`,
         });
       }
-      // create the user
-      // create their session and redirect to /
       const user = await register({ username, password });
       if (!user) {
         return badRequest({
@@ -119,79 +117,58 @@ export default function Login() {
   const [searchParams] = useSearchParams();
 
   return (
-    <div className="background-wrapper">
-      <section className="container login-content">
-        <div className="content">
+    <div className="login-wrapper">
+      <div className="login-container">
+        <div className="login-content">
           <h1>Sign in to Your Account</h1>
-          <form method="post">
-            <input type="hidden" name="loginType" value="login" />
-            <input
+          <form className="login-form" method="post">
+            <Input type="hidden" name="loginType" value="login" />
+            <Input
               type="hidden"
               name="redirectTo"
               value={searchParams.get("redirectTo") ?? undefined}
             />
-            <div className="login-field username">
-              <label htmlFor="username-input">Username</label>
-              <input
-                type="text"
-                autoFocus
-                id="username-input"
-                name="username"
-                defaultValue={actionData?.fields?.username}
-                aria-invalid={Boolean(actionData?.fieldErrors?.username)}
-                aria-errormessage={
-                  actionData?.fieldErrors?.username
-                    ? "username-error"
-                    : undefined
-                }
-              />
-              {actionData?.fieldErrors?.username ? (
-                <p
-                  className="form-validation-error"
-                  role="alert"
-                  id="username-error"
-                >
-                  {actionData.fieldErrors.username}
-                </p>
-              ) : null}
-            </div>
-            <div className="login-field password">
-              <label htmlFor="password-input">Password</label>
-              <input
-                id="password-input"
-                name="password"
-                type="password"
-                defaultValue={actionData?.fields?.password}
-                aria-invalid={Boolean(actionData?.fieldErrors?.password)}
-                aria-errormessage={
-                  actionData?.fieldErrors?.password
-                    ? "password-error"
-                    : undefined
-                }
-              />
-              {actionData?.fieldErrors?.password ? (
-                <p
-                  className="form-validation-error"
-                  role="alert"
-                  id="password-error"
-                >
-                  {actionData.fieldErrors.password}
-                </p>
-              ) : null}
-            </div>
-            <div id="form-error-message">
+
+            <Field
+              errorMsg={actionData?.fieldErrors?.username}
+              label="Username"
+              type="text"
+              autoFocus
+              id="username-input"
+              name="username"
+              defaultValue={actionData?.fields?.username}
+              aria-invalid={Boolean(actionData?.fieldErrors?.username)}
+              aria-errormessage={
+                actionData?.fieldErrors?.username ? "username-error" : undefined
+              }
+            />
+
+            <Field
+              errorMsg={actionData?.fieldErrors?.password}
+              label="Password"
+              id="password-input"
+              name="password"
+              type="password"
+              defaultValue={actionData?.fields?.password}
+              aria-invalid={Boolean(actionData?.fieldErrors?.password)}
+              aria-errormessage={
+                actionData?.fieldErrors?.password ? "password-error" : undefined
+              }
+            />
+
+            <div data-field>
               {actionData?.formError ? (
-                <p className="form-validation-error" role="alert">
+                <p className="field-error" role="alert">
                   {actionData.formError}
                 </p>
               ) : null}
             </div>
-            <button type="submit" className="button">
-              Submit
-            </button>
+
+            <Button type="submit">Submit</Button>
           </form>
         </div>
-      </section>
+      </div>
+
       <aside className="login-aside"></aside>
     </div>
   );

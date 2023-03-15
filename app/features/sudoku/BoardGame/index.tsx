@@ -22,6 +22,7 @@ import {
   isMatchCell,
   isUserCell,
 } from "~/utils/game";
+import { Button } from "../../../comps/Button";
 import Score from "../Score";
 import Cell from "./Cell";
 import CountDown from "./CountDown";
@@ -236,7 +237,7 @@ const BoardGame = ({
       <div className="game-info">
         {initGameStatus === "READY" && (
           <div className="start-button-c">
-            <button
+            <Button
               className="start-button"
               type="button"
               onClick={() => {
@@ -255,7 +256,7 @@ const BoardGame = ({
                 : curUser?.status === "READY"
                 ? "Remove ready"
                 : "Ready"}
-            </button>
+            </Button>
           </div>
         )}
         <div className="game-flex-wrapper">

@@ -13,7 +13,10 @@ import type { Socket } from "socket.io-client";
 import io from "socket.io-client";
 import globalStyles from "~/styles/global.css";
 import headerStyles from "~/styles/header/header.css";
-import indexStyles from "~/styles/index.css";
+import { links as buttonLinks } from "~/comps/Button";
+import { links as inputLinks } from "~/comps/Input";
+import { links as fieldLinks } from "~/comps/Field";
+
 import Rubik from "./comps/Rubik";
 import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
@@ -30,9 +33,11 @@ export const meta: MetaFunction = () => ({
 
 export const links: LinksFunction = () => {
   return [
+    ...buttonLinks(),
+    ...inputLinks(),
+    ...fieldLinks(),
     { rel: "stylesheet", href: globalStyles },
     { rel: "stylesheet", href: headerStyles },
-    { rel: "stylesheet", href: indexStyles },
     {
       rel: "apple-touch-icon",
       sizes: "180x180",

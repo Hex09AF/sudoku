@@ -5,14 +5,14 @@ import type {
 } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import BoardGame from "~/comps/BoardGame";
+import BoardGame from "~/features/sudoku/BoardGame";
 
 import { useEffect } from "react";
 import { baseBoard } from "~/const/board";
 import { useSocket } from "~/context";
 import mergeMovesWithBoard from "~/helper/merge";
 import SOLVE from "~/helper/solve";
-import stylesUrl from "~/styles/index.css";
+import stylesUrl from "~/styles/sudoku/index.css";
 import {
   getMoves,
   getRoom,

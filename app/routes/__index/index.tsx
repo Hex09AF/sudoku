@@ -6,6 +6,7 @@ import { useRef, useState } from "react";
 import LookUp from "~/assets/svg/LookUp";
 import { getRooms } from "~/utils/room.server";
 import EmptyRoom from "~/assets/empty-rooms.jpeg";
+import { Input } from "~/comps/Input";
 
 export const loader = async ({ request }: LoaderArgs) => {
   const rooms = await getRooms();
@@ -38,7 +39,7 @@ export default function Lobby() {
             <LookUp />
           </div>
           <form onSubmit={getRoom} ref={getRoomFormRef}>
-            <input name="idRoom" placeholder="Type the room id.." />
+            <Input name="idRoom" placeholder="Type the room id.." />
           </form>
         </label>
         {data.rooms.length > 0 ? (

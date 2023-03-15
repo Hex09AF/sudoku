@@ -1,8 +1,8 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LinksFunction, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
-import BoardGame from "~/comps/BoardGame/BotPlay";
+import BoardGame from "~/features/sudoku/BoardGame/BotPlay";
 import Header from "~/comps/Header";
 
 import RANDOMBOARD from "~/helper/random";
@@ -10,8 +10,18 @@ import SOLVE from "~/helper/solve";
 import { getUser } from "~/utils/session.server";
 
 import { Outlet } from "@remix-run/react";
-import UsersOnline from "~/comps/UsersOnline/UsersOnline";
+import UsersOnline from "~/features/home/UsersOnline";
 import { getRooms } from "~/utils/room.server";
+
+import stylesUrl from "~/styles/home/home.css";
+import stylesSudokuUrl from "~/styles/sudoku/index.css";
+
+export const links: LinksFunction = () => {
+  return [
+    { rel: "stylesheet", href: stylesUrl },
+    { rel: "stylesheet", href: stylesSudokuUrl },
+  ];
+};
 
 export const loader = async ({ request }: LoaderArgs) => {
   const user = await getUser(request);

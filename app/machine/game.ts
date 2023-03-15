@@ -88,7 +88,7 @@ const gameMachine = createMachine<GameContext>(
           }
 
           const findingWinner = players.reduce((curWinner, curPlayer) => {
-            return curWinner.score > curPlayer.score ? curWinner : curWinner;
+            return curWinner.score > curPlayer.score ? curWinner : curPlayer;
           });
 
           return findingWinner.userId;

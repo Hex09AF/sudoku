@@ -1,0 +1,17 @@
+[data-button] {
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background: var(--primary-color);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+[data-button]:hover {
+  background-color: #005ce6;
+}
+
+[data-button]:disabled {
+  background-color: #d7dfe9;
+}

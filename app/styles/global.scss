@@ -1,5 +1,10 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap");
 
+:root {
+  --primary-color: #0066ff;
+  --border-color: #d7dfe9;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -13,78 +18,7 @@ html {
   font-weight: 500;
 }
 
-.background-wrapper {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  max-height: 100%;
-  max-width: 141%;
-  justify-content: center;
-  align-items: center;
-  perspective: 1000px;
-}
-
-.login-aside {
-  height: 100%;
-  width: 60%;
-  z-index: -1;
-  right: 0;
-  position: absolute;
-  background: url(../assets/shamiron-bormon-sudoku.jpeg),
-    linear-gradient(90deg, #fffffff0, transparent 50%);
-  background-blend-mode: overlay;
-  background-size: cover;
-  background-position: center;
-  &::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    top: 0;
-    mix-blend-mode: color-dodge;
-    transition: all 0.33s ease;
-    opacity: 1;
-    background-image: url(https://assets.codepen.io/13471/sparkles.gif),
-      url(https://assets.codepen.io/13471/holo.png),
-      linear-gradient(
-        125deg,
-        #ff008450 15%,
-        #fca40040 30%,
-        #ffff0030 40%,
-        #00ff8a20 60%,
-        #00cfff40 70%,
-        #cc4cfa50 85%
-      );
-    background-position: 50% 50%;
-    background-size: 150%, 50%, 150%;
-    background-repeat: repeat, repeat, repeat;
-    background-blend-mode: overlay;
-    filter: brightness(1) contrast(1);
-    transition: all 0.33s ease;
-    opacity: 1;
-  }
-}
-
-button {
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  background: #0066ff;
-  color: white;
-  font-weight: 600;
-  cursor: pointer;
-  &:hover {
-    background-color: #005ce6;
-  }
-  &:disabled {
-    background-color: #d7dfe9;
-  }
-}
-
-input {
-  border: 1px solid #d7dfe9;
-}
+// 404
 
 .rubik-wrapper {
   display: flex;

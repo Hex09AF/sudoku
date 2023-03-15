@@ -61,12 +61,10 @@ const Cell = ({
   const isMatchCellClass = isUserCell && isMatchCell ? " match-cell " : "";
 
   const conflictCellClass =
-    (isConflictCol || isConflictRow || isConflictSquare) &&
-    isNumber &&
-    !isMatchCell
+    (isConflictCol || isConflictRow || isConflictSquare || !isMatchCell) &&
+    isNumber
       ? " number-conflict "
       : "";
-  const conflictValueClass = conflictCellClass ? " default-conflict " : "";
 
   const isUserClass = isUser ? " user-cell " : "";
   const isEnemyClass = isEnemy ? " enemy-cell " : "";
@@ -97,7 +95,7 @@ const Cell = ({
         }
         onClick={() => handleSelectCell()}
       >
-        <div className={`cell-value` + conflictValueClass}>
+        <div className={`cell-value`}>
           <span>{`${cellVal || ""}`}</span>
         </div>
       </td>

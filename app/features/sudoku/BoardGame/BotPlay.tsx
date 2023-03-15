@@ -1,9 +1,8 @@
-import type { SetStateAction } from "react";
 import { useEffect, useRef, useState } from "react";
 import type { Board } from "~/declares/interfaces/Board";
 import type { GameMove } from "~/declares/interfaces/GameMove";
-import type { Pair } from "~/declares/interfaces/Pair";
 import type { UserId } from "~/declares/interfaces/Id";
+import type { Pair } from "~/declares/interfaces/Pair";
 import {
   checkValid,
   getCellUserId,
@@ -12,9 +11,9 @@ import {
   isUserCell,
   randBetween,
 } from "~/utils/game";
+import { Button } from "../../../comps/Button";
 import Score from "../Score";
 import Cell from "./Cell";
-import { json } from "@remix-run/node";
 
 type BoardGameProps = {
   solveBoard: Board;
@@ -266,7 +265,7 @@ const BoardGame = ({
         ))}
         {!isGameStart && (
           <div className="start-button-c">
-            <button
+            <Button
               className="start-button"
               type="button"
               onClick={() => {
@@ -274,7 +273,7 @@ const BoardGame = ({
               }}
             >
               Play with bot
-            </button>
+            </Button>
           </div>
         )}
       </div>

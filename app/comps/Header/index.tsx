@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { Button } from "../Button";
 
 type HeaderProps = {
   user: {
@@ -13,9 +14,7 @@ export default function Header({ user }: HeaderProps) {
       <nav>
         {user ? (
           <form action="/logout" method="post">
-            <button type="submit" className="button">
-              Sign out
-            </button>
+            <Button type="submit">Sign out</Button>
           </form>
         ) : (
           <Link to="/login">Sign in</Link>
@@ -33,7 +32,7 @@ export default function Header({ user }: HeaderProps) {
       <div>
         {user?.username == "kody" ? (
           <form method="post" action="/">
-            <button type="submit">Create game</button>
+            <Button type="submit">Create game</Button>
           </form>
         ) : (
           ""

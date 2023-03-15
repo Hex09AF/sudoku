@@ -1,0 +1,65 @@
+.login-wrapper {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+
+  .login-aside {
+    height: 100%;
+    width: 60%;
+    z-index: -1;
+    right: 0;
+    position: absolute;
+    background: url(../../assets/shamiron-bormon-sudoku.jpeg),
+      linear-gradient(90deg, #fffffff0, transparent 50%);
+    background-blend-mode: overlay;
+    background-size: cover;
+    background-position: center;
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: 0;
+      mix-blend-mode: color-dodge;
+      transition: all 0.33s ease;
+      opacity: 1;
+      background-image: url(https://assets.codepen.io/13471/sparkles.gif),
+        url(https://assets.codepen.io/13471/holo.png),
+        linear-gradient(
+          125deg,
+          #ff008450 15%,
+          #fca40040 30%,
+          #ffff0030 40%,
+          #00ff8a20 60%,
+          #00cfff40 70%,
+          #cc4cfa50 85%
+        );
+      background-position: 50% 50%;
+      background-size: 150%, 50%, 150%;
+      background-repeat: repeat, repeat, repeat;
+      background-blend-mode: overlay;
+      filter: brightness(1) contrast(1);
+      transition: all 0.33s ease;
+      opacity: 1;
+    }
+  }
+
+  .login-container {
+    margin-right: auto;
+    height: 100%;
+    width: 60%;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .login-content {
+      width: 100%;
+      max-width: 24rem;
+    }
+  }
+}

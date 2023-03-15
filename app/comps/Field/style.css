@@ -1,0 +1,15 @@
+[data-field] {
+  margin: 1.5rem 0;
+}
+
+[data-field] label {
+  display: block;
+  font-size: 0.875rem;
+  margin: 1.5rem 0 0.5rem;
+}
+
+[data-field] .field-error {
+  margin: 0.5rem 0 1rem;
+  color: #e12120;
+  font-size: 0.8rem;
+}
