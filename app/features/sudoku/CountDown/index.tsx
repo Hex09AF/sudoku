@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCountdown } from "~/hooks/useCountDown";
+import { useCountdown } from "~/utils/hooks/useCountDown";
 
 type CountDownProps = {
   onFinish: Function;

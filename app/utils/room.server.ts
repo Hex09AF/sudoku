@@ -1,5 +1,5 @@
 import { redirect } from "@remix-run/node";
-import RANDOMBOARD from "~/helper/random";
+import RANDOMBOARD from "~/utils/helper/random";
 import { db } from "./db.server";
 
 export async function createRoom() {

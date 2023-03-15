@@ -1,5 +1,5 @@
-import { baseBoard } from "~/const/board";
-import type { Board } from "~/declares/interfaces/Board";
+import { baseBoard } from "~/utils/const/board";
+import type { Board } from "~/utils/declares/interfaces/Board";
 
 /**
  *

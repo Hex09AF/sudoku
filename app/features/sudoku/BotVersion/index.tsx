@@ -226,7 +226,6 @@ const BoardGame = ({
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score
-            socketStatus={userInRoom.socketStatus}
             winner={gameState.context.winner}
             userId={userInRoom.userId}
             isUser={userInRoom.userId == userId}
@@ -344,7 +343,7 @@ const BoardGame = ({
             </div>
           </div>
           <div className="game-intro">
-            <p>🕹️ Play with arrow ⬅️ ➡️ ⬆️ ⬇️ and number keys 🔢</p>
+            <p>🕹️ Play with arrow and number keys</p>
           </div>
         </div>
       </div>

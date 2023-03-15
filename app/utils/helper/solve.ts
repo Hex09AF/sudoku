@@ -1,5 +1,5 @@
-import type { Board } from "~/declares/interfaces/Board";
-import type { Pair } from "~/declares/interfaces/Pair";
+import type { Board } from "~/utils/declares/interfaces/Board";
+import type { Pair } from "~/utils/declares/interfaces/Pair";
 
 const SOLVE = (boardValue: Board) => {
   return new Promise<Board>((resolve, reject) => {

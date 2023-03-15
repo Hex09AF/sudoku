@@ -17,7 +17,7 @@ import { links as buttonLinks } from "~/comps/Button";
 import { links as inputLinks } from "~/comps/Input";
 import { links as fieldLinks } from "~/comps/Field";
 
-import Rubik from "./comps/Rubik";
+import Rubik from "./features/404/Rubik";
 import { SocketProvider } from "./context";
 import { createRoom } from "./utils/room.server";
 import favicon from "~/assets/favicon/apple-touch-icon.png";

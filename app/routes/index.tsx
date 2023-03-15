@@ -2,11 +2,11 @@ import type { LinksFunction, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
-import BoardGame from "~/features/sudoku/BoardGame/BotPlay";
+import BoardGame from "~/features/sudoku/BotVersion";
 import Header from "~/comps/Header";
 
-import RANDOMBOARD from "~/helper/random";
-import SOLVE from "~/helper/solve";
+import RANDOMBOARD from "~/utils/helper/random";
+import SOLVE from "~/utils/helper/solve";
 import { getUser } from "~/utils/session.server";
 
 import { Outlet } from "@remix-run/react";
@@ -15,6 +15,7 @@ import { getRooms } from "~/utils/room.server";
 
 import stylesUrl from "~/styles/home/home.css";
 import stylesSudokuUrl from "~/styles/sudoku/index.css";
+import AvailableRoom from "~/features/home/AvailableRoom";
 
 export const links: LinksFunction = () => {
   return [
@@ -49,7 +50,7 @@ export default function Index() {
       <Header user={user} />
 
       <div className="lobby-c">
-        <Outlet />
+        <AvailableRoom rooms={data.rooms} />
         <BoardGame
           solveBoard={data.solveBoard}
           initGameMoves={[
@@ -58,18 +59,22 @@ export default function Index() {
               userId: "USER_LOCAL_ID",
               score: 0,
               plus: 0,
+              status: "READY",
+              socketStatus: "ONLINE",
             },
             {
               moves: [],
               userId: "BOT_LOCAL_ID",
               score: 0,
               plus: 0,
+              status: "READY",
+              socketStatus: "ONLINE",
             },
           ]}
           userId={"USER_LOCAL_ID"}
           initBoard={data.board}
         />
-        <UsersOnline rooms={data.rooms} user={data.user} />
+        <UsersOnline user={data.user} />
       </div>
     </div>
   );

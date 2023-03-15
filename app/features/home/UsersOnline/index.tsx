@@ -2,8 +2,8 @@ import type { SerializeFrom } from "@remix-run/node";
 import { useEffect, useState } from "react";
 import EmptyUser from "~/assets/empty-users.jpeg";
 import { useSocket } from "~/context";
-import { SocketEvent } from "~/declares/interfaces/Socket";
-import hashToAvatar from "~/helper/hash";
+import { SocketEvent } from "~/utils/declares/interfaces/Socket";
+import hashToAvatar from "~/utils/helper/hash";
 
 type UsersOnlineProps = {
   user: SerializeFrom<{ id: string; username: string }> | null;

@@ -28,7 +28,6 @@
   align-items: center;
   gap: 16px;
   font-size: 0.875rem;
-  cursor: pointer;
 }
 .app-header__findroom input {
   border: none;

@@ -1,15 +1,15 @@
 import { assign, createMachine } from "xstate";
-import type { Board } from "~/declares/interfaces/Board";
-import type { GameMove } from "~/declares/interfaces/GameMove";
-import type { UserId } from "~/declares/interfaces/Id";
-import type { Pair } from "~/declares/interfaces/Pair";
+import type { Board } from "~/utils/declares/interfaces/Board";
+import type { GameMove } from "~/utils/declares/interfaces/GameMove";
+import type { UserId } from "~/utils/declares/interfaces/Id";
+import type { Pair } from "~/utils/declares/interfaces/Pair";
 import {
   SUDOKU_ACTION as A,
   SUDOKU_CALLBACK as C,
   SUDOKU_EVENT as E,
   SUDOKU_GUARD as G,
   SUDOKU_STATE as S,
-} from "~/declares/sudoku-machine/sudoku.machine.type";
+} from "~/utils/declares/sudoku-machine/sudoku.machine.type";
 
 interface GameContext {
   players: GameMove[];

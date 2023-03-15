@@ -1,5 +1,5 @@
-import type { Pair } from "~/declares/interfaces/Pair";
-import hashToAvatar from "~/helper/hash";
+import type { Pair } from "~/utils/declares/interfaces/Pair";
+import hashToAvatar from "~/utils/helper/hash";
 
 type CellProps = {
   isHightLight: boolean;

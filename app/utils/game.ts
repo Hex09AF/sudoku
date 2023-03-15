@@ -1,7 +1,7 @@
-import type { Board, CellValue } from "~/declares/interfaces/Board";
-import type { GameMove } from "~/declares/interfaces/GameMove";
-import type { Pair } from "~/declares/interfaces/Pair";
-import type { UserId } from "~/declares/interfaces/Id";
+import type { Board, CellValue } from "~/utils/declares/interfaces/Board";
+import type { GameMove } from "~/utils/declares/interfaces/GameMove";
+import type { Pair } from "~/utils/declares/interfaces/Pair";
+import type { UserId } from "~/utils/declares/interfaces/Id";
 
 const getCellUserId = (gameMoves: GameMove[], pair: Pair) => {
   let userId = "";

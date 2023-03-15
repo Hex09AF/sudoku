@@ -1,3 +1,16 @@
+@charset "UTF-8";
+a.game-back {
+  background-color: unset;
+  color: unset;
+  position: absolute;
+  text-decoration: none;
+  color: unset;
+  font-weight: 600;
+  font-size: 0.85rem;
+  left: 1rem;
+  top: 1rem;
+}
+
 .sudoku-wrapper {
   width: 100%;
   height: 100%;
@@ -138,20 +151,25 @@
   background-color: #fbfba1;
 }
 .game-cell.enemy-cell::before, .game-cell.user-cell::before {
-  opacity: 0.7;
+  border-radius: 20%;
   content: "";
   display: block;
   position: absolute;
   background-size: cover;
-  width: 16px;
-  height: 16px;
   background-image: var(--avatar-image-cell);
 }
 .game-cell.user-cell::before {
+  width: 16px;
+  height: 16px;
   top: 0;
   right: 0;
 }
+.game-cell.enemy-cell {
+  opacity: 0.7;
+}
 .game-cell.enemy-cell::before {
+  width: 12px;
+  height: 12px;
   bottom: 0;
   left: 0;
 }
@@ -422,6 +440,7 @@ svg:not(:root) {
 
 .score-wrapper {
   margin: 32px;
+  margin-top: 36px;
   gap: 32px;
   display: flex;
   align-items: center;
@@ -429,17 +448,20 @@ svg:not(:root) {
 }
 
 .score-info {
+  min-width: 6rem;
+  border-radius: 4px;
+  padding: 10px;
   font-size: 0.75rem;
   color: #eee4da;
-  position: relative;
-  font-weight: 500;
-  border-radius: 4px;
   background-color: #bbada0;
+  background: url(../../assets/bg-score.jpeg);
+  background-size: cover;
+  background-position: center;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 10px;
 }
 .score-info::before {
   border-radius: 50%;
@@ -453,9 +475,6 @@ svg:not(:root) {
   height: 32px;
   background-image: var(--avatar-image);
 }
-.score-info h2 {
-  color: white;
-}
 .score-info .plus-point {
   color: white;
   border-radius: 4px;
@@ -465,10 +484,21 @@ svg:not(:root) {
   width: 100%;
   text-align: center;
   background: none;
-  transition: all 0.3s ease-in 0s;
   animation-name: fly-up;
-  animation-duration: 0.8s;
+  animation-duration: 1s;
   animation-fill-mode: forwards;
+}
+.score-info.user-offline {
+  opacity: 0.5;
+}
+.score-info.user-winner::after {
+  display: block;
+  content: "👑";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -75%);
+  font-size: 3rem;
 }
 
 @keyframes fly-up {

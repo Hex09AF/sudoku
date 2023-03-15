@@ -27,7 +27,7 @@
 
 .list-room {
   height: 100%;
-  border: 2px solid #344861;
+  border: 1.5px solid #344861;
   border-left: none;
   overflow: hidden;
   border-top-right-radius: 8px;
@@ -44,8 +44,8 @@
   right: 0;
   writing-mode: vertical-rl;
   text-orientation: sideways;
-  transform: translateX(calc(100% - 2px));
-  border: 2px solid #344861;
+  transform: translateX(calc(100% - 1.5px));
+  border: 1.5px solid #344861;
   padding: 0.5rem 0.5rem;
   border-radius: 8px;
   border-top-left-radius: 0;
@@ -78,7 +78,7 @@
 
 .list-user {
   height: 100%;
-  border: 2px solid #344861;
+  border: 1.5px solid #344861;
   border-right: none;
   overflow: hidden;
   border-top-left-radius: 8px;
@@ -95,8 +95,8 @@
   left: 0;
   writing-mode: vertical-rl;
   text-orientation: sideways;
-  transform: translateX(calc(-100% + 2px)) rotate(180deg);
-  border: 2px solid #344861;
+  transform: translateX(calc(-100% + 1.5px)) rotate(180deg);
+  border: 1.5px solid #344861;
   padding: 0.5rem 0.5rem;
   border-radius: 8px;
   border-top-left-radius: 0;

@@ -1,23 +1,21 @@
-import type { LoaderArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Link, useLoaderData, useNavigate } from "@remix-run/react";
+import type { Room, UsersOnRooms } from "@prisma/client";
+import type { SerializeFrom } from "@remix-run/node";
+import { Link, useNavigate } from "@remix-run/react";
 import { formatDistanceToNowStrict } from "date-fns";
 import { useRef, useState } from "react";
-import LookUp from "~/assets/svg/LookUp";
-import { getRooms } from "~/utils/room.server";
 import EmptyRoom from "~/assets/empty-rooms.jpeg";
+import LookUp from "~/assets/svg/LookUp";
 import { Input } from "~/comps/Input";
 
-export const loader = async ({ request }: LoaderArgs) => {
-  const rooms = await getRooms();
+interface AvailableRoomProps {
+  rooms: SerializeFrom<
+    Room & {
+      users: UsersOnRooms[];
+    }
+  >[];
+}
 
-  return json({
-    rooms,
-  });
-};
-
-export default function Lobby() {
-  const data = useLoaderData<typeof loader>();
+export default function AvailableRoom({ rooms }: AvailableRoomProps) {
   const [show, setShow] = useState(false);
   const navigate = useNavigate();
   const getRoomFormRef = useRef(null);
@@ -42,8 +40,8 @@ export default function Lobby() {
             <Input name="idRoom" placeholder="Type the room id.." />
           </form>
         </label>
-        {data.rooms.length > 0 ? (
-          data.rooms.map((v, idx) => (
+        {rooms.length > 0 ? (
+          rooms.map((v, idx) => (
             <div className="room-info" key={v.id}>
               <Link to={`/solo/${v.id}`}>
                 Room {idx + 1}
