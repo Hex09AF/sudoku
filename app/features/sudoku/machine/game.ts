@@ -57,6 +57,9 @@ const gameMachine = createMachine<GameContext>(
               [E.updateUserStatus]: {
                 actions: [A.executeUpdateUserStatus],
               },
+              [E.updateUserOnlineStatus]: {
+                actions: [A.executeUpdateUserOnlineStatus],
+              },
             },
           },
           [S.playingCheckingGameState]: {
@@ -164,6 +167,20 @@ const gameMachine = createMachine<GameContext>(
           );
           if (curUser) {
             curUser.status = userInfo.status;
+          }
+          return players;
+        },
+      }),
+
+      [A.executeUpdateUserOnlineStatus]: assign({
+        players: (context, event) => {
+          const { userInfo } = event;
+          const { players } = context;
+          const curUser = players.find(
+            (player) => player.userId == userInfo.userId
+          );
+          if (curUser) {
+            curUser.socketStatus = userInfo.socketStatus;
           }
           return players;
         },

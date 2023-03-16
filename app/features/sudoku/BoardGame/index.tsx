@@ -175,10 +175,7 @@ const BoardGame = ({
       send({ type: SUDOKU_EVENT.updateUserStatus, userInfo });
     };
     const handleRemoveClient = ({ userInfo }: { userInfo: UserInRoom }) => {
-      // setUsersInRoom((preUsers) => {
-      //   const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
-      //   return JSON.parse(JSON.stringify(newUsers));
-      // });
+      send({ type: SUDOKU_EVENT.updateUserOnlineStatus, userInfo });
     };
     const handleAddClient = ({ usersInfo }: { usersInfo: GameMove[] }) => {
       send({ type: SUDOKU_EVENT.bulkUsers, usersInfo });

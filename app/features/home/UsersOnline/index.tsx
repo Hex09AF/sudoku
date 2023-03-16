@@ -22,23 +22,11 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
 
   useEffect(() => {
     if (!socket) return;
-    socket.on("connect", () => {
-      socket.emit(SocketEvent.CLIENT_CONNECTED, { user, socketId: socket.id });
-    });
-    return () => {
-      socket.off("connect");
-    };
-  }, [socket, user]);
-
-  useEffect(() => {
-    if (!socket) return;
     socket.on(SocketEvent.SERVER_CLIENT_CONNECTED, (listUserOnline) => {
       setUsers(listUserOnline);
     });
-    return () => {
-      socket.off(SocketEvent.SERVER_CLIENT_CONNECTED);
-    };
-  }, [socket]);
+    socket.emit(SocketEvent.CLIENT_CONNECTED, { user });
+  }, [socket, user]);
 
   return (
     <div className={`list-user-c ${!show ? "show" : ""}`}>
@@ -69,7 +57,7 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
           setShow((pre) => !pre);
         }}
       >
-        Users Online
+        Online users
       </div>
     </div>
   );

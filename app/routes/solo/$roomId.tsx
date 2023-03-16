@@ -111,6 +111,10 @@ export default function SoloRoom() {
       plus: 0,
       status: data.curUserStatus,
     });
+
+    return () => {
+      socket.emit(SocketEvent.CLIENT_LEAVE_ROOM);
+    };
   }, [socket, data]);
 
   return (

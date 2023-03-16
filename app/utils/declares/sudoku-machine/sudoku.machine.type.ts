@@ -21,6 +21,7 @@ export enum SUDOKU_ACTION {
   executeMove = "executeMove",
   executeBulkUsers = "executeBulkUsers",
   executeUpdateUserStatus = "executeUpdateUserStatus",
+  executeUpdateUserOnlineStatus = "executeUpdateUserOnlineStatus",
 }
 
 export enum SUDOKU_EVENT {
@@ -28,4 +29,5 @@ export enum SUDOKU_EVENT {
   move = "move",
   bulkUsers = "bulkUsers",
   updateUserStatus = "updateUserStatus",
+  updateUserOnlineStatus = "updateUserOnlineStatus",
 }

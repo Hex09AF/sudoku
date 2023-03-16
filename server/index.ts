@@ -53,21 +53,18 @@ io.on("connection", (socket) => {
    * CLIENT WAITING LIST
    */
   connectedClients.push({ socketId: socket.id });
-  socket.on(
-    SocketEvent.CLIENT_CONNECTED,
-    ({ user, socketId }: InfoConnected) => {
-      if (user) {
-        const curUser = connectedClients.find(
-          (client) => client.socketId === socketId
-        );
-        if (curUser) {
-          curUser.userId = user.id;
-          curUser.username = user.username;
-        }
+  socket.on(SocketEvent.CLIENT_CONNECTED, ({ user }: InfoConnected) => {
+    if (user) {
+      const curUser = connectedClients.find(
+        (client) => client.socketId === socket.id
+      );
+      if (curUser) {
+        curUser.userId = user.id;
+        curUser.username = user.username;
       }
-      io.emit(SocketEvent.SERVER_CLIENT_CONNECTED, connectedClients);
     }
-  );
+    io.emit(SocketEvent.SERVER_CLIENT_CONNECTED, connectedClients);
+  });
 
   /**
    * CLIENT JOIN A ROOM
@@ -158,6 +155,20 @@ io.on("connection", (socket) => {
       });
     }
   );
+
+  /**
+   * REMOVE CLIENT WHEN LEAVE ROOM
+   */
+  socket.on(SocketEvent.CLIENT_LEAVE_ROOM, () => {
+    const user = userLeave(socket.id);
+
+    if (user) {
+      user.socketStatus = "OFFLINE";
+      io.to(user.roomId).emit(SocketEvent.SERVER_REMOVE_CLIENT, {
+        userInfo: user,
+      });
+    }
+  });
 
   socket.on("disconnect", () => {
     connectedClients = connectedClients.filter(

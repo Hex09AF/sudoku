@@ -64,7 +64,7 @@ export default function AvailableRoom({ rooms }: AvailableRoomProps) {
           setShow((pre) => !pre);
         }}
       >
-        Room Name
+        Rooms
       </div>
     </div>
   );

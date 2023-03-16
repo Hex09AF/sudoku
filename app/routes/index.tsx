@@ -16,6 +16,7 @@ import { getRooms } from "~/utils/room.server";
 import stylesUrl from "~/styles/home/home.css";
 import stylesSudokuUrl from "~/styles/sudoku/index.css";
 import AvailableRoom from "~/features/home/AvailableRoom";
+import { useSocket } from "~/context";
 
 export const links: LinksFunction = () => {
   return [
