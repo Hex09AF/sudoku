@@ -25,8 +25,8 @@ import {
   userJoin,
   userLeave,
 } from "./utils/users";
-import { Pair } from "./declares/interfaces/Pair";
-import { UserId } from "./declares/interfaces/Id";
+import type { Pair } from "./declares/interfaces/Pair";
+import type { UserId } from "./declares/interfaces/Id";
 
 const MODE = process.env.NODE_ENV;
 const BUILD_DIR = path.join(process.cwd(), "server/build");
@@ -163,6 +163,7 @@ io.on("connection", (socket) => {
     const user = userLeave(socket.id);
 
     if (user) {
+      socket.leave(user.roomId);
       user.socketStatus = "OFFLINE";
       io.to(user.roomId).emit(SocketEvent.SERVER_REMOVE_CLIENT, {
         userInfo: user,

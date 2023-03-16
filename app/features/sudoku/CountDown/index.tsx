@@ -6,15 +6,19 @@ type CountDownProps = {
 };
 
 const CountDown = ({ onFinish }: CountDownProps) => {
-  const { count, formatCountdown } = useCountdown(5);
+  const { done, formatCountdown } = useCountdown(5);
 
   useEffect(() => {
-    if (Math.floor(count) === 5000) {
+    if (done) {
       onFinish();
     }
-  }, [count]);
+  }, [done]);
 
-  return <div>The game will start in {formatCountdown()}</div>;
+  return (
+    <div className="count-down-info">
+      The game will start in {formatCountdown()}
+    </div>
+  );
 };
 
 export default CountDown;

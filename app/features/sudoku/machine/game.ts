@@ -176,13 +176,19 @@ const gameMachine = createMachine<GameContext>(
         players: (context, event) => {
           const { userInfo } = event;
           const { players } = context;
-          const curUser = players.find(
-            (player) => player.userId == userInfo.userId
-          );
-          if (curUser) {
-            curUser.socketStatus = userInfo.socketStatus;
+          if (userInfo.status === "PLAYING") {
+            const curUser = players.find(
+              (player) => player.userId == userInfo.userId
+            );
+            if (curUser) {
+              curUser.socketStatus = userInfo.socketStatus;
+            }
+            return players;
+          } else {
+            return players.filter(
+              (player) => player.userId !== userInfo.userId
+            );
           }
-          return players;
         },
       }),
 

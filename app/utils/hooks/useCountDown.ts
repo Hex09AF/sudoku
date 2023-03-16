@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 
 export function useCountdown(duration: number) {
   const [count, setCount] = useState(0);
+  const [done, setDone] = useState(false);
 
   useEffect(() => {
     let start: number, previousTimeStamp: number;
@@ -19,6 +20,8 @@ export function useCountdown(duration: number) {
       if (elapsed < duration * 1000) {
         previousTimeStamp = timestamp;
         requestAnimationFrame(step);
+      } else {
+        setDone(true);
       }
     }
 
@@ -35,5 +38,5 @@ export function useCountdown(duration: number) {
     return `${remaining.toString()}.${milliseconds.toString()}`;
   }, [count, duration]);
 
-  return { count, formatCountdown };
+  return { done, count, formatCountdown };
 }

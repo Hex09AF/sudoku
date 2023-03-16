@@ -194,6 +194,7 @@ const BoardGame = ({
   }, [socket, send]);
 
   const onFinish = () => {
+    console.log("EMIT")
     const formData = new FormData();
     formData.append("intent", "updateGameStatus");
     formData.append("roomId", roomId);
@@ -216,6 +217,7 @@ const BoardGame = ({
       action: `/solo/${roomId}`,
       replace: true,
     });
+    console.log("AFTER EMIT")
   };
 
   return (

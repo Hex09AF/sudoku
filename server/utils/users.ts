@@ -4,7 +4,7 @@ import type {
   UserInRoom,
 } from "server/declares/interfaces/Socket";
 
-const users: UserInRoom[] = [];
+export const users: UserInRoom[] = [];
 
 function userJoin({
   id,

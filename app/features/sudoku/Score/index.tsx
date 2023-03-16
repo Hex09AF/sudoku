@@ -52,10 +52,8 @@ export default function Score({
           "Offline"
         ) : status === "NOT_READY" ? (
           "Not ready"
-        ) : status === "PLAYING" ? (
-          "Playing"
         ) : (
-          status
+          status.toLowerCase()
         )}
       </div>
     </div>

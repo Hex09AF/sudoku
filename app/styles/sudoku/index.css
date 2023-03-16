@@ -1,4 +1,21 @@
 @charset "UTF-8";
+.count-down-info {
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.user-status {
+  text-transform: capitalize;
+}
+
+.start-button {
+  margin-bottom: 0.5rem;
+}
+.start-button-c {
+  display: flex;
+  justify-content: center;
+}
+
 a.game-back {
   background-color: unset;
   color: unset;
