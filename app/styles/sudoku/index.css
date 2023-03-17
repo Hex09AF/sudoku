@@ -143,7 +143,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -154,7 +154,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -165,7 +165,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -188,7 +188,8 @@ a.game-back {
   background-image: url("../../assets/stars.png"), linear-gradient(125deg, rgba(255, 0, 132, 0.3137254902) 15%, rgba(252, 164, 0, 0.2509803922) 30%, rgba(255, 255, 0, 0.1882352941) 40%, rgba(0, 255, 138, 0.1254901961) 60%, rgba(0, 207, 255, 0.2509803922) 70%, rgba(204, 76, 250, 0.3137254902) 85%);
   background-size: cover;
   background-blend-mode: overlay;
-  animation-duration: 850ms;
+  animation-duration: 750ms;
+  animation-timing-function: cubic-bezier(0.42, 0, 0.33, 1);
 }
 .game-cell .cell-animate.animate-col {
   animation-name: wave-col;

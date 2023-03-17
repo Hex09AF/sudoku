@@ -20,6 +20,7 @@ interface GameContext {
   canColXNumberY: any[][];
   canSquareXYNumberZ: any[][];
   winner: UserId | null;
+  cellAnimateMap: Map<number, string>;
 }
 
 const gameMachine = createMachine<GameContext>(
@@ -44,6 +45,7 @@ const gameMachine = createMachine<GameContext>(
                     A.executeFill,
                     C.updateGameMovesToDB,
                     A.executeUpdateCanArray,
+                    A.executeAnimateCell,
                   ],
                   target: S.playingCheckingGameState,
                 },
@@ -80,6 +82,61 @@ const gameMachine = createMachine<GameContext>(
   },
   {
     actions: {
+      [A.executeAnimateCell]: assign({
+        cellAnimateMap: (context, event) => {
+          const { board, solveBoard } = context;
+          const { pair } = event;
+          const { row, col } = pair;
+          let mapping = new Map<number, string>();
+          let flagRow = 0,
+            flagCol = 0,
+            flagSqr = 0;
+
+          for (let idx = 0; idx < 9; ++idx) {
+            flagCol += board[idx][col] === solveBoard[idx][col] ? 1 : 0;
+            flagRow += board[row][idx] === solveBoard[row][idx] ? 1 : 0;
+          }
+
+          const startRow = ((row / 3) >> 0) * 3,
+            startCol = ((col / 3) >> 0) * 3;
+          for (let idx = 0; idx < 3; ++idx) {
+            for (let idx2 = 0; idx2 < 3; ++idx2) {
+              flagSqr +=
+                board[startRow + idx][startCol + idx2] ===
+                solveBoard[startRow + idx][startCol + idx2]
+                  ? 1
+                  : 0;
+            }
+          }
+
+          for (let idxRow = 0; idxRow < 9; ++idxRow)
+            for (let idxCol = 0; idxCol < 9; ++idxCol) {
+              let styles = [];
+              if (idxRow === row && flagRow === 9) {
+                styles.push(`animate-row delay-row-${Math.abs(col - idxCol)}`);
+              }
+              if (idxCol === col && flagCol === 9) {
+                styles.push(`animate-col delay-col-${Math.abs(row - idxRow)}`);
+              }
+              if (
+                (idxRow / 3) >> 0 === (row / 3) >> 0 &&
+                (idxCol / 3) >> 0 === (col / 3) >> 0 &&
+                flagSqr === 9
+              ) {
+                styles.push(
+                  `animate-sqr delay-sqr-${
+                    Math.abs(col - idxCol) + Math.abs(row - idxRow)
+                  }`
+                );
+              }
+              const strStyles = styles.join(" ");
+              if (strStyles)
+                mapping.set(idxRow * 10 + idxCol, styles.join(" "));
+            }
+
+          return mapping;
+        },
+      }),
       [A.executeTryGameEnd]: assign({
         winner: ({ winner, board, solveBoard, players }) => {
           for (let rowIdx = 0; rowIdx < 9; ++rowIdx) {

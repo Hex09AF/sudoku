@@ -22,6 +22,7 @@ export enum SUDOKU_ACTION {
   executeBulkUsers = "executeBulkUsers",
   executeUpdateUserStatus = "executeUpdateUserStatus",
   executeUpdateUserOnlineStatus = "executeUpdateUserOnlineStatus",
+  executeAnimateCell = "executeAnimateCell",
 }
 
 export enum SUDOKU_EVENT {

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Pair } from "~/utils/declares/interfaces/Pair";
 import hashToAvatar from "~/utils/helper/hash";
 
@@ -79,6 +80,23 @@ const Cell = ({
     setSelectCell(cellIdx);
   };
 
+  const [animate, setAnimate] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (cellAnimateClass) {
+      setAnimate((preState) => {
+        return [...preState, cellAnimateClass + ' ' + preState.length];
+      });
+      setTimeout(() => {
+        setAnimate((preState) => {
+          const newState = [...preState];
+          newState.splice(0, 1);
+          return newState;
+        });
+      }, 1000);
+    }
+  }, [cellAnimateClass]);
+
   return (
     <>
       <td
@@ -99,10 +117,9 @@ const Cell = ({
       >
         <div className={`cell-value`}>
           <span>{`${cellVal || ""}`}</span>
-          <div
-            key={cellAnimateClass}
-            className={`cell-animate ` + cellAnimateClass}
-          />
+          {animate.map((ani) => (
+            <div key={ani} className={`cell-animate ` + ani} />
+          ))}
         </div>
       </td>
     </>

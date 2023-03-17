@@ -147,7 +147,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -159,7 +159,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -171,7 +171,7 @@ a.game-back {
   35% {
     opacity: 1;
   }
-  90% {
+  100% {
     opacity: 0;
   }
 }
@@ -204,7 +204,8 @@ a.game-back {
       );
     background-size: cover;
     background-blend-mode: overlay;
-    animation-duration: 850ms;
+    animation-duration: 750ms;
+    animation-timing-function: cubic-bezier(0.42, 0, 0.33, 1);
 
     &.animate-col {
       animation-name: wave-col;
