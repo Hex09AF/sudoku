@@ -69,7 +69,12 @@ export const loader: LoaderFunction = async ({ params, request }) => {
       userId: v.userId,
       moves: JSON.parse(v?.moves || "[]"),
       score: v.score,
-      status: v.role === "PLAYER" ? "PLAYING" : "NOT_READY",
+      status:
+        v.role === "PLAYER"
+          ? "PLAYING"
+          : room.gameStatus === "START"
+          ? "VIEWER"
+          : "NOT_READY",
       socketStatus: "OFFLINE",
     };
   });
@@ -89,7 +94,9 @@ export const loader: LoaderFunction = async ({ params, request }) => {
     board,
     userId,
     moves,
-    curUserStatus: userMoves?.status || "NOT_READY",
+    curUserStatus:
+      userMoves?.status ||
+      (room.gameStatus === "START" ? "VIEWER" : "NOT_READY"),
     curUserMoves: userMoves?.moves || [],
     curScore: userMoves?.score || 0,
   });

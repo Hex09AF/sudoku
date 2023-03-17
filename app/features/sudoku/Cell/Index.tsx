@@ -2,6 +2,7 @@ import type { Pair } from "~/utils/declares/interfaces/Pair";
 import hashToAvatar from "~/utils/helper/hash";
 
 type CellProps = {
+  cellAnimateClass: string;
   isHightLight: boolean;
   userId: string;
   isEnemy: boolean;
@@ -19,6 +20,7 @@ type CellProps = {
 };
 
 const Cell = ({
+  cellAnimateClass,
   isHightLight,
   userId,
   setSelectCell,
@@ -97,6 +99,10 @@ const Cell = ({
       >
         <div className={`cell-value`}>
           <span>{`${cellVal || ""}`}</span>
+          <div
+            key={cellAnimateClass}
+            className={`cell-animate ` + cellAnimateClass}
+          />
         </div>
       </td>
     </>

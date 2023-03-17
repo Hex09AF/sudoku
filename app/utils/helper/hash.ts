@@ -22,3 +22,9 @@ export default function hashToAvatar(str: string) {
   }
   return userImages[idx];
 }
+
+export function randomHead() {
+  const hat = ["🧢", "🎩", "⛑", "🌦", "🎓", "👒", "👑"];
+  const idx = Math.floor(Math.random() * hat.length);
+  return hat[idx];
+}

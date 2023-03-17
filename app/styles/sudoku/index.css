@@ -136,6 +136,39 @@ a.game-back {
   border-bottom: 0;
 }
 
+@keyframes wave-col {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
+@keyframes wave-row {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
+@keyframes wave-sqr {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
 .game-cell {
   cursor: pointer;
   position: relative;
@@ -144,10 +177,99 @@ a.game-back {
   border-right: 1px solid #bec6d4;
   border-bottom: 1px solid #bec6d4;
 }
-.game-cell::after {
-  padding-bottom: 100%;
+.game-cell .cell-animate {
+  z-index: 2;
+  height: 100%;
+  width: 100%;
+  position: absolute;
   content: "";
   display: block;
+  opacity: 0;
+  background-image: url("../../assets/stars.png"), linear-gradient(125deg, rgba(255, 0, 132, 0.3137254902) 15%, rgba(252, 164, 0, 0.2509803922) 30%, rgba(255, 255, 0, 0.1882352941) 40%, rgba(0, 255, 138, 0.1254901961) 60%, rgba(0, 207, 255, 0.2509803922) 70%, rgba(204, 76, 250, 0.3137254902) 85%);
+  background-size: cover;
+  background-blend-mode: overlay;
+  animation-duration: 850ms;
+}
+.game-cell .cell-animate.animate-col {
+  animation-name: wave-col;
+}
+.game-cell .cell-animate.animate-row {
+  animation-name: wave-row;
+}
+.game-cell .cell-animate.animate-sqr {
+  animation-name: wave-sqr;
+}
+.game-cell .cell-animate.delay-row-1 {
+  animation-delay: 75ms;
+}
+.game-cell .cell-animate.delay-col-1 {
+  animation-delay: 75ms;
+}
+.game-cell .cell-animate.delay-sqr-1 {
+  animation-delay: 75ms;
+}
+.game-cell .cell-animate.delay-row-2 {
+  animation-delay: 150ms;
+}
+.game-cell .cell-animate.delay-col-2 {
+  animation-delay: 150ms;
+}
+.game-cell .cell-animate.delay-sqr-2 {
+  animation-delay: 150ms;
+}
+.game-cell .cell-animate.delay-row-3 {
+  animation-delay: 225ms;
+}
+.game-cell .cell-animate.delay-col-3 {
+  animation-delay: 225ms;
+}
+.game-cell .cell-animate.delay-sqr-3 {
+  animation-delay: 225ms;
+}
+.game-cell .cell-animate.delay-row-4 {
+  animation-delay: 300ms;
+}
+.game-cell .cell-animate.delay-col-4 {
+  animation-delay: 300ms;
+}
+.game-cell .cell-animate.delay-sqr-4 {
+  animation-delay: 300ms;
+}
+.game-cell .cell-animate.delay-row-5 {
+  animation-delay: 375ms;
+}
+.game-cell .cell-animate.delay-col-5 {
+  animation-delay: 375ms;
+}
+.game-cell .cell-animate.delay-sqr-5 {
+  animation-delay: 375ms;
+}
+.game-cell .cell-animate.delay-row-6 {
+  animation-delay: 450ms;
+}
+.game-cell .cell-animate.delay-col-6 {
+  animation-delay: 450ms;
+}
+.game-cell .cell-animate.delay-sqr-6 {
+  animation-delay: 450ms;
+}
+.game-cell .cell-animate.delay-row-7 {
+  animation-delay: 525ms;
+}
+.game-cell .cell-animate.delay-col-7 {
+  animation-delay: 525ms;
+}
+.game-cell .cell-animate.delay-sqr-7 {
+  animation-delay: 525ms;
+}
+.game-cell .cell-animate.delay-row-8 {
+  animation-delay: 600ms;
+}
+.game-cell .cell-animate.delay-col-8 {
+  animation-delay: 600ms;
+}
+.game-cell .cell-animate.delay-sqr-8 {
+  animation-delay: 600ms;
 }
 .game-cell.table-hightlight {
   background-color: #ffffe8;
@@ -168,6 +290,7 @@ a.game-back {
   background-color: #fbfba1;
 }
 .game-cell.enemy-cell::before, .game-cell.user-cell::before {
+  z-index: 4;
   border-radius: 20%;
   content: "";
   display: block;
@@ -207,6 +330,10 @@ a.game-back {
   font-weight: 100;
   color: #666;
   text-align: center;
+}
+.cell-value span {
+  position: relative;
+  z-index: 4;
 }
 
 .cell-value span {
@@ -464,6 +591,24 @@ svg:not(:root) {
   justify-content: center;
 }
 
+.viewer-info {
+  position: relative;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background-image: var(--avatar-image);
+  background-size: cover;
+}
+.viewer-info::after {
+  display: block;
+  content: var(--viewer-hat);
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translate(-50%, -55%);
+  font-size: 24px;
+}
+
 .score-info {
   min-width: 6rem;
   border-radius: 4px;
@@ -481,6 +626,7 @@ svg:not(:root) {
   justify-content: center;
 }
 .score-info::before {
+  z-index: 4;
   border-radius: 50%;
   content: "";
   display: block;

@@ -140,6 +140,42 @@ a.game-back {
   border-bottom: 0;
 }
 
+@keyframes wave-col {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
+
+@keyframes wave-row {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
+
+@keyframes wave-sqr {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0;
+  }
+}
+
 .game-cell {
   cursor: pointer;
   position: relative;
@@ -148,10 +184,51 @@ a.game-back {
   border-right: 1px solid #bec6d4;
   border-bottom: 1px solid #bec6d4;
 
-  &::after {
-    padding-bottom: 100%;
+  .cell-animate {
+    z-index: 2;
+    height: 100%;
+    width: 100%;
+    position: absolute;
     content: "";
     display: block;
+    opacity: 0;
+    background-image: url("../../assets/stars.png"),
+      linear-gradient(
+        125deg,
+        #ff008450 15%,
+        #fca40040 30%,
+        #ffff0030 40%,
+        #00ff8a20 60%,
+        #00cfff40 70%,
+        #cc4cfa50 85%
+      );
+    background-size: cover;
+    background-blend-mode: overlay;
+    animation-duration: 850ms;
+
+    &.animate-col {
+      animation-name: wave-col;
+    }
+
+    &.animate-row {
+      animation-name: wave-row;
+    }
+
+    &.animate-sqr {
+      animation-name: wave-sqr;
+    }
+
+    @for $i from 1 to 9 {
+      &.delay-row-#{$i} {
+        animation-delay: $i * 75ms;
+      }
+      &.delay-col-#{$i} {
+        animation-delay: $i * 75ms;
+      }
+      &.delay-sqr-#{$i} {
+        animation-delay: $i * 75ms;
+      }
+    }
   }
 
   &.table-hightlight {
@@ -185,6 +262,7 @@ a.game-back {
   &.enemy-cell,
   &.user-cell {
     &::before {
+      z-index: 4;
       border-radius: 20%;
       content: "";
       display: block;
@@ -229,6 +307,10 @@ a.game-back {
   font-weight: 100;
   color: #666;
   text-align: center;
+  span {
+    position: relative;
+    z-index: 4;
+  }
 }
 
 .cell-value span {
@@ -496,6 +578,24 @@ svg:not(:root) {
   justify-content: center;
 }
 
+.viewer-info {
+  position: relative;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  background-image: var(--avatar-image);
+  background-size: cover;
+  &::after {
+    display: block;
+    content: var(--viewer-hat);
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -55%);
+    font-size: 24px;
+  }
+}
+
 .score-info {
   min-width: 6rem;
 
@@ -516,6 +616,7 @@ svg:not(:root) {
   justify-content: center;
 
   &::before {
+    z-index: 4;
     border-radius: 50%;
     content: "";
     display: block;

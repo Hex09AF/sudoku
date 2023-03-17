@@ -17,7 +17,7 @@ export function useCountdown(duration: number) {
         setCount(Math.min(elapsed, duration * 1000));
       }
 
-      if (elapsed < duration * 1000) {
+      if (Math.floor(elapsed) <= duration * 1000) {
         previousTimeStamp = timestamp;
         requestAnimationFrame(step);
       } else {

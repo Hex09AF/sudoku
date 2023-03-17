@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import type { UserId } from "~/utils/declares/interfaces/Id";
-import hashToAvatar from "~/utils/helper/hash";
+import hashToAvatar, { randomHead } from "~/utils/helper/hash";
 import Point from "./point";
 
 type ScoreProps = {
@@ -32,6 +32,14 @@ export default function Score({
     !winner && socketStatus === "OFFLINE" ? "user-offline" : "";
 
   const winnerClass = winner === userId ? "user-winner" : "";
+
+  if (status === "VIEWER") {
+    const viewerStyle = {
+      ["--avatar-image" as any]: `url(${hashToAvatar(userId)})`,
+      ["--viewer-hat" as any]: `"${randomHead()}"`,
+    };
+    return <div style={viewerStyle} className={`viewer-info`} />;
+  }
 
   return (
     <div

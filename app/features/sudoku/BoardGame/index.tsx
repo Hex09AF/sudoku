@@ -194,7 +194,6 @@ const BoardGame = ({
   }, [socket, send]);
 
   const onFinish = () => {
-    console.log("EMIT")
     const formData = new FormData();
     formData.append("intent", "updateGameStatus");
     formData.append("roomId", roomId);
@@ -217,11 +216,43 @@ const BoardGame = ({
       action: `/solo/${roomId}`,
       replace: true,
     });
-    console.log("AFTER EMIT")
   };
 
+  const mapStyle = useMemo(() => {
+    const { row, col } = gameState.context.selectCell;
+    let mapping = new Map<number, string>();
+
+    for (let idxRow = 0; idxRow < 9; ++idxRow)
+      for (let idxCol = 0; idxCol < 9; ++idxCol) {
+        let styles = [];
+        if (idxRow === row) {
+          styles.push(`animate-row delay-row-${Math.abs(col - idxCol)}`);
+        }
+        if (idxCol === col) {
+          styles.push(`animate-col delay-col-${Math.abs(row - idxRow)}`);
+        }
+        if (
+          (idxRow / 3) >> 0 === (row / 3) >> 0 &&
+          (idxCol / 3) >> 0 === (col / 3) >> 0
+        ) {
+          styles.push(
+            `animate-sqr delay-sqr-${
+              Math.abs(col - idxCol) + Math.abs(row - idxRow)
+            }`
+          );
+        }
+        mapping.set(idxRow * 10 + idxCol, styles.join(" "));
+      }
+
+    return mapping;
+  }, [gameState.context.selectCell]);
+
   return (
-    <div className="sudoku-wrapper" tabIndex={-1} onKeyDown={handleKeyDown}>
+    <div
+      className="sudoku-wrapper"
+      tabIndex={-1}
+      onKeyDown={curUser?.status === "PLAYING" ? handleKeyDown : undefined}
+    >
       <div className="score-wrapper">
         {usersInRoom.map((userInRoom) => (
           <Score
@@ -275,6 +306,9 @@ const BoardGame = ({
                       {row.map((val, idx2) => {
                         return (
                           <Cell
+                            cellAnimateClass={
+                              mapStyle.get(idx * 10 + idx2) || ""
+                            }
                             isHightLight={gameState.matches(
                               SUDOKU_STATE.playing
                             )}
