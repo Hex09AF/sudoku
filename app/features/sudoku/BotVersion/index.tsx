@@ -160,7 +160,11 @@ const BoardGame = ({
   }, [gameState, solveBoard, initBoard, send, isGameStart]);
 
   return (
-    <div className="sudoku-wrapper" tabIndex={-1} onKeyDown={handleKeyDown}>
+    <div
+      className="sudoku-wrapper"
+      tabIndex={-1}
+      onKeyDown={isGameStart ? handleKeyDown : undefined}
+    >
       <div className="score-wrapper">
         {gameState.context.players.map((userInRoom) => (
           <Score
