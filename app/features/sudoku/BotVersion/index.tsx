@@ -1,34 +1,29 @@
-import { useSubmit } from "@remix-run/react";
 import { useMachine } from "@xstate/react";
-import debounce from "lodash.debounce";
-import { useCallback, useEffect, useMemo } from "react";
+import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
+import Confetti from "~/assets/svg/Confetti";
+import ConfettiMedium from "~/assets/svg/ConfettiMedium";
+import ConfettiSlow from "~/assets/svg/ConfettiSlow";
+import { Button } from "~/comps/Button";
+import { gameMachine } from "~/features/sudoku/machine/game";
 import type { Board } from "~/utils/declares/interfaces/Board";
 import type { GameMove } from "~/utils/declares/interfaces/GameMove";
 import type { RoomId, UserId } from "~/utils/declares/interfaces/Id";
 import type { Pair } from "~/utils/declares/interfaces/Pair";
-import type {
-  UserInfoStatus,
-  UserInRoom,
-} from "~/utils/declares/interfaces/Socket";
-import { SocketEvent } from "~/utils/declares/interfaces/Socket";
 import {
-  SUDOKU_CALLBACK,
   SUDOKU_EVENT,
   SUDOKU_STATE,
 } from "~/utils/declares/sudoku-machine/sudoku.machine.type";
-import { gameMachine } from "~/features/sudoku/machine/game";
 import {
   checkValid,
   getCellUserId,
   isEnemyCell,
   isMatchCell,
   isUserCell,
+  randBetween,
 } from "~/utils/game";
-import { Button } from "../../../comps/Button";
-import Score from "../Score";
 import Cell from "../Cell/Index";
-import CountDown from "../CountDown";
+import Score from "../Score";
 
 type BoardGameProps = {
   initGameStatus: string;
@@ -62,53 +57,11 @@ const BoardGame = ({
         .fill(0)
         .map(() => new Array(3).fill(0).map(() => new Array(10).fill(0))),
       winner: null,
-    },
-    actions: {
-      [SUDOKU_CALLBACK.updateGameMovesToDB]: (context, event) => {
-        const { userPlayId } = event;
-        const { players } = context;
-        if (userPlayId === userId) {
-          const curInfo = players.find((v) => v.userId == userPlayId);
-          if (curInfo) {
-            postGameMoves({ moves: curInfo.moves, score: curInfo.score });
-          }
-        }
-      },
+      cellAnimateMap: new Map(),
     },
   });
 
-  const postGameMoves = useCallback(
-    debounce(({ moves, score }) => {
-      const formData = new FormData();
-      formData.append("roomId", roomId);
-      formData.append("userId", userId);
-      formData.append("newCurUserMoves", JSON.stringify(moves));
-      formData.append("newScore", JSON.stringify(score));
-      formData.append("intent", "updateGameMoves");
-      submit(formData, {
-        method: "post",
-        action: `/solo/${roomId}`,
-        replace: true,
-      });
-    }, 650),
-    [gameState.context.selectCell]
-  );
-
-  const submit = useSubmit();
-
-  const usersInRoom = gameState.context.players.filter(
-    (player) => player.socketStatus !== "HEHE"
-  );
-
-  const curUser = useMemo(
-    () => usersInRoom.find((v) => v.userId === userId),
-    [usersInRoom, userId]
-  );
-
-  const isPlay = useMemo(() => {
-    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
-    return readyUsers.length === usersInRoom.length;
-  }, [usersInRoom]);
+  const [isGameStart, setIsGameStart] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     let value = -1;
@@ -137,7 +90,6 @@ const BoardGame = ({
 
     if (
       !e.repeat &&
-      initGameStatus === "START" &&
       value !== -1 &&
       checkValid(
         value,
@@ -149,7 +101,8 @@ const BoardGame = ({
         gameState.context.selectCell
       )
     ) {
-      socket?.emit(SocketEvent.CLIENT_PLAY, {
+      send({
+        type: SUDOKU_EVENT.fill,
         pair: gameState.context.selectCell,
         value,
         userPlayId: userId,
@@ -158,114 +111,86 @@ const BoardGame = ({
   };
 
   useEffect(() => {
-    if (!socket) return;
-    const handleUpdateBoard = ({
-      pair,
-      value,
-      userPlayId,
-    }: {
-      pair: Pair;
-      value: number;
-      userPlayId: UserId;
-    }) => {
-      send({ type: SUDOKU_EVENT.fill, pair, value, userPlayId });
-    };
+    if (gameState.matches(SUDOKU_STATE.ending)) return;
+    if (!isGameStart) return;
 
-    const handleUpdateStatus = ({ userInfo }: { userInfo: UserInfoStatus }) => {
-      send({ type: SUDOKU_EVENT.updateUserStatus, userInfo });
-    };
-    const handleRemoveClient = ({ userInfo }: { userInfo: UserInRoom }) => {
-      // setUsersInRoom((preUsers) => {
-      //   const newUsers = preUsers.filter((v) => v.userId != userInfo.userId);
-      //   return JSON.parse(JSON.stringify(newUsers));
-      // });
-    };
-    const handleAddClient = ({ usersInfo }: { usersInfo: GameMove[] }) => {
-      send({ type: SUDOKU_EVENT.bulkUsers, usersInfo });
-    };
+    const botPlay = setInterval(() => {
+      let canMoves: Pair[] = [];
 
-    socket.on(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
-    socket.on(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
-    socket.on(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
-    socket.on(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
+      for (let rowIdx = 0; rowIdx < 9; ++rowIdx) {
+        for (let colIdx = 0; colIdx < 9; ++colIdx) {
+          if (
+            gameState.context.board[rowIdx][colIdx] !==
+            gameState.context.solveBoard[rowIdx][colIdx]
+          ) {
+            canMoves.push({ row: rowIdx, col: colIdx });
+          }
+        }
+      }
+
+      const { row, col } = canMoves[randBetween(0, canMoves.length - 1)];
+      let isCorrect = randBetween(1, 10) <= 7;
+      const value = isCorrect
+        ? gameState.context.solveBoard[row][col]
+        : randBetween(1, 9);
+
+      if (
+        checkValid(
+          value,
+          gameState.context.players,
+          "BOT_LOCAL_ID",
+          initBoard,
+          solveBoard,
+          gameState.context.board,
+          { row, col }
+        )
+      ) {
+        send({
+          type: SUDOKU_EVENT.fill,
+          pair: { row, col },
+          value,
+          userPlayId: "BOT_LOCAL_ID",
+        });
+      }
+    }, 1000);
+
     return () => {
-      socket.off(SocketEvent.SERVER_CLIENT_PLAY, handleUpdateBoard);
-      socket.off(SocketEvent.SERVER_UPDATE_CLIENT_STATUS, handleUpdateStatus);
-      socket.off(SocketEvent.SERVER_REMOVE_CLIENT, handleRemoveClient);
-      socket.off(SocketEvent.SERVER_ADD_CLIENT, handleAddClient);
+      clearInterval(botPlay);
     };
-  }, [socket, send]);
-
-  const onFinish = () => {
-    const formData = new FormData();
-    formData.append("intent", "updateGameStatus");
-    formData.append("roomId", roomId);
-    formData.append("gameStatus", "START");
-    const readyUsers = usersInRoom.filter((v) => v.status === "READY");
-    formData.append(
-      "readyUsers",
-      JSON.stringify(readyUsers.map((v) => v.userId))
-    );
-
-    socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
-      userInfo: {
-        userId: userId,
-        status: "PLAYING",
-      },
-      roomId,
-    });
-    submit(formData, {
-      method: "post",
-      action: `/solo/${roomId}`,
-      replace: true,
-    });
-  };
+  }, [gameState, solveBoard, initBoard, send, isGameStart]);
 
   return (
     <div className="sudoku-wrapper" tabIndex={-1} onKeyDown={handleKeyDown}>
       <div className="score-wrapper">
-        {usersInRoom.map((userInRoom) => (
+        {gameState.context.players.map((userInRoom) => (
           <Score
+            socketStatus=""
             winner={gameState.context.winner}
             userId={userInRoom.userId}
             isUser={userInRoom.userId == userId}
             key={userInRoom.userId}
             score={userInRoom.score}
             plusPoint={userInRoom.plus || 0}
-            status={userInRoom.status}
+            status={""}
           />
         ))}
-      </div>
-
-      <div className="game-info">
-        {initGameStatus === "READY" && (
+        {!isGameStart && (
           <div className="start-button-c">
             <Button
               className="start-button"
               type="button"
               onClick={() => {
-                socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
-                  userInfo: {
-                    userId,
-                    status: curUser?.status === "READY" ? "NOT_READY" : "READY",
-                  },
-                  roomId,
-                });
+                setIsGameStart(true);
               }}
-              disabled={usersInRoom.length < 2}
             >
-              {usersInRoom.length < 2
-                ? "Wait for another player to start.."
-                : curUser?.status === "READY"
-                ? "Remove ready"
-                : "Ready"}
+              Play with bot
             </Button>
           </div>
         )}
+      </div>
+
+      <div className="game-info">
         <div className="game-flex-wrapper">
-          {isPlay && usersInRoom.length >= 2 && initGameStatus === "READY" && (
-            <CountDown onFinish={onFinish} />
-          )}
           <div className="game-wrapper">
             <div className="game">
               <table className="game-table">
@@ -275,6 +200,11 @@ const BoardGame = ({
                       {row.map((val, idx2) => {
                         return (
                           <Cell
+                            cellAnimateClass={
+                              gameState.context.cellAnimateMap.get(
+                                idx * 10 + idx2
+                              ) || ""
+                            }
                             isHightLight={gameState.matches(
                               SUDOKU_STATE.playing
                             )}
@@ -311,7 +241,7 @@ const BoardGame = ({
                               send({ type: SUDOKU_EVENT.move, pair });
                             }}
                             cellIdx={{ row: idx, col: idx2 }}
-                            cellVal={initGameStatus === "START" ? val : 0}
+                            cellVal={isGameStart ? val : 0}
                             key={idx * 10 + idx2}
                             isConflictRow={
                               gameState.context.canRowXNumberY[idx][val] > 1
@@ -341,9 +271,22 @@ const BoardGame = ({
                 </tbody>
               </table>
             </div>
+            {gameState.matches(SUDOKU_STATE.ending) && (
+              <div className="game-win-scence">
+                <div className="game-win-confetti">
+                  <Confetti />
+                </div>
+                <div className="game-win-confetti confetti-medium">
+                  <ConfettiMedium />
+                </div>
+                <div className="game-win-confetti confetti-slow">
+                  <ConfettiSlow />
+                </div>
+              </div>
+            )}
           </div>
           <div className="game-intro">
-            <p>🕹️ Play with arrow and number keys</p>
+            <p>🕹️ Play with arrow ⬅️ ➡️ ⬆️ ⬇️ and number keys 🔢</p>
           </div>
         </div>
       </div>
