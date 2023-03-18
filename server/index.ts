@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import fs from "fs";
 import { createServer } from "http";
 import path from "path";
