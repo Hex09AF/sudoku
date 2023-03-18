@@ -65,6 +65,58 @@ a.game-back {
   }
 }
 
+.game-win-scence {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  perspective: 1000px;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.game-win-confetti {
+  position: absolute;
+  transform: translateY(-100%);
+  animation: confetti-fast 14s ease-out 0s;
+
+  &.confetti-medium {
+    animation: confetti-medium 17s ease-out 0s;
+  }
+
+  &.confetti-slow {
+    animation: confetti-slow 20s ease-out 0s;
+  }
+}
+
+@keyframes confetti-fast {
+  from {
+    transform: translateY(-100%) rotate(0);
+  }
+  to {
+    transform: translateY(100%) rotate(90deg);
+  }
+}
+
+@keyframes confetti-slow {
+  from {
+    transform: translateY(-100%) rotate(0);
+  }
+  to {
+    transform: translateY(100%) rotate(-90deg);
+  }
+}
+
+@keyframes confetti-medium {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
 .game {
   position: absolute;
   top: 0;

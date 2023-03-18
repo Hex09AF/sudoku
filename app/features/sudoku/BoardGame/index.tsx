@@ -29,6 +29,9 @@ import { Button } from "../../../comps/Button";
 import Score from "../Score";
 import Cell from "../Cell/Index";
 import CountDown from "../CountDown";
+import Confetti from "~/assets/svg/Confetti";
+import ConfettiMedium from "~/assets/svg/ConfettiMedium";
+import ConfettiSlow from "~/assets/svg/ConfettiSlow";
 
 type BoardGameProps = {
   initGameStatus: string;
@@ -349,6 +352,19 @@ const BoardGame = ({
                 </tbody>
               </table>
             </div>
+            {gameState.matches(SUDOKU_STATE.ending) && (
+              <div className="game-win-scence">
+                <div className="game-win-confetti">
+                  <Confetti />
+                </div>
+                <div className="game-win-confetti confetti-medium">
+                  <ConfettiMedium />
+                </div>
+                <div className="game-win-confetti confetti-slow">
+                  <ConfettiSlow />
+                </div>
+              </div>
+            )}
           </div>
           <div className="game-intro">
             <p>🕹️ Play with arrow ⬅️ ➡️ ⬆️ ⬇️ and number keys 🔢</p>
