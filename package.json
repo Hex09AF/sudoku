@@ -7,10 +7,11 @@
     "local:build": "remix build",
     "dev": "concurrently \"npm run sass\" \"remix watch\" \"npm run server:dev\"",
     "server:dev": "cross-env NODE_ENV=development nodemon server/index.ts --watch",
-    "build": "npm run push && npm run seed && remix build",
+    "build": "npm run push && npm run seed && remix build && npm run build:server",
     "start": "cross-env NODE_ENV=production node server/index.js",
     "push": "npx prisma db push",
-    "seed": "npx prisma db seed"
+    "seed": "npx prisma db seed",
+    "build:server": "npx tsc --project tsconfig.server.json"
   },
   "prisma": {
     "seed": "node --require esbuild-register prisma/seeds.ts"

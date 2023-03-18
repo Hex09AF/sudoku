@@ -2,7 +2,7 @@ import type {
   GameMove,
   UserInfoStatus,
   UserInRoom,
-} from "server/declares/interfaces/Socket";
+} from "../declares/interfaces/Socket";
 
 export const users: UserInRoom[] = [];
 

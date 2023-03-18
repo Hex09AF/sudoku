@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noImplicitAny": true,
+    "moduleResolution": "node",
+    "baseUrl": "./server",
+    "sourceMap": true
+  },
+  "include": ["server/index.ts"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
