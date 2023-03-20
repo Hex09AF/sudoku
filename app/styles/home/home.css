@@ -3,6 +3,16 @@
   grid-template-columns: 0fr 2fr 0fr;
   gap: 4rem;
   transition: 500ms;
+  overflow: hidden;
+}
+@media screen and (max-width: 800px) {
+  .lobby-c {
+    display: block;
+    padding: 0.5rem;
+  }
+  .lobby-c .list-user {
+    display: none;
+  }
 }
 
 .lobby-c:has(.list-room-c.show) {
@@ -19,40 +29,51 @@
 
 .list-room {
   height: 100%;
-  border: 1.5px solid #344861;
-  border-left: none;
-  overflow: hidden;
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
+  overflow: hidden;
+}
+.list-room-w {
+  position: relative;
+  box-shadow: rgba(0, 0, 0, 0.0784313725) 0 1px, rgba(0, 0, 0, 0.0784313725) 1px 0px;
+  border-radius: 8px;
+  height: 90%;
 }
 .list-room-c {
-  position: relative;
   min-width: 0;
   margin-top: 1rem;
 }
 .list-room-tag {
   position: absolute;
-  top: 30%;
-  right: 0;
-  writing-mode: vertical-rl;
-  text-orientation: sideways;
-  transform: translateX(calc(100% - 1.5px));
-  border: 1.5px solid #344861;
+  top: 50%;
+  left: 100%;
+  transform: translateY(-50%);
   padding: 0.5rem 0.5rem;
   border-radius: 8px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
-  background: #0066ff;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.75rem;
+}
+.list-room-tag span {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
 }
 .list-room .room-info {
   white-space: nowrap;
 }
 .list-room .room-info:hover {
   background-color: #f2f2f3;
+}
+.list-room .room-info__door {
+  display: none;
+}
+@media screen and (max-width: 800px) {
+  .list-room .room-info__door {
+    display: block;
+  }
 }
 .list-room .room-info a {
   padding: 1rem 1rem;
@@ -67,37 +88,53 @@
   font-size: 0.75rem;
   color: #636369;
 }
+@media screen and (max-width: 800px) {
+  .list-room .room-info a {
+    gap: 0rem;
+    flex-direction: column;
+    align-items: center;
+  }
+}
+@media screen and (max-width: 800px) {
+  .list-room .room-info-c {
+    overflow: auto;
+    display: flex;
+  }
+}
 
 .list-user {
   height: 100%;
-  border: 1.5px solid #344861;
-  border-right: none;
-  overflow: hidden;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
+  overflow: hidden;
+}
+.list-user-w {
+  position: relative;
+  box-shadow: rgba(0, 0, 0, 0.0784313725) 0 1px, rgba(0, 0, 0, 0.0784313725) -1px 0px;
+  border-radius: 8px;
+  height: 90%;
 }
 .list-user-c {
-  position: relative;
   min-width: 0;
   margin-top: 1rem;
 }
 .list-user-tag {
   position: absolute;
-  top: 30%;
+  top: 50%;
   left: 0;
-  writing-mode: vertical-rl;
-  text-orientation: sideways;
-  transform: translateX(calc(-100% + 1.5px)) rotate(180deg);
-  border: 1.5px solid #344861;
+  transform: translateX(-100%) translateY(-50%);
   padding: 0.5rem 0.5rem;
   border-radius: 8px;
-  border-top-left-radius: 0;
-  border-bottom-left-radius: 0;
-  background: #0066ff;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
   color: #fff;
   font-weight: 600;
   cursor: pointer;
   font-size: 0.75rem;
+}
+.list-user-tag span {
+  writing-mode: vertical-lr;
+  text-orientation: upright;
 }
 .list-user .user-info {
   display: flex;
@@ -128,6 +165,17 @@
 .empty-info img {
   max-width: 100%;
   height: auto;
+}
+
+@media screen and (max-width: 800px) {
+  .list-room-w,
+  .list-user-w {
+    box-shadow: none;
+  }
+  .list-room-tag,
+  .list-user-tag {
+    display: none;
+  }
 }
 
 /*# sourceMappingURL=home.css.map */

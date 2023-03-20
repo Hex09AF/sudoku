@@ -1,4 +1,4 @@
-import { useMachine } from "@xstate/react";
+import { useMachine, useSelector } from "@xstate/react";
 import { useEffect, useState } from "react";
 import type { Socket } from "socket.io-client";
 import Confetti from "~/assets/svg/Confetti";
@@ -45,7 +45,7 @@ const BoardGame = ({
   socket,
   initGameMoves,
 }: BoardGameProps) => {
-  const [gameState, send] = useMachine(gameMachine, {
+  const [gameState, send, service] = useMachine(gameMachine, {
     context: {
       players: initGameMoves,
       board: initBoard,
@@ -60,6 +60,10 @@ const BoardGame = ({
       cellAnimateMap: new Map(),
     },
   });
+
+  const isMatchEnding = useSelector(service, (state) =>
+    state.matches(SUDOKU_STATE.ending)
+  );
 
   const [isGameStart, setIsGameStart] = useState(false);
 
@@ -111,7 +115,7 @@ const BoardGame = ({
   };
 
   useEffect(() => {
-    if (gameState.matches(SUDOKU_STATE.ending)) return;
+    if (isMatchEnding) return;
     if (!isGameStart) return;
 
     const botPlay = setInterval(() => {
@@ -140,7 +144,7 @@ const BoardGame = ({
           gameState.context.players,
           "BOT_LOCAL_ID",
           initBoard,
-          solveBoard,
+          gameState.context.solveBoard,
           gameState.context.board,
           { row, col }
         )
@@ -157,7 +161,15 @@ const BoardGame = ({
     return () => {
       clearInterval(botPlay);
     };
-  }, [gameState, solveBoard, initBoard, send, isGameStart]);
+  }, [
+    send,
+    isMatchEnding,
+    gameState.context.board,
+    gameState.context.solveBoard,
+    gameState.context.players,
+    initBoard,
+    isGameStart,
+  ]);
 
   return (
     <div
@@ -178,24 +190,25 @@ const BoardGame = ({
             status={""}
           />
         ))}
-        {!isGameStart && (
-          <div className="start-button-c">
-            <Button
-              className="start-button"
-              type="button"
-              onClick={() => {
-                setIsGameStart(true);
-              }}
-            >
-              Play with bot
-            </Button>
-          </div>
-        )}
       </div>
 
       <div className="game-info">
         <div className="game-flex-wrapper">
           <div className="game-wrapper">
+            {!isGameStart && (
+              <div className="start-button-c">
+                <Button
+                  className="start-button"
+                  type="button"
+                  onClick={() => {
+                    setIsGameStart(true);
+                  }}
+                >
+                  Play with bot
+                </Button>
+              </div>
+            )}
+
             <div className="game">
               <table className="game-table">
                 <tbody>
@@ -209,9 +222,10 @@ const BoardGame = ({
                                 idx * 10 + idx2
                               ) || ""
                             }
-                            isHightLight={gameState.matches(
-                              SUDOKU_STATE.playing
-                            )}
+                            isHightLight={
+                              isGameStart &&
+                              gameState.matches(SUDOKU_STATE.playing)
+                            }
                             userId={getCellUserId(gameState.context.players, {
                               row: idx,
                               col: idx2,
@@ -242,7 +256,8 @@ const BoardGame = ({
                             )}
                             selectCell={gameState.context.selectCell}
                             setSelectCell={(pair: Pair) => {
-                              send({ type: SUDOKU_EVENT.move, pair });
+                              if (isGameStart)
+                                send({ type: SUDOKU_EVENT.move, pair });
                             }}
                             cellIdx={{ row: idx, col: idx2 }}
                             cellVal={isGameStart ? val : 0}
@@ -290,6 +305,26 @@ const BoardGame = ({
             )}
           </div>
           <div className="game-intro">
+            {gameState.matches(SUDOKU_STATE.playing) && isGameStart && (
+              <div className="numpad-c">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((v) => (
+                  <Button
+                    className="numpad"
+                    key={v}
+                    onClick={() => {
+                      send({
+                        type: SUDOKU_EVENT.fill,
+                        pair: gameState.context.selectCell,
+                        value: v,
+                        userPlayId: userId,
+                      });
+                    }}
+                  >
+                    {v}
+                  </Button>
+                ))}
+              </div>
+            )}
             <p>🕹️ Play with arrow ⬅️ ➡️ ⬆️ ⬇️ and number keys 🔢</p>
           </div>
         </div>

@@ -5,6 +5,7 @@ import { formatDistanceToNowStrict } from "date-fns";
 import { useRef, useState } from "react";
 import EmptyRoom from "~/assets/empty-rooms.jpeg";
 import LookUp from "~/assets/svg/LookUp";
+import { Button } from "~/comps/Button";
 import { Input } from "~/comps/Input";
 
 interface AvailableRoomProps {
@@ -31,40 +32,45 @@ export default function AvailableRoom({ rooms }: AvailableRoomProps) {
 
   return (
     <div className={`list-room-c ${!show ? "show" : ""}`}>
-      <div className="list-room">
-        <label className="app-header__findroom">
-          <div style={{ flexShrink: 0 }}>
-            <LookUp />
-          </div>
-          <form onSubmit={getRoom} ref={getRoomFormRef}>
-            <Input name="idRoom" placeholder="Type the room id.." />
-          </form>
-        </label>
-        {rooms.length > 0 ? (
-          rooms.map((v, idx) => (
-            <div className="room-info" key={v.id}>
-              <Link to={`/solo/${v.id}`}>
-                Room {idx + 1}
-                <span className="room-info__time">
-                  {formatDistanceToNowStrict(new Date(v.createdAt))}
-                </span>
-              </Link>
+      <div className="list-room-w">
+        <div className="list-room">
+          <label className="app-header__findroom">
+            <div style={{ flexShrink: 0 }}>
+              <LookUp />
             </div>
-          ))
-        ) : (
-          <div className="empty-info empty-room">
-            <img src={EmptyRoom} alt="empty room" />
-            <span className="empty-text">Admin will create a room soon.</span>
-          </div>
-        )}
-      </div>
-      <div
-        className="list-room-tag"
-        onClick={() => {
-          setShow((pre) => !pre);
-        }}
-      >
-        Rooms
+            <form onSubmit={getRoom} ref={getRoomFormRef}>
+              <Input name="idRoom" placeholder="Type the room id.." />
+            </form>
+          </label>
+          {rooms.length > 0 ? (
+            <div className="room-info-c">
+              {rooms.map((v, idx) => (
+                <div className="room-info" key={v.id}>
+                  <Link to={`/solo/${v.id}`}>
+                    <span>Room {idx + 1}</span>
+                    <span className="room-info__door">🚪</span>
+                    <span className="room-info__time">
+                      {formatDistanceToNowStrict(new Date(v.createdAt))}
+                    </span>
+                  </Link>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="empty-info empty-room">
+              <img src={EmptyRoom} alt="empty room" />
+              <span className="empty-text">Admin will create a room soon.</span>
+            </div>
+          )}
+        </div>
+        <Button
+          className="list-room-tag"
+          onClick={() => {
+            setShow((pre) => !pre);
+          }}
+        >
+          <span>Rooms</span>
+        </Button>
       </div>
     </div>
   );

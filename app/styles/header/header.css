@@ -3,9 +3,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 1rem 1rem;
+  padding: 1rem;
   height: 64px;
   box-shadow: rgba(0, 0, 0, 0.08) 0 1px;
+}
+@media screen and (max-width: 800px) {
+  .app-header {
+    padding: 0.5rem;
+    height: 48px;
+  }
 }
 .app-header__slogan {
   max-width: 300px;
@@ -13,12 +19,22 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+@media screen and (max-width: 800px) {
+  .app-header__slogan {
+    font-size: 1rem;
+  }
+}
 .app-header__slogan .slogan {
   color: #636369;
 }
 .app-header__slogan .slogan--highlight {
   font-weight: 600;
   margin-right: 8px;
+}
+@media screen and (max-width: 800px) {
+  .app-header__slogan .slogan {
+    display: none;
+  }
 }
 .app-header__findroom {
   border-radius: 8px;
@@ -33,6 +49,11 @@
   border: none;
   background: transparent;
   outline: none;
+}
+@media screen and (max-width: 800px) {
+  .app-header__findroom {
+    padding: 0rem 0.5rem;
+  }
 }
 
 /*# sourceMappingURL=header.css.map */

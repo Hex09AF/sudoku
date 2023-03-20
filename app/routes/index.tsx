@@ -2,21 +2,19 @@ import type { LinksFunction, LoaderArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 
-import BoardGame from "~/features/sudoku/BotVersion";
 import Header from "~/comps/Header";
+import BoardGame from "~/features/sudoku/BotVersion";
 
 import RANDOMBOARD from "~/utils/helper/random";
 import SOLVE from "~/utils/helper/solve";
 import { getUser } from "~/utils/session.server";
 
-import { Outlet } from "@remix-run/react";
 import UsersOnline from "~/features/home/UsersOnline";
 import { getRooms } from "~/utils/room.server";
 
+import AvailableRoom from "~/features/home/AvailableRoom";
 import stylesUrl from "~/styles/home/home.css";
 import stylesSudokuUrl from "~/styles/sudoku/index.css";
-import AvailableRoom from "~/features/home/AvailableRoom";
-import { useSocket } from "~/context";
 
 export const links: LinksFunction = () => {
   return [
@@ -52,7 +50,10 @@ export default function Index() {
 
       <div className="lobby-c">
         <AvailableRoom rooms={data.rooms} />
+
         <BoardGame
+          roomId=""
+          initGameStatus=""
           solveBoard={data.solveBoard}
           initGameMoves={[
             {

@@ -36,26 +36,29 @@ export const links: LinksFunction = () => {
     ...buttonLinks(),
     ...inputLinks(),
     ...fieldLinks(),
-    { rel: "stylesheet", href: globalStyles },
-    { rel: "stylesheet", href: headerStyles },
+    { rel: "stylesheet", href: globalStyles, as: "style" },
+    { rel: "stylesheet", href: headerStyles, as: "style" },
     {
       rel: "apple-touch-icon",
       sizes: "180x180",
       href: favicon,
+      as: "image",
     },
     {
       rel: "icon",
       type: "image/png",
       sizes: "32x32",
       href: favicon32,
+      as: "image",
     },
     {
       rel: "icon",
       type: "image/png",
       sizes: "16x16",
       href: favicon16,
+      as: "image",
     },
-    { rel: "manifest", href: faviconManifest },
+    { rel: "manifest", href: faviconManifest, as: "manifest" },
   ];
 };
 

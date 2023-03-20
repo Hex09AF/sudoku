@@ -1,6 +1,7 @@
 import type { SerializeFrom } from "@remix-run/node";
 import { useEffect, useState } from "react";
 import EmptyUser from "~/assets/empty-users.jpeg";
+import { Button } from "~/comps/Button";
 import { useSocket } from "~/context";
 import { SocketEvent } from "~/utils/declares/interfaces/Socket";
 import hashToAvatar from "~/utils/helper/hash";
@@ -30,34 +31,36 @@ export default function UsersOnline({ user }: UsersOnlineProps) {
 
   return (
     <div className={`list-user-c ${!show ? "show" : ""}`}>
-      <div className="list-user">
-        {users.length > 0 ? (
-          users.map((v) => (
-            <div className="user-info" key={v.socketId}>
-              <img
-                className="user-info__avatar"
-                src={hashToAvatar(v?.userId ? v.userId : v.socketId)}
-                alt="avatar"
-                width={48}
-                height={48}
-              />
-              {v?.userId ? v.username : "Guest"}
+      <div className="list-user-w">
+        <div className="list-user">
+          {users.length > 0 ? (
+            users.map((v) => (
+              <div className="user-info" key={v.socketId}>
+                <img
+                  className="user-info__avatar"
+                  src={hashToAvatar(v?.userId ? v.userId : v.socketId)}
+                  alt="avatar"
+                  width={48}
+                  height={48}
+                />
+                {v?.userId ? v.username : "Guest"}
+              </div>
+            ))
+          ) : (
+            <div className="empty-info empty-user">
+              <img src={EmptyUser} alt="empty user" />
+              <span className="empty-text">People not join the game yet.</span>
             </div>
-          ))
-        ) : (
-          <div className="empty-info empty-user">
-            <img src={EmptyUser} alt="empty user" />
-            <span className="empty-text">People not join the game yet.</span>
-          </div>
-        )}
-      </div>
-      <div
-        className="list-user-tag"
-        onClick={() => {
-          setShow((pre) => !pre);
-        }}
-      >
-        Online users
+          )}
+        </div>
+        <Button
+          className="list-user-tag"
+          onClick={() => {
+            setShow((pre) => !pre);
+          }}
+        >
+          <span>Online users</span>
+        </Button>
       </div>
     </div>
   );

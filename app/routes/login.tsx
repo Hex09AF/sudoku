@@ -9,7 +9,7 @@ import { badRequest } from "~/utils/request.server";
 import { createUserSession, login, register } from "~/utils/session.server";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: stylesUrl },
+  { rel: "stylesheet", href: stylesUrl, as: "style" },
 ];
 
 function validateUsername(username: unknown) {

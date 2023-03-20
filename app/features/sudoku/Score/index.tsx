@@ -47,7 +47,7 @@ export default function Score({
       className={`score-info ${onlineStatusClass} ${winnerClass}`}
     >
       <div>{isUser ? "My" : ""} Scores</div>
-      <h2>{score || 0}</h2>
+      <h3>{score || 0}</h3>
       {Boolean(plusPoint) && <MyPoint />}
       <div className="user-status">
         {winner ? (

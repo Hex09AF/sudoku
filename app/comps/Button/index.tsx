@@ -1,7 +1,10 @@
+import type { LinksFunction } from "@remix-run/node";
 import { forwardRef } from "react";
 import styles from "./style.css";
 
-export const links = () => [{ rel: "stylesheet", href: styles }];
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles, as: "style" },
+];
 
 export const Button = forwardRef<
   HTMLButtonElement,

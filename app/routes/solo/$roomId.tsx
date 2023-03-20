@@ -8,23 +8,22 @@ import { Link, useLoaderData } from "@remix-run/react";
 import BoardGame from "~/features/sudoku/BoardGame";
 
 import { useEffect } from "react";
-import { baseBoard } from "~/utils/const/board";
 import { useSocket } from "~/context";
+import stylesUrl from "~/styles/sudoku/index.css";
+import { baseBoard } from "~/utils/const/board";
+import { SocketEvent } from "~/utils/declares/interfaces/Socket";
 import mergeMovesWithBoard from "~/utils/helper/merge";
 import SOLVE from "~/utils/helper/solve";
-import stylesUrl from "~/styles/sudoku/index.css";
 import {
   getMoves,
   getRoom,
-  updateMoves,
   updateGameStatus,
+  updateMoves,
 } from "~/utils/room.server";
 import { requireUserId } from "~/utils/session.server";
-import { SocketEvent } from "~/utils/declares/interfaces/Socket";
-import { Button } from "~/comps/Button";
 
 export const links: LinksFunction = () => {
-  return [{ rel: "stylesheet", href: stylesUrl }];
+  return [{ rel: "stylesheet", href: stylesUrl, as: "style" }];
 };
 
 export const action = async ({ request }: ActionArgs) => {
@@ -126,20 +125,22 @@ export default function SoloRoom() {
 
   return (
     <>
-      <Link to="/" className="game-back">
-        {" "}
-        ← Back to home
-      </Link>
+      <div className="game-room">
+        <Link to="/" className="game-back">
+          {" "}
+          ← Back to home
+        </Link>
 
-      <BoardGame
-        initGameStatus={data.gameStatus}
-        solveBoard={data.solveBoard}
-        initGameMoves={data.moves}
-        userId={data.userId}
-        socket={socket}
-        roomId={data.roomId}
-        initBoard={data.board}
-      />
+        <BoardGame
+          initGameStatus={data.gameStatus}
+          solveBoard={data.solveBoard}
+          initGameMoves={data.moves}
+          userId={data.userId}
+          socket={socket}
+          roomId={data.roomId}
+          initBoard={data.board}
+        />
+      </div>
     </>
   );
 }

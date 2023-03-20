@@ -244,35 +244,36 @@ const BoardGame = ({
       </div>
 
       <div className="game-info">
-        {initGameStatus === "READY" && (
-          <div className="start-button-c">
-            <Button
-              className="start-button"
-              type="button"
-              onClick={() => {
-                socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
-                  userInfo: {
-                    userId,
-                    status: curUser?.status === "READY" ? "NOT_READY" : "READY",
-                  },
-                  roomId,
-                });
-              }}
-              disabled={usersInRoom.length < 2}
-            >
-              {usersInRoom.length < 2
-                ? "Wait for another player to start.."
-                : curUser?.status === "READY"
-                ? "Remove ready"
-                : "Ready"}
-            </Button>
-          </div>
-        )}
         <div className="game-flex-wrapper">
           {isPlay && usersInRoom.length >= 2 && initGameStatus === "READY" && (
             <CountDown onFinish={onFinish} />
           )}
           <div className="game-wrapper">
+            {initGameStatus === "READY" && (
+              <div className="start-button-c">
+                <Button
+                  className="start-button"
+                  type="button"
+                  onClick={() => {
+                    socket?.emit(SocketEvent.CLIENT_UPDATE_CLIENT_STATUS, {
+                      userInfo: {
+                        userId,
+                        status:
+                          curUser?.status === "READY" ? "NOT_READY" : "READY",
+                      },
+                      roomId,
+                    });
+                  }}
+                  disabled={usersInRoom.length < 2}
+                >
+                  {usersInRoom.length < 2
+                    ? "Wait for another player to start.."
+                    : curUser?.status === "READY"
+                    ? "Remove ready"
+                    : "Ready"}
+                </Button>
+              </div>
+            )}
             <div className="game">
               <table className="game-table">
                 <tbody>
@@ -367,6 +368,27 @@ const BoardGame = ({
             )}
           </div>
           <div className="game-intro">
+            {gameState.matches(SUDOKU_STATE.playing) &&
+              initGameStatus === "START" && (
+                <div className="numpad-c">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((v) => (
+                    <Button
+                      className="numpad"
+                      key={v}
+                      onClick={() => {
+                        send({
+                          type: SUDOKU_EVENT.fill,
+                          pair: gameState.context.selectCell,
+                          value: v,
+                          userPlayId: userId,
+                        });
+                      }}
+                    >
+                      {v}
+                    </Button>
+                  ))}
+                </div>
+              )}
             <p>🕹️ Play with arrow ⬅️ ➡️ ⬆️ ⬇️ and number keys 🔢</p>
           </div>
         </div>

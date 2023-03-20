@@ -1,10 +1,11 @@
+import type { LinksFunction } from "@remix-run/node";
 import { Input, links as inputLinks } from "../Input";
 
 import styles from "./style.css";
 
-export const links = () => [
+export const links: LinksFunction = () => [
   ...inputLinks(),
-  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: styles, as: "style" },
 ];
 
 interface FieldProps {
