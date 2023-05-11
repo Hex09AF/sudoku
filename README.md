@@ -66,3 +66,8 @@ You need to define an index signature for an object. Interfaces can define an in
 You need to use an interface in a third-party library or framework that expects it.
 
 It's important to note that these guidelines are not hard and fast rules and there can be overlap between when to use types and interfaces. Ultimately, the decision of whether to use a type or an interface depends on the specific use case and personal preference.
+
+# Research caching with redis
+
+[ ] https://redis.com/blog/how-to-build-an-app-that-allows-you-to-build-real-time-multiplayer-games-using-redis/
+[ ] https://redis.com/blog/how-to-create-a-real-time-online-multi-player-strategy-game-using-redis/
