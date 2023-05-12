@@ -69,5 +69,6 @@ It's important to note that these guidelines are not hard and fast rules and the
 
 # Research caching with redis
 
-[ ] https://redis.com/blog/how-to-build-an-app-that-allows-you-to-build-real-time-multiplayer-games-using-redis/
-[ ] https://redis.com/blog/how-to-create-a-real-time-online-multi-player-strategy-game-using-redis/
+[x] https://redis.com/blog/how-to-build-an-app-that-allows-you-to-build-real-time-multiplayer-games-using-redis/
+[x] https://redis.com/blog/how-to-create-a-real-time-online-multi-player-strategy-game-using-redis/
+[ ] https://www.codementor.io/@dominicscanlan/build-an-online-multiplayer-game-with-socket-io-redis-angularjs-vgwdx0y8t
