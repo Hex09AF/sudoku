@@ -71,4 +71,11 @@ It's important to note that these guidelines are not hard and fast rules and the
 
 [x] https://redis.com/blog/how-to-build-an-app-that-allows-you-to-build-real-time-multiplayer-games-using-redis/
 [x] https://redis.com/blog/how-to-create-a-real-time-online-multi-player-strategy-game-using-redis/
-[ ] https://www.codementor.io/@dominicscanlan/build-an-online-multiplayer-game-with-socket-io-redis-angularjs-vgwdx0y8t
+[x] https://www.codementor.io/@dominicscanlan/build-an-online-multiplayer-game-with-socket-io-redis-angularjs-vgwdx0y8t
+[ ] https://github.com/umcconnell/destroyer2/tree/main/game-server
+
+## Where should i implement the game state (store, logic, FE (state) or BE (redis) ????)
+[ ] https://www.reddit.com/r/redis/comments/cn59j4/redis_for_holding_live_game_state/
+[ ] https://stackoverflow.com/questions/25328317/does-redis-persist-data
+[ ] https://www.reddit.com/r/redis/comments/crry8s/storing_card_game_state_in_redis_with_many_rooms/
+[ ] https://www.alibabacloud.com/tech-news/game-server/4l1w5hzon3v-the-use-of-redis-in-the-game-server
