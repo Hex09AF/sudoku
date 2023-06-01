@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.2
+
 # base node image
 FROM node:18-bullseye-slim as base
 
@@ -37,6 +39,9 @@ ADD prisma .
 RUN npx prisma generate
 
 ADD . .
+
+RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env
+
 RUN npm run build
 
 # Finally, build the production image with minimal footprint
