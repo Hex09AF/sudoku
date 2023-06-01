@@ -3,5 +3,3 @@ fly.toml
 *.log
 .DS_Store
 /.cache
-/public/build
-/build
