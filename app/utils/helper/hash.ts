@@ -1,16 +1,16 @@
 const userImages = [
-  "https://partyanimals.com/static/img/avatars_12@2x.f05718d8.jpg",
-  "https://partyanimals.com/static/img/avatars_11@2x.c841344e.jpg",
-  "https://partyanimals.com/static/img/avatars_10@2x.fdc921f3.jpg",
-  "https://partyanimals.com/static/img/avatars_09@2x.349eb9e1.jpg",
-  "https://partyanimals.com/static/img/avatars_08@2x.f4b168ab.jpg",
-  "https://partyanimals.com/static/img/avatars_07@2x.5d95c63b.jpg",
-  "https://partyanimals.com/static/img/avatars_06@2x.e1140503.jpg",
-  "https://partyanimals.com/static/img/avatars_05@2x.4e4403b7.jpg",
-  "https://partyanimals.com/static/img/avatars_04@2x.a8f03c96.jpg",
-  "https://partyanimals.com/static/img/avatars_03@2x.7ab39dde.jpg",
-  "https://partyanimals.com/static/img/avatars_02@2x.c7280e5d.jpg",
-  "https://partyanimals.com/static/img/avatars_01@2x.4857b43c.jpg",
+  "https://partyanimals.com/assets/nemo-1ec2022f.webp",
+  "https://partyanimals.com/assets/underbite-da11c605.webp",
+  "https://partyanimals.com/assets/tiagra-720c8a6b.webp",
+  "https://partyanimals.com/assets/macchiato-c82b08d5.webp",
+  "https://partyanimals.com/assets/otta-5100f243.webp",
+  "https://partyanimals.com/assets/morse-512323ce.webp",
+  "https://partyanimals.com/assets/harry-3dadf282.webp",
+  "https://partyanimals.com/assets/coco-57891444.webp",
+  "https://partyanimals.com/assets/carrot-30dd3a88.webp",
+  "https://partyanimals.com/assets/bacon-3f5a3683.webp",
+  "https://partyanimals.com/assets/barbie-5199a7dd.webp",
+  "https://partyanimals.com/assets/valiente-8a7eae7a.webp",
 ];
 
 export default function hashToAvatar(str: string) {

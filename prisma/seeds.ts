@@ -10,7 +10,7 @@ async function seed() {
     create: {
       username: "kody",
       passwordHash:
-        "$2a$10$J3KUUA1ZjkgxmjIhOpztYuMfy9ovEiRBoRz4pQgExIq/8wJWWbluW",
+        "$2a$10$wpxaSypb3rfWrEV61G4eg.Sjps8d3gaIM.1Z6Bw13TYuCeTDAELYe",
     },
   });
   const kody2 = await db.user.upsert({
@@ -21,7 +21,7 @@ async function seed() {
     create: {
       username: "kody2",
       passwordHash:
-        "$2a$10$4RIfbFVuMqM4jkvZmrd7CefU4NmBNqnllHU1D9QMG1RoAaPyqoVFy",
+        "$2a$10$ogiEXZkyb7u/ygI5yU8mvu0vvLEXxvzwKIYyH.mckOyZgs6YJH/wu",
     },
   });
   const kody3 = await db.user.upsert({
@@ -32,7 +32,7 @@ async function seed() {
     create: {
       username: "kody3",
       passwordHash:
-        "$2a$10$4RIfbFVuMqM4jkvZmrd7CefU4NmBNqnllHU1D9QMG1RoAaPyqoVFy",
+        "$2a$10$ogiEXZkyb7u/ygI5yU8mvu0vvLEXxvzwKIYyH.mckOyZgs6YJH/wu",
     },
   });
   const kody4 = await db.user.upsert({
@@ -43,7 +43,7 @@ async function seed() {
     create: {
       username: "kody4",
       passwordHash:
-        "$2a$10$4RIfbFVuMqM4jkvZmrd7CefU4NmBNqnllHU1D9QMG1RoAaPyqoVFy",
+        "$2a$10$ogiEXZkyb7u/ygI5yU8mvu0vvLEXxvzwKIYyH.mckOyZgs6YJH/wu",
     },
   });
   const kody5 = await db.user.upsert({
@@ -54,7 +54,7 @@ async function seed() {
     create: {
       username: "kody5",
       passwordHash:
-        "$2a$10$4RIfbFVuMqM4jkvZmrd7CefU4NmBNqnllHU1D9QMG1RoAaPyqoVFy",
+        "$2a$10$ogiEXZkyb7u/ygI5yU8mvu0vvLEXxvzwKIYyH.mckOyZgs6YJH/wu",
     },
   });
 }
