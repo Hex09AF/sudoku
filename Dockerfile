@@ -36,15 +36,13 @@ WORKDIR /app
 COPY --from=deps /app/node_modules /app/node_modules
 
 ADD prisma .
-RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
-    . /etc/secrets/.env && \
-    npx prisma generate
+RUN npx prisma generate
 
 ADD . .
 
-RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env \
-    . /etc/secrets/.env && \
-    npm run build
+# RUN --mount=type=secret,id=_env,dst=/etc/secrets/.env cat /etc/secrets/.env
+
+RUN npm run build
 
 # Finally, build the production image with minimal footprint
 FROM base
